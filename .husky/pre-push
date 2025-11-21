@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 运行测试
+npm run test
+
+# 运行构建检查
+npm run build
+
+# 检查构建是否成功
+if [ $? -eq 0 ]; then
+  echo "✅ Pre-push checks passed!"
+else
+  echo "❌ Pre-push checks failed. Please fix the issues and try again."
+  exit 1
+fi

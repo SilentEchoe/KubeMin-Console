@@ -1,0 +1,41 @@
+{
+  "name": "kubemin-console",
+  "version": "1.0.0",
+  "description": "主要技术栈：   - React 18 + TypeScript - 现代化前端框架   - React Flow (v12+) - 核心画布引擎，负责节点渲染和连线管理   - Zustand - 轻量级状态管理，处理工作流状态   - Tailwind CSS - 样式框架   - Vite - 构建工具",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SilentEchoe/KubeMin-Console.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SilentEchoe/KubeMin-Console/issues"
+  },
+  "homepage": "https://github.com/SilentEchoe/KubeMin-Console#readme",
+  "dependencies": {
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "reactflow": "^11.11.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17"
+  }
+}

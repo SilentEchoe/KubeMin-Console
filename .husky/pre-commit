@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 运行 lint-staged
+npx lint-staged
+
+# 运行 TypeScript 检查
+npm run type-check
+
+# 如果上述检查通过，则提交通过
+if [ $? -eq 0 ]; then
+  echo "✅ Pre-commit checks passed!"
+else
+  echo "❌ Pre-commit checks failed. Please fix the issues and try again."
+  exit 1
+fi
