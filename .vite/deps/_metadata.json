@@ -1,0 +1,52 @@
+{
+  "hash": "fbbd7454",
+  "configHash": "80a54d63",
+  "lockfileHash": "fa402b86",
+  "browserHash": "362bddf5",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/.pnpm/react@19.2.0/node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "2847c17b",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/.pnpm/react@19.2.0/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "0ab72f48",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/.pnpm/react-dom@19.2.0_react@19.2.0/node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "2aae3285",
+      "needsInterop": true
+    },
+    "lucide-react": {
+      "src": "../../node_modules/.pnpm/lucide-react@0.554.0_react@19.2.0/node_modules/lucide-react/dist/esm/lucide-react.js",
+      "file": "lucide-react.js",
+      "fileHash": "7f3661a0",
+      "needsInterop": false
+    },
+    "@xyflow/react": {
+      "src": "../../node_modules/.pnpm/@xyflow+react@12.9.3_@types+react@19.2.6_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/@xyflow/react/dist/esm/index.js",
+      "file": "@xyflow_react.js",
+      "fileHash": "4bf47919",
+      "needsInterop": false
+    },
+    "zustand": {
+      "src": "../../node_modules/.pnpm/zustand@5.0.8_@types+react@19.2.6_react@19.2.0_use-sync-external-store@1.6.0_react@19.2.0_/node_modules/zustand/esm/index.mjs",
+      "file": "zustand.js",
+      "fileHash": "b875301c",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-N6ETM74P": {
+      "file": "chunk-N6ETM74P.js"
+    },
+    "chunk-CVMZ763F": {
+      "file": "chunk-CVMZ763F.js"
+    }
+  }
+}
