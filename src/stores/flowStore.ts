@@ -1,48 +1,59 @@
-import { create } from 'zustand'
-import { Node, Edge } from 'reactflow'
-import { FlowState } from '../types/flow'
+import { create } from 'zustand';
+import {
+    addEdge,
+    applyNodeChanges,
+    applyEdgeChanges,
+} from '@xyflow/react';
+import type {
+    Connection,
+    EdgeChange,
+    NodeChange,
+} from '@xyflow/react';
+import type { FlowState, FlowNode } from '../types/flow';
 
-const initialNodes: Node[] = [
-  {
-    id: '1',
-    type: 'input',
-    data: { label: '开始节点' },
-    position: { x: 250, y: 25 },
-  },
-  {
-    id: '2',
-    data: { label: '处理节点 1' },
-    position: { x: 250, y: 125 },
-  },
-  {
-    id: '3',
-    data: { label: '处理节点 2' },
-    position: { x: 100, y: 225 },
-  },
-  {
-    id: '4',
-    data: { label: '处理节点 3' },
-    position: { x: 400, y: 225 },
-  },
-  {
-    id: '5',
-    type: 'output',
-    data: { label: '结束节点' },
-    position: { x: 250, y: 325 },
-  },
-]
-
-const initialEdges: Edge[] = [
-  { id: 'e1-2', source: '1', target: '2' },
-  { id: 'e2-3', source: '2', target: '3' },
-  { id: 'e2-4', source: '2', target: '4' },
-  { id: 'e3-5', source: '3', target: '5' },
-  { id: 'e4-5', source: '4', target: '5' },
-]
-
-export const useFlowStore = create<FlowState>(() => ({
-  nodes: initialNodes,
-  edges: initialEdges,
-  selectedNode: null,
-  selectedEdge: null,
-}))
+export const useFlowStore = create<FlowState>((set, get) => ({
+    nodes: [
+        {
+            id: '1',
+            type: 'custom',
+            position: { x: 250, y: 5 },
+            data: { label: 'Start', description: 'Entry point of the workflow', icon: 'play' },
+        },
+        {
+            id: '2',
+            type: 'custom',
+            position: { x: 100, y: 200 },
+            data: { label: 'Process', description: 'Data processing node', icon: 'cpu' },
+        },
+        {
+            id: '3',
+            type: 'custom',
+            position: { x: 400, y: 200 },
+            data: { label: 'Output', description: 'Result output', icon: 'output' },
+        },
+    ],
+    edges: [
+        { id: 'e1-2', source: '1', target: '2', animated: true },
+        { id: 'e1-3', source: '1', target: '3', animated: true },
+    ],
+    onNodesChange: (changes: NodeChange[]) => {
+        set({
+            nodes: applyNodeChanges(changes, get().nodes) as FlowNode[],
+        });
+    },
+    onEdgesChange: (changes: EdgeChange[]) => {
+        set({
+            edges: applyEdgeChanges(changes, get().edges),
+        });
+    },
+    onConnect: (connection: Connection) => {
+        set({
+            edges: addEdge(connection, get().edges),
+        });
+    },
+    addNode: (node: FlowNode) => {
+        set({
+            nodes: [...get().nodes, node],
+        });
+    },
+}));

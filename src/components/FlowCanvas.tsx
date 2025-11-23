@@ -1,42 +1,79 @@
-import React, { useCallback } from 'react'
-import ReactFlow, {
-  Controls,
-  Background,
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  Connection,
-  Edge,
-} from 'reactflow'
-import 'reactflow/dist/style.css'
-import { useFlowStore } from '../stores/flowStore'
+import React, { useCallback } from 'react';
+import {
+    ReactFlow,
+    Background,
+    Controls,
+    MiniMap,
+    Panel,
+} from '@xyflow/react';
+import type { NodeTypes } from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+
+import { useFlowStore } from '../stores/flowStore';
+import CustomNode from './CustomNode';
+
+const nodeTypes: NodeTypes = {
+    custom: CustomNode,
+};
 
 const FlowCanvas: React.FC = () => {
-  const { nodes: initialNodes, edges: initialEdges } = useFlowStore()
-  const [nodes, , onNodesChange] = useNodesState(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+    const {
+        nodes,
+        edges,
+        onNodesChange,
+        onEdgesChange,
+        onConnect,
+        addNode,
+    } = useFlowStore();
 
-  const onConnect = useCallback(
-    (params: Edge | Connection) => setEdges((eds: Edge[]) => addEdge(params, eds)),
-    [setEdges]
-  )
+    const handleAddNode = useCallback(() => {
+        const id = Math.random().toString(36).substr(2, 9);
+        addNode({
+            id,
+            type: 'custom',
+            position: { x: Math.random() * 500, y: Math.random() * 500 },
+            data: {
+                label: 'New Node',
+                description: 'Newly added node',
+                icon: 'file',
+            },
+        });
+    }, [addNode]);
 
-  return (
-    <div className="w-full h-96 border rounded-lg bg-white">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        fitView
-        attributionPosition="bottom-left"
-      >
-        <Controls />
-        <Background gap={12} size={1} />
-      </ReactFlow>
-    </div>
-  )
-}
+    return (
+        <div style={{ width: '100%', height: '100%' }}>
+            <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                nodeTypes={nodeTypes}
+                fitView
+            >
+                <Background color="#f1f5f9" gap={16} />
+                <Controls />
+                <MiniMap />
+                <Panel position="top-right">
+                    <button
+                        onClick={handleAddNode}
+                        style={{
+                            padding: '8px 16px',
+                            background: '#2563eb',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 500,
+                            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        }}
+                    >
+                        Add Node
+                    </button>
+                </Panel>
+            </ReactFlow>
+        </div>
+    );
+};
 
-export default FlowCanvas
+export default FlowCanvas;
