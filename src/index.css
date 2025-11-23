@@ -16,6 +16,9 @@
   --color-state-accent-active: rgb(21 90 239 / 0.08);
   --color-text-accent: #155aef;
   --color-text-tertiary: #475467;
+  --color-text-primary: #101828;
+  --color-background-section-burn: #f5f7f9;
+  --color-text-disabled: #98a2b3;
 }
 
 :root {
