@@ -43,7 +43,7 @@ const PropertyPanel: React.FC = () => {
                     justifyContent: 'space-between',
                 }}
             >
-                <div style={{ fontWeight: 600, fontSize: '16px', color: '#0f172a' }}>
+                <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>
                     Properties
                 </div>
                 <button
@@ -64,65 +64,7 @@ const PropertyPanel: React.FC = () => {
                 </button>
             </div>
 
-            {/* Content */}
-            <div style={{ padding: '20px', flex: 1, overflowY: 'auto' }}>
-                <div style={{ marginBottom: '20px' }}>
-                    <label
-                        style={{
-                            display: 'block',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            color: '#334155',
-                            marginBottom: '8px',
-                        }}
-                    >
-                        Label
-                    </label>
-                    <input
-                        type="text"
-                        value={selectedNode.data.label || ''}
-                        onChange={(e) => handleChange('label', e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '8px 12px',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '14px',
-                            outline: 'none',
-                            transition: 'border-color 0.2s',
-                        }}
-                    />
-                </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                    <label
-                        style={{
-                            display: 'block',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            color: '#334155',
-                            marginBottom: '8px',
-                        }}
-                    >
-                        Description
-                    </label>
-                    <textarea
-                        value={selectedNode.data.description || ''}
-                        onChange={(e) => handleChange('description', e.target.value)}
-                        rows={4}
-                        style={{
-                            width: '100%',
-                            padding: '8px 12px',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '14px',
-                            outline: 'none',
-                            resize: 'vertical',
-                            fontFamily: 'inherit',
-                        }}
-                    />
-                </div>
-            </div>
         </div>
     );
 };
