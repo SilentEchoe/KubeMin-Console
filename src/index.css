@@ -1,8 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --color-components-panel-bg: #ffffff;
+  --color-components-panel-border: #e2e8f0;
+  --color-components-button-secondary-border: #e2e8f0;
+  --color-components-button-secondary-bg: #ffffff;
+  --color-text-secondary: #64748b;
+  --color-state-base-hover: #f1f5f9;
+  --color-divider-regular: #cbd5e1;
+  --color-components-button-primary-bg: #2563eb;
+  --color-components-button-primary-hover: #1d4ed8;
+  --color-components-button-primary-text: #ffffff;
+}
 
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;

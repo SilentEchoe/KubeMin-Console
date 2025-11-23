@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { Play, ChevronDown } from 'lucide-react';
 import {
     ReactFlow,
     Background,
@@ -45,23 +46,10 @@ const FlowCanvas: React.FC = () => {
         onNodesChange,
         onEdgesChange,
         onConnect,
-        addNode,
         setSelectedNode,
     } = useFlowStore();
 
-    const handleAddNode = useCallback(() => {
-        const id = Math.random().toString(36).substr(2, 9);
-        addNode({
-            id,
-            type: 'custom',
-            position: { x: Math.random() * 500, y: Math.random() * 500 },
-            data: {
-                label: 'New Node',
-                description: 'Newly added node',
-                icon: 'file',
-            },
-        });
-    }, [addNode]);
+
 
     const onNodeClick = useCallback((_: React.MouseEvent, node: any) => {
         setSelectedNode(node.id);
@@ -89,21 +77,35 @@ const FlowCanvas: React.FC = () => {
                 <Controls />
                 <MiniMap />
                 <Panel position="top-right">
-                    <button
-                        onClick={handleAddNode}
-                        style={{
-                            padding: '8px 16px',
-                            background: '#2563eb',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontWeight: 500,
-                            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                        }}
-                    >
-                        Add Node
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {/* Test Run Button Group */}
+                        <div className="flex h-8 items-center rounded-lg border-[0.5px] border-components-button-secondary-border bg-components-button-secondary-bg px-0.5 shadow-xs">
+                            <button
+                                onClick={() => console.log('Test Run')}
+                                className="flex h-7 cursor-pointer items-center rounded-md px-2.5 text-[13px] font-medium text-text-secondary hover:bg-state-base-hover border-none bg-transparent"
+                            >
+                                <Play className="mr-1 h-4 w-4" />
+                                Test Run
+                            </button>
+                            <div className="mx-0.5 h-3.5 w-[1px] bg-divider-regular"></div>
+                            <button
+                                className="flex h-7 cursor-pointer items-center rounded-md px-2.5 text-[13px] font-medium text-text-secondary hover:bg-state-base-hover border-none bg-transparent"
+                            >
+                                History
+                            </button>
+                        </div>
+
+                        {/* Publish Button */}
+                        <div className="flex h-8 items-center">
+                            <button
+                                onClick={() => console.log('Publish')}
+                                className="flex h-8 items-center rounded-lg bg-components-button-primary-bg px-3 text-[13px] font-medium text-components-button-primary-text hover:bg-components-button-primary-hover border-none cursor-pointer"
+                            >
+                                Publish
+                                <ChevronDown className="ml-1 h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
                 </Panel>
                 <ZoomIndicator />
             </ReactFlow>
