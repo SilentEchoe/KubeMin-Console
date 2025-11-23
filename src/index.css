@@ -20,6 +20,16 @@
   --color-background-section-burn: #f5f7f9;
   --color-text-disabled: #98a2b3;
   --color-components-panel-bg-blur: rgb(255 255 255 / 0.95);
+  --color-workflow-block-bg: #ffffff;
+  --color-workflow-block-border: #f3f3f3;
+  --color-components-input-bg-normal: rgb(200 206 218 / 0.25);
+  --color-components-badge-bg-dimm: #f9fafb;
+  --color-divider-deep: #e5e7eb; /* Assuming a value for divider-deep */
+  --color-components-option-card-option-selected-border: #2563eb;
+  --color-state-accent-solid: #2563eb;
+  --color-state-success-solid: #22c55e;
+  --color-state-destructive-solid: #ef4444;
+  --color-state-warning-solid: #f59e0b;
 }
 
 :root {

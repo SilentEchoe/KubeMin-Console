@@ -1,6 +1,15 @@
 import React from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
+import { cn } from '../utils/cn';
+
+const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
+const PANEL_HEADER_STYLES = 'flex items-center justify-between border-b border-components-panel-border px-5 py-4';
+const PANEL_TITLE_STYLES = 'text-base font-semibold text-text-primary';
+const PANEL_CLOSE_BUTTON_STYLES = 'flex items-center justify-center rounded-md p-1 text-text-secondary hover:bg-state-base-hover transition-colors';
+const PANEL_CONTENT_STYLES = 'flex-1 overflow-y-auto p-4';
+const LABEL_STYLES = 'mb-1 block text-xs font-medium text-text-tertiary uppercase';
+const INPUT_CONTAINER_STYLES = 'rounded-lg border border-components-panel-border bg-components-badge-bg-dimm p-2 hover:bg-state-base-hover transition-colors cursor-pointer';
 
 const PropertyPanel: React.FC = () => {
     const { nodes, selectedNodeId, setSelectedNode } = useFlowStore();
@@ -11,93 +20,64 @@ const PropertyPanel: React.FC = () => {
         return null;
     }
 
-
-
     return (
         <div
+            className={PANEL_CONTAINER_STYLES}
             style={{
-                position: 'absolute',
-                top: '70px',
-                right: '20px',
-                bottom: '20px',
-                width: '320px',
-                background: '#fff',
-                borderRadius: '12px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                zIndex: 20,
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                border: '1px solid #e2e8f0',
+                minWidth: '400px',
+                maxWidth: '720px',
+                width: '400px', // Default width, could be dynamic
             }}
         >
             {/* Header */}
-            <div
-                style={{
-                    padding: '16px 20px',
-                    borderBottom: '1px solid #e2e8f0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                }}
-            >
-                <div style={{ fontWeight: 1200, fontSize: '16px', color: '#0f172a' }}>
+            <div className={PANEL_HEADER_STYLES}>
+                <div className={PANEL_TITLE_STYLES}>
                     Properties
                 </div>
                 <button
                     onClick={() => setSelectedNode(null)}
-                    style={{
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: '#64748b',
-                        padding: '4px',
-                        borderRadius: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
+                    className={PANEL_CLOSE_BUTTON_STYLES}
                 >
                     <X size={20} />
                 </button>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className={PANEL_CONTENT_STYLES}>
                 {/* Model Selection */}
                 <div className="mb-4">
-                    <label className="mb-1 block text-xs font-medium text-gray-500 uppercase">
+                    <label className={LABEL_STYLES}>
                         Model
                     </label>
-                    <div className="flex items-center justify-between rounded-lg bg-gray-50 p-2 border border-gray-200 cursor-pointer hover:bg-gray-100">
+                    <div className={cn(INPUT_CONTAINER_STYLES, "flex items-center justify-between")}>
                         <div className="flex items-center gap-2">
                             <div className="h-5 w-5 rounded bg-green-100 flex items-center justify-center text-green-600 text-xs font-bold">
                                 G
                             </div>
-                            <span className="text-sm text-gray-700 font-medium">gpt-4o</span>
+                            <span className="text-sm text-text-primary font-medium">gpt-4o</span>
                         </div>
-                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                        <ChevronDown className="h-4 w-4 text-text-tertiary" />
                     </div>
                 </div>
 
                 {/* Context */}
                 <div className="mb-4">
-                    <label className="mb-1 block text-xs font-medium text-gray-500 uppercase">
+                    <label className={LABEL_STYLES}>
                         Context
                     </label>
-                    <div className="rounded-lg border border-dashed border-gray-300 p-2 text-center hover:bg-gray-50 cursor-pointer transition-colors">
-                        <span className="text-xs text-gray-500">Add Context</span>
+                    <div className="rounded-lg border border-dashed border-gray-300 p-2 text-center hover:bg-state-base-hover cursor-pointer transition-colors">
+                        <span className="text-xs text-text-secondary">Add Context</span>
                     </div>
                 </div>
 
                 {/* System Prompt */}
                 <div className="mb-4">
-                    <label className="mb-1 block text-xs font-medium text-gray-500 uppercase">
+                    <label className={LABEL_STYLES}>
                         System Prompt
                     </label>
                     <div className="relative">
                         <textarea
-                            className="w-full rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-h-[200px] resize-none"
+                            className="w-full rounded-lg border border-components-panel-border bg-components-badge-bg-dimm p-3 text-sm text-text-primary outline-none focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid min-h-[200px] resize-none"
                             placeholder="You are a helpful assistant..."
                             defaultValue={selectedNode.data.description || ''}
                         />
