@@ -4,6 +4,7 @@ export type FlowNodeData = {
     label: string;
     description?: string;
     icon?: string;
+    componentType?: string;
 };
 
 export type FlowNode = Node<FlowNodeData>;

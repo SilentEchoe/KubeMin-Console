@@ -12,7 +12,7 @@ const LABEL_STYLES = 'mb-1 block text-xs font-medium text-text-tertiary uppercas
 const INPUT_CONTAINER_STYLES = 'rounded-lg border border-components-panel-border bg-components-badge-bg-dimm p-2 hover:bg-state-base-hover transition-colors cursor-pointer';
 
 const PropertyPanel: React.FC = () => {
-    const { nodes, selectedNodeId, setSelectedNode } = useFlowStore();
+    const { nodes, selectedNodeId, setSelectedNode, updateNodeData } = useFlowStore();
 
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
@@ -32,7 +32,7 @@ const PropertyPanel: React.FC = () => {
             {/* Header */}
             <div className={PANEL_HEADER_STYLES}>
                 <div className={PANEL_TITLE_STYLES}>
-                    Properties
+                    Component Set
                 </div>
                 <button
                     onClick={() => setSelectedNode(null)}
@@ -44,19 +44,25 @@ const PropertyPanel: React.FC = () => {
 
             {/* Content */}
             <div className={PANEL_CONTENT_STYLES}>
-                {/* Model Selection */}
+                {/* Component Type Selection */}
                 <div className="mb-4">
                     <label className={LABEL_STYLES}>
-                        Model
+                        Component Type
                     </label>
-                    <div className={cn(INPUT_CONTAINER_STYLES, "flex items-center justify-between")}>
-                        <div className="flex items-center gap-2">
-                            <div className="h-5 w-5 rounded bg-green-100 flex items-center justify-center text-green-600 text-xs font-bold">
-                                G
-                            </div>
-                            <span className="text-sm text-text-primary font-medium">gpt-4o</span>
-                        </div>
-                        <ChevronDown className="h-4 w-4 text-text-tertiary" />
+                    <div className="relative">
+                        <select
+                            className={cn(INPUT_CONTAINER_STYLES, "w-full appearance-none flex items-center justify-between outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                            value={selectedNode.data.componentType || 'webservice'}
+                            onChange={(e) => {
+                                updateNodeData(selectedNode.id, { componentType: e.target.value });
+                            }}
+                        >
+                            <option value="webservice">webservice</option>
+                            <option value="store">store</option>
+                            <option value="config">config</option>
+                            <option value="secret">secret</option>
+                        </select>
+                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary pointer-events-none" />
                     </div>
                 </div>
 

@@ -38,11 +38,11 @@ const CanvasControl: React.FC = () => {
     };
 
     return (
-        <div className="pointer-events-none absolute left-4 top-4 z-10 flex flex-col items-start gap-2">
+        <div className="pointer-events-none absolute left-4 top-4 z-50 flex flex-col items-start gap-2">
             <div className="pointer-events-auto flex flex-col items-center rounded-lg border-[0.5px] border-components-actionbar-border bg-components-actionbar-bg p-0.5 text-text-tertiary shadow-lg">
                 {/* Pointer Mode */}
                 <div
-                    className={`mb - 1 flex h - 8 w - 8 cursor - pointer items - center justify - center rounded - lg transition - colors ${controlMode === ControlMode.Pointer
+                    className={`mb-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition-colors ${controlMode === ControlMode.Pointer
                         ? 'bg-state-accent-active text-text-accent'
                         : 'hover:bg-state-base-hover hover:text-text-secondary'
                         } `}
@@ -54,7 +54,7 @@ const CanvasControl: React.FC = () => {
 
                 {/* Hand Mode */}
                 <div
-                    className={`flex h - 8 w - 8 cursor - pointer items - center justify - center rounded - lg transition - colors ${controlMode === ControlMode.Hand
+                    className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition-colors ${controlMode === ControlMode.Hand
                         ? 'bg-state-accent-active text-text-accent'
                         : 'hover:bg-state-base-hover hover:text-text-secondary'
                         } `}
@@ -69,7 +69,7 @@ const CanvasControl: React.FC = () => {
             <div className="relative" ref={addBlockRef}>
                 <div className="pointer-events-auto flex flex-col items-center rounded-lg border-[0.5px] border-components-actionbar-border bg-components-actionbar-bg p-0.5 text-text-tertiary shadow-lg">
                     <div
-                        className={`flex h - 8 w - 8 cursor - pointer items - center justify - center rounded - lg transition - colors ${showAddBlock
+                        className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition-colors ${showAddBlock
                             ? 'bg-state-accent-active text-text-accent'
                             : 'hover:bg-state-base-hover hover:text-text-secondary'
                             } `}

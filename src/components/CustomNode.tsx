@@ -43,7 +43,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
                         </span>
                     </div>
                     <div className={NODE_BADGE_STYLES}>
-                        LLM
+                        Component
                     </div>
                 </div>
 
