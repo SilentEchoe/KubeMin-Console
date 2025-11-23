@@ -21,6 +21,7 @@ export type FlowState = {
     edges: FlowEdge[];
     selectedNodeId: string | null;
     controlMode: ControlMode;
+    panelMenu: { top: number; left: number } | null;
     onNodesChange: (changes: any) => void;
     onEdgesChange: (changes: any) => void;
     onConnect: (connection: any) => void;
@@ -28,4 +29,5 @@ export type FlowState = {
     setSelectedNode: (id: string | null) => void;
     updateNodeData: (id: string, data: Partial<FlowNodeData>) => void;
     setControlMode: (mode: ControlMode) => void;
+    setPanelMenu: (menu: { top: number; left: number } | null) => void;
 };

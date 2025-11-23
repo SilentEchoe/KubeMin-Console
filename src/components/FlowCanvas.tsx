@@ -17,6 +17,8 @@ import { useFlowStore } from '../stores/flowStore';
 import CustomNode from './CustomNode';
 import CanvasControl from './CanvasControl';
 import { ControlMode } from '../types/flow';
+import type { FlowNode } from '../types/flow';
+import PanelContextMenu from './PanelContextMenu';
 
 const nodeTypes: NodeTypes = {
     custom: CustomNode,
@@ -51,11 +53,22 @@ const FlowCanvas: React.FC = () => {
         onConnect,
         setSelectedNode,
         controlMode,
+        setPanelMenu,
     } = useFlowStore();
 
+    const handlePaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
+        event.preventDefault();
+        const container = document.querySelector('.react-flow');
+        if (container) {
+            const { left, top } = container.getBoundingClientRect();
+            setPanelMenu({
+                top: event.clientY - top,
+                left: event.clientX - left,
+            });
+        }
+    }, [setPanelMenu]);
 
-
-    const onNodeClick = useCallback((_: React.MouseEvent, node: any) => {
+    const onNodeClick = useCallback((_: React.MouseEvent, node: FlowNode) => {
         setSelectedNode(node.id);
     }, [setSelectedNode]);
 
@@ -73,6 +86,7 @@ const FlowCanvas: React.FC = () => {
                 onConnect={onConnect}
                 onNodeClick={onNodeClick}
                 onPaneClick={onPaneClick}
+                onPaneContextMenu={handlePaneContextMenu}
                 nodeTypes={nodeTypes}
                 defaultViewport={{ x: 0, y: 0, zoom: 0.75 }}
                 fitView={false}
@@ -85,6 +99,7 @@ const FlowCanvas: React.FC = () => {
                 <Controls />
                 <MiniMap />
                 <CanvasControl />
+                <PanelContextMenu />
                 <Panel position="top-right">
                     <div className="flex items-center gap-2">
                         {/* Test Run Button Group */}

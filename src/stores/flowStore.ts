@@ -39,6 +39,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     ],
     selectedNodeId: null,
     controlMode: ControlMode.Pointer,
+    panelMenu: null,
     onNodesChange: (changes: NodeChange[]) => {
         set({
             nodes: applyNodeChanges(changes, get().nodes) as FlowNode[],
@@ -77,5 +78,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     },
     setControlMode: (mode: ControlMode) => {
         set({ controlMode: mode });
+    },
+    setPanelMenu: (menu) => {
+        set({ panelMenu: menu });
     },
 }));

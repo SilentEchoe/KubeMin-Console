@@ -19,6 +19,7 @@
   --color-text-primary: #101828;
   --color-background-section-burn: #f5f7f9;
   --color-text-disabled: #98a2b3;
+  --color-components-panel-bg-blur: rgb(255 255 255 / 0.95);
 }
 
 :root {
