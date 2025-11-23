@@ -20,6 +20,8 @@ import { ControlMode } from '../types/flow';
 import type { FlowNode } from '../types/flow';
 import PanelContextMenu from './PanelContextMenu';
 
+import { useShortcuts } from '../hooks/useShortcuts';
+
 const nodeTypes: NodeTypes = {
     custom: CustomNode,
 };
@@ -45,6 +47,7 @@ const ZoomIndicator = () => {
 };
 
 const FlowCanvas: React.FC = () => {
+    useShortcuts();
     const {
         nodes,
         edges,
@@ -90,6 +93,7 @@ const FlowCanvas: React.FC = () => {
                 nodeTypes={nodeTypes}
                 defaultViewport={{ x: 0, y: 0, zoom: 0.75 }}
                 fitView={false}
+                deleteKeyCode={null} // Disable default delete to use custom shortcuts
                 panOnScroll={controlMode === ControlMode.Pointer}
                 panOnDrag={controlMode === ControlMode.Hand || [1, 2]}
                 selectionOnDrag={controlMode === ControlMode.Pointer}

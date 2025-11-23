@@ -82,4 +82,26 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     setPanelMenu: (menu) => {
         set({ panelMenu: menu });
     },
+    deleteSelectedElements: () => {
+        const { nodes, edges, selectedNodeId } = get();
+        const nodesToDelete = nodes.filter((node) => node.selected || node.id === selectedNodeId);
+        const edgesToDelete = edges.filter((edge) => edge.selected);
+
+        if (nodesToDelete.length === 0 && edgesToDelete.length === 0) {
+            return;
+        }
+
+        const nodeIdsToDelete = new Set(nodesToDelete.map((node) => node.id));
+
+        set({
+            nodes: nodes.filter((node) => !nodeIdsToDelete.has(node.id)),
+            edges: edges.filter(
+                (edge) =>
+                    !edgesToDelete.includes(edge) &&
+                    !nodeIdsToDelete.has(edge.source) &&
+                    !nodeIdsToDelete.has(edge.target)
+            ),
+            selectedNodeId: nodeIdsToDelete.has(selectedNodeId || '') ? null : selectedNodeId,
+        });
+    },
 }));

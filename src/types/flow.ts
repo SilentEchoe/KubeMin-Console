@@ -30,4 +30,5 @@ export type FlowState = {
     updateNodeData: (id: string, data: Partial<FlowNodeData>) => void;
     setControlMode: (mode: ControlMode) => void;
     setPanelMenu: (menu: { top: number; left: number } | null) => void;
+    deleteSelectedElements: () => void;
 };
