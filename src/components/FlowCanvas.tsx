@@ -5,6 +5,8 @@ import {
     Controls,
     MiniMap,
     Panel,
+    useViewport,
+    BackgroundVariant,
 } from '@xyflow/react';
 import type { NodeTypes } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -16,6 +18,26 @@ const nodeTypes: NodeTypes = {
     custom: CustomNode,
 };
 
+const ZoomIndicator = () => {
+    const { zoom } = useViewport();
+    return (
+        <div style={{
+            position: 'absolute',
+            bottom: '10px',
+            right: '10px',
+            background: 'rgba(255, 255, 255, 0.8)',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            color: '#64748b',
+            pointerEvents: 'none',
+            zIndex: 5
+        }}>
+            {Math.round(zoom * 100)}%
+        </div>
+    );
+};
+
 const FlowCanvas: React.FC = () => {
     const {
         nodes,
@@ -24,6 +46,7 @@ const FlowCanvas: React.FC = () => {
         onEdgesChange,
         onConnect,
         addNode,
+        setSelectedNode,
     } = useFlowStore();
 
     const handleAddNode = useCallback(() => {
@@ -40,18 +63,29 @@ const FlowCanvas: React.FC = () => {
         });
     }, [addNode]);
 
+    const onNodeClick = useCallback((_: React.MouseEvent, node: any) => {
+        setSelectedNode(node.id);
+    }, [setSelectedNode]);
+
+    const onPaneClick = useCallback(() => {
+        setSelectedNode(null);
+    }, [setSelectedNode]);
+
     return (
-        <div style={{ width: '100%', height: '100%' }}>
+        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
+                onNodeClick={onNodeClick}
+                onPaneClick={onPaneClick}
                 nodeTypes={nodeTypes}
-                fitView
+                defaultViewport={{ x: 0, y: 0, zoom: 0.75 }}
+                fitView={false}
             >
-                <Background color="#f1f5f9" gap={16} />
+                <Background color="#94a3b8" gap={20} size={1} variant={BackgroundVariant.Dots} />
                 <Controls />
                 <MiniMap />
                 <Panel position="top-right">
@@ -71,6 +105,7 @@ const FlowCanvas: React.FC = () => {
                         Add Node
                     </button>
                 </Panel>
+                <ZoomIndicator />
             </ReactFlow>
         </div>
     );

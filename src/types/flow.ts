@@ -12,8 +12,11 @@ export type FlowEdge = Edge;
 export type FlowState = {
     nodes: FlowNode[];
     edges: FlowEdge[];
+    selectedNodeId: string | null;
     onNodesChange: (changes: any) => void;
     onEdgesChange: (changes: any) => void;
     onConnect: (connection: any) => void;
     addNode: (node: FlowNode) => void;
+    setSelectedNode: (id: string | null) => void;
+    updateNodeData: (id: string, data: Partial<FlowNodeData>) => void;
 };

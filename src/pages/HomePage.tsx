@@ -1,6 +1,7 @@
 import React from 'react';
 import FlowCanvas from '../components/FlowCanvas';
 import Sidebar from '../components/Sidebar';
+import PropertyPanel from '../components/PropertyPanel';
 
 const HomePage: React.FC = () => {
     return (
@@ -24,6 +25,7 @@ const HomePage: React.FC = () => {
                 <Sidebar />
                 <main style={{ flex: 1, position: 'relative' }}>
                     <FlowCanvas />
+                    <PropertyPanel />
                 </main>
             </div>
         </div>

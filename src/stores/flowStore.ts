@@ -9,7 +9,7 @@ import type {
     EdgeChange,
     NodeChange,
 } from '@xyflow/react';
-import type { FlowState, FlowNode } from '../types/flow';
+import type { FlowState, FlowNode, FlowNodeData } from '../types/flow';
 
 export const useFlowStore = create<FlowState>((set, get) => ({
     nodes: [
@@ -36,6 +36,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         { id: 'e1-2', source: '1', target: '2', animated: true },
         { id: 'e1-3', source: '1', target: '3', animated: true },
     ],
+    selectedNodeId: null,
     onNodesChange: (changes: NodeChange[]) => {
         set({
             nodes: applyNodeChanges(changes, get().nodes) as FlowNode[],
@@ -54,6 +55,22 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     addNode: (node: FlowNode) => {
         set({
             nodes: [...get().nodes, node],
+        });
+    },
+    setSelectedNode: (id: string | null) => {
+        set({ selectedNodeId: id });
+    },
+    updateNodeData: (id: string, data: Partial<FlowNodeData>) => {
+        set({
+            nodes: get().nodes.map((node) => {
+                if (node.id === id) {
+                    return {
+                        ...node,
+                        data: { ...node.data, ...data },
+                    };
+                }
+                return node;
+            }),
         });
     },
 }));
