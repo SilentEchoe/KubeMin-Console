@@ -29,8 +29,8 @@ const CanvasControl: React.FC = () => {
             type: 'custom',
             position: { x: Math.random() * 500 + 100, y: Math.random() * 500 + 100 },
             data: {
-                label: type.toUpperCase(),
-                description: `New ${type} node`,
+                label: type.charAt(0).toUpperCase() + type.slice(1),
+                description: '',
                 icon: 'box',
             },
         });

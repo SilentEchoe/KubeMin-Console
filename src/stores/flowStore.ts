@@ -82,4 +82,33 @@ export const useFlowStore = create<FlowState>((set, get) => ({
             selectedNodeId: nodeIdsToDelete.has(selectedNodeId || '') ? null : selectedNodeId,
         });
     },
+    clipboard: null,
+    copyNode: () => {
+        const { nodes, selectedNodeId } = get();
+        const selectedNode = nodes.find((n) => n.id === selectedNodeId || n.selected);
+        if (selectedNode) {
+            set({ clipboard: selectedNode });
+        }
+    },
+    pasteNode: () => {
+        const { clipboard, nodes } = get();
+        if (!clipboard) return;
+
+        const id = Math.random().toString(36).substr(2, 9);
+        const newNode: FlowNode = {
+            ...clipboard,
+            id,
+            position: {
+                x: clipboard.position.x + 50,
+                y: clipboard.position.y + 50,
+            },
+            selected: true,
+            data: { ...clipboard.data }, // Deep copy data if needed
+        };
+
+        set({
+            nodes: [...nodes.map(n => ({ ...n, selected: false })), newNode],
+            selectedNodeId: id,
+        });
+    },
 }));

@@ -3,7 +3,7 @@ import { useFlowStore } from '../stores/flowStore';
 import { isEventTargetInputArea } from '../utils/keyboard';
 
 export const useShortcuts = () => {
-    const { deleteSelectedElements } = useFlowStore();
+    const { deleteSelectedElements, copyNode, pasteNode } = useFlowStore();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -15,11 +15,21 @@ export const useShortcuts = () => {
                 e.preventDefault();
                 deleteSelectedElements();
             }
+
+            if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
+                e.preventDefault();
+                copyNode();
+            }
+
+            if ((e.metaKey || e.ctrlKey) && e.key === 'v') {
+                e.preventDefault();
+                pasteNode();
+            }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [deleteSelectedElements]);
+    }, [deleteSelectedElements, copyNode, pasteNode]);
 };

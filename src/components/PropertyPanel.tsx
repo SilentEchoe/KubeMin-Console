@@ -66,29 +66,59 @@ const PropertyPanel: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Context */}
-                <div className="mb-4">
-                    <label className={LABEL_STYLES}>
-                        Context
-                    </label>
-                    <div className="rounded-lg border border-dashed border-gray-300 p-2 text-center hover:bg-state-base-hover cursor-pointer transition-colors">
-                        <span className="text-xs text-text-secondary">Add Context</span>
-                    </div>
-                </div>
+                {/* Conditional Controls */}
+                {(!selectedNode.data.componentType || selectedNode.data.componentType === 'webservice') && (
+                    <>
+                        {/* Image */}
+                        <div className="mb-4">
+                            <label className={LABEL_STYLES}>Image</label>
+                            <input
+                                type="text"
+                                className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                placeholder="e.g. nginx:latest"
+                                value={selectedNode.data.image || ''}
+                                onChange={(e) => updateNodeData(selectedNode.id, { image: e.target.value })}
+                            />
+                        </div>
 
-                {/* System Prompt */}
-                <div className="mb-4">
-                    <label className={LABEL_STYLES}>
-                        System Prompt
-                    </label>
-                    <div className="relative">
+                        {/* Namespace */}
+                        <div className="mb-4">
+                            <label className={LABEL_STYLES}>Namespace</label>
+                            <input
+                                type="text"
+                                className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                placeholder="default"
+                                value={selectedNode.data.namespace || ''}
+                                onChange={(e) => updateNodeData(selectedNode.id, { namespace: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Replicas */}
+                        <div className="mb-4">
+                            <label className={LABEL_STYLES}>Replicas</label>
+                            <input
+                                type="number"
+                                className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                placeholder="1"
+                                min={1}
+                                value={selectedNode.data.replicas || 1}
+                                onChange={(e) => updateNodeData(selectedNode.id, { replicas: parseInt(e.target.value) || 1 })}
+                            />
+                        </div>
+                    </>
+                )}
+
+                {(selectedNode.data.componentType === 'config' || selectedNode.data.componentType === 'secret') && (
+                    <div className="mb-4">
+                        <label className={LABEL_STYLES}>Content</label>
                         <textarea
                             className="w-full rounded-lg border border-components-panel-border bg-components-badge-bg-dimm p-3 text-sm text-text-primary outline-none focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid min-h-[200px] resize-none"
-                            placeholder="You are a helpful assistant..."
-                            defaultValue={selectedNode.data.description || ''}
+                            placeholder={selectedNode.data.componentType === 'secret' ? "key=value" : "config data..."}
+                            value={selectedNode.data.content || ''}
+                            onChange={(e) => updateNodeData(selectedNode.id, { content: e.target.value })}
                         />
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

@@ -5,6 +5,10 @@ export type FlowNodeData = {
     description?: string;
     icon?: string;
     componentType?: string;
+    image?: string;
+    namespace?: string;
+    replicas?: number;
+    content?: string;
 };
 
 export type FlowNode = Node<FlowNodeData>;
@@ -23,6 +27,7 @@ export type FlowState = {
     selectedNodeId: string | null;
     controlMode: ControlMode;
     panelMenu: { top: number; left: number } | null;
+    clipboard: FlowNode | null;
     onNodesChange: (changes: any) => void;
     onEdgesChange: (changes: any) => void;
     onConnect: (connection: any) => void;
@@ -32,4 +37,6 @@ export type FlowState = {
     setControlMode: (mode: ControlMode) => void;
     setPanelMenu: (menu: { top: number; left: number } | null) => void;
     deleteSelectedElements: () => void;
+    copyNode: () => void;
+    pasteNode: () => void;
 };
