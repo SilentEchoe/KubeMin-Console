@@ -1,5 +1,6 @@
 import React from 'react';
 import FlowCanvas from '../components/FlowCanvas';
+import Sidebar from '../components/Sidebar';
 
 const HomePage: React.FC = () => {
     return (
@@ -12,15 +13,19 @@ const HomePage: React.FC = () => {
                     alignItems: 'center',
                     padding: '0 24px',
                     background: '#fff',
+                    zIndex: 10,
                 }}
             >
                 <div style={{ fontWeight: 700, fontSize: '18px', color: '#0f172a' }}>
                     KubeMin Console
                 </div>
             </header>
-            <main style={{ flex: 1, position: 'relative' }}>
-                <FlowCanvas />
-            </main>
+            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+                <Sidebar />
+                <main style={{ flex: 1, position: 'relative' }}>
+                    <FlowCanvas />
+                </main>
+            </div>
         </div>
     );
 };
