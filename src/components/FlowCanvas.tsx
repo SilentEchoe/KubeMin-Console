@@ -8,12 +8,15 @@ import {
     Panel,
     useViewport,
     BackgroundVariant,
+    PanOnScrollMode,
 } from '@xyflow/react';
 import type { NodeTypes } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import { useFlowStore } from '../stores/flowStore';
 import CustomNode from './CustomNode';
+import CanvasControl from './CanvasControl';
+import { ControlMode } from '../types/flow';
 
 const nodeTypes: NodeTypes = {
     custom: CustomNode,
@@ -47,6 +50,7 @@ const FlowCanvas: React.FC = () => {
         onEdgesChange,
         onConnect,
         setSelectedNode,
+        controlMode,
     } = useFlowStore();
 
 
@@ -72,10 +76,15 @@ const FlowCanvas: React.FC = () => {
                 nodeTypes={nodeTypes}
                 defaultViewport={{ x: 0, y: 0, zoom: 0.75 }}
                 fitView={false}
+                panOnScroll={controlMode === ControlMode.Pointer}
+                panOnDrag={controlMode === ControlMode.Hand || [1, 2]}
+                selectionOnDrag={controlMode === ControlMode.Pointer}
+                panOnScrollMode={PanOnScrollMode.Free} // Free pan on scroll
             >
                 <Background color="#94a3b8" gap={20} size={1} variant={BackgroundVariant.Dots} />
                 <Controls />
                 <MiniMap />
+                <CanvasControl />
                 <Panel position="top-right">
                     <div className="flex items-center gap-2">
                         {/* Test Run Button Group */}

@@ -10,6 +10,7 @@ import type {
     NodeChange,
 } from '@xyflow/react';
 import type { FlowState, FlowNode, FlowNodeData } from '../types/flow';
+import { ControlMode } from '../types/flow';
 
 export const useFlowStore = create<FlowState>((set, get) => ({
     nodes: [
@@ -37,6 +38,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         { id: 'e1-3', source: '1', target: '3', animated: true },
     ],
     selectedNodeId: null,
+    controlMode: ControlMode.Pointer,
     onNodesChange: (changes: NodeChange[]) => {
         set({
             nodes: applyNodeChanges(changes, get().nodes) as FlowNode[],
@@ -72,5 +74,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
                 return node;
             }),
         });
+    },
+    setControlMode: (mode: ControlMode) => {
+        set({ controlMode: mode });
     },
 }));
