@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
 
 const PropertyPanel: React.FC = () => {
-    const { nodes, selectedNodeId, setSelectedNode, updateNodeData } = useFlowStore();
+    const { nodes, selectedNodeId, setSelectedNode } = useFlowStore();
 
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
@@ -11,9 +11,7 @@ const PropertyPanel: React.FC = () => {
         return null;
     }
 
-    const handleChange = (field: string, value: string) => {
-        updateNodeData(selectedNode.id, { [field]: value });
-    };
+
 
     return (
         <div
