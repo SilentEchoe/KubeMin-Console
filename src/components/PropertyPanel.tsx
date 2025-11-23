@@ -17,7 +17,7 @@ const PropertyPanel: React.FC = () => {
         <div
             style={{
                 position: 'absolute',
-                top: '20px',
+                top: '70px',
                 right: '20px',
                 bottom: '20px',
                 width: '320px',

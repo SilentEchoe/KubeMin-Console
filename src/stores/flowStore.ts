@@ -13,30 +13,8 @@ import type { FlowState, FlowNode, FlowNodeData } from '../types/flow';
 import { ControlMode } from '../types/flow';
 
 export const useFlowStore = create<FlowState>((set, get) => ({
-    nodes: [
-        {
-            id: '1',
-            type: 'custom',
-            position: { x: 250, y: 5 },
-            data: { label: 'Start', description: 'Entry point of the workflow', icon: 'play' },
-        },
-        {
-            id: '2',
-            type: 'custom',
-            position: { x: 100, y: 200 },
-            data: { label: 'Process', description: 'Data processing node', icon: 'cpu' },
-        },
-        {
-            id: '3',
-            type: 'custom',
-            position: { x: 400, y: 200 },
-            data: { label: 'Output', description: 'Result output', icon: 'output' },
-        },
-    ],
-    edges: [
-        { id: 'e1-2', source: '1', target: '2', animated: true },
-        { id: 'e1-3', source: '1', target: '3', animated: true },
-    ],
+    nodes: [],
+    edges: [],
     selectedNodeId: null,
     controlMode: ControlMode.Pointer,
     panelMenu: null,
