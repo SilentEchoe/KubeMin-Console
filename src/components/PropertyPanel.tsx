@@ -2,6 +2,7 @@ import React from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
 import { cn } from '../utils/cn';
+import EnvironmentVariableManager from './EnvironmentVariableManager';
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
 const PANEL_HEADER_STYLES = 'flex items-center justify-between border-b border-components-panel-border px-5 py-4';
@@ -110,12 +111,12 @@ const PropertyPanel: React.FC = () => {
 
                 {(selectedNode.data.componentType === 'config' || selectedNode.data.componentType === 'secret') && (
                     <div className="mb-4">
-                        <label className={LABEL_STYLES}>Content</label>
-                        <textarea
-                            className="w-full rounded-lg border border-components-panel-border bg-components-badge-bg-dimm p-3 text-sm text-text-primary outline-none focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid min-h-[200px] resize-none"
-                            placeholder={selectedNode.data.componentType === 'secret' ? "key=value" : "config data..."}
-                            value={selectedNode.data.content || ''}
-                            onChange={(e) => updateNodeData(selectedNode.id, { content: e.target.value })}
+                        <label className={LABEL_STYLES}>
+                            {selectedNode.data.componentType === 'secret' ? 'Secret Variables' : '环境变量'}
+                        </label>
+                        <EnvironmentVariableManager
+                            variables={selectedNode.data.environmentVariables || []}
+                            onChange={(variables) => updateNodeData(selectedNode.id, { environmentVariables: variables })}
                         />
                     </div>
                 )}

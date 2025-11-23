@@ -1,5 +1,11 @@
 import type { Node, Edge } from '@xyflow/react';
 
+export type EnvironmentVariable = {
+    key: string;
+    value: string;
+    isSecret?: boolean;
+};
+
 export type FlowNodeData = {
     label: string;
     description?: string;
@@ -9,6 +15,7 @@ export type FlowNodeData = {
     namespace?: string;
     replicas?: number;
     content?: string;
+    environmentVariables?: EnvironmentVariable[];
 };
 
 export type FlowNode = Node<FlowNodeData>;
