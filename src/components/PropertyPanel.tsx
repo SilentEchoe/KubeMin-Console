@@ -5,6 +5,8 @@ import { cn } from '../utils/cn';
 import EnvironmentVariableManager from './EnvironmentVariableManager';
 import EnvPanel from './EnvPanel';
 import FlexRow from './FlexRow';
+import DropdownButton, { type DropdownItem } from './ui/DropdownButton';
+import { Play, RotateCw, Trash2 } from 'lucide-react';
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
 const PANEL_HEADER_STYLES = 'flex items-center justify-between border-b border-components-panel-border px-5 py-4';
@@ -112,6 +114,23 @@ const PropertyPanel: React.FC = () => {
                                 onChange={(e) => updateNodeData(selectedNode.id, { replicas: parseInt(e.target.value) || 1 })}
                             />
                         </FlexRow>
+
+                        {/* Actions Dropdown */}
+                        <div className="mb-4">
+                            <label className={LABEL_STYLES}>Actions</label>
+                            <DropdownButton
+                                variant="secondary"
+                                className="w-full"
+                                items={[
+                                    { key: 'deploy', label: 'Deploy', icon: <Play size={14} /> },
+                                    { key: 'restart', label: 'Restart', icon: <RotateCw size={14} /> },
+                                    { key: 'delete', label: 'Delete', icon: <Trash2 size={14} />, className: 'text-red-600 hover:bg-red-50' },
+                                ]}
+                                onSelect={(key) => console.log('Selected action:', key)}
+                            >
+                                Manage Service
+                            </DropdownButton>
+                        </div>
                     </>
                 )}
 
@@ -127,7 +146,7 @@ const PropertyPanel: React.FC = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

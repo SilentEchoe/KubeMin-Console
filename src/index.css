@@ -24,7 +24,8 @@
   --color-workflow-block-border: #f3f3f3;
   --color-components-input-bg-normal: rgb(200 206 218 / 0.25);
   --color-components-badge-bg-dimm: #f9fafb;
-  --color-divider-deep: #e5e7eb; /* Assuming a value for divider-deep */
+  --color-divider-deep: #e5e7eb;
+  /* Assuming a value for divider-deep */
   --color-components-option-card-option-selected-border: #2563eb;
   --color-state-accent-solid: #2563eb;
   --color-state-success-solid: #22c55e;
@@ -58,6 +59,32 @@ body {
 button {
   font-family: inherit;
 }
+
+/* Button Styles */
+.btn {
+  @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-slate-50 hover:bg-blue-600/90;
+}
+
+.btn-destructive {
+  @apply bg-red-500 text-slate-50 hover:bg-red-500/90;
+}
+
+.btn-secondary {
+  @apply bg-slate-100 text-slate-900 hover:bg-slate-100/80;
+}
+
+.btn-ghost {
+  @apply hover:bg-slate-100 hover:text-slate-900;
+}
+
+.btn-link {
+  @apply text-slate-900 underline-offset-4 hover:underline;
+}
+
 
 /* Custom Node Styles */
 .custom-node.selected {
