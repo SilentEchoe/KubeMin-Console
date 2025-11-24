@@ -4,6 +4,7 @@ import { useFlowStore } from '../stores/flowStore';
 import { cn } from '../utils/cn';
 import EnvironmentVariableManager from './EnvironmentVariableManager';
 import EnvPanel from './EnvPanel';
+import FlexRow from './FlexRow';
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
 const PANEL_HEADER_STYLES = 'flex items-center justify-between border-b border-components-panel-border px-5 py-4';
@@ -100,17 +101,17 @@ const PropertyPanel: React.FC = () => {
                         </div>
 
                         {/* Replicas */}
-                        <div className="mb-4">
-                            <label className={LABEL_STYLES}>Replicas</label>
+                        <FlexRow className="justify-between">
+                            <label className={cn(LABEL_STYLES, "mb-0")}>Replicas</label>
                             <input
                                 type="number"
-                                className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                className={cn(INPUT_CONTAINER_STYLES, "w-24 outline-none focus:ring-1 focus:ring-state-accent-solid text-right")}
                                 placeholder="1"
                                 min={1}
                                 value={selectedNode.data.replicas || 1}
                                 onChange={(e) => updateNodeData(selectedNode.id, { replicas: parseInt(e.target.value) || 1 })}
                             />
-                        </div>
+                        </FlexRow>
                     </>
                 )}
 
