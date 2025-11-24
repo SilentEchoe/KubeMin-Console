@@ -7,6 +7,18 @@ export type EnvironmentVariable = {
     description?: string;
 };
 
+export type PropertyItem = {
+    id: string;
+    value: string;
+    placeholder?: string;
+};
+
+export type EnvConfigItem = {
+    id: string;
+    key: string;
+    value: string;
+};
+
 export type FlowNodeData = {
     label: string;
     description?: string;
@@ -17,6 +29,8 @@ export type FlowNodeData = {
     replicas?: number;
     content?: string;
     environmentVariables?: EnvironmentVariable[];
+    properties?: PropertyItem[];
+    envConfig?: EnvConfigItem[];
 };
 
 export type FlowNode = Node<FlowNodeData>;

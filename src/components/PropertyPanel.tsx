@@ -116,6 +116,7 @@ const PropertyPanel: React.FC = () => {
                             {/* Tags (Dynamic Input List) */}
                             <div>
                                 <DynamicInputList
+                                    key={selectedNode.id} // Force re-render on node change
                                     title="" // Title handled by FieldCollapse
                                     placeholder="Enter port"
                                     btnText="Add Properties"
@@ -124,7 +125,8 @@ const PropertyPanel: React.FC = () => {
                                     deleteBtnClassName="bg-white h-6 w-6 p-1"
                                     showEmptyState={false}
                                     itemContainerClassName="bg-white"
-                                    onItemsChange={(items) => console.log('Properties updated:', items)}
+                                    initialItems={selectedNode.data.properties || []}
+                                    onItemsChange={(items) => updateNodeData(selectedNode.id, { properties: items })}
                                 />
                             </div>
                         </FieldCollapse>
@@ -133,6 +135,7 @@ const PropertyPanel: React.FC = () => {
                             {/* Config (Dynamic Key-Value List) */}
                             <div>
                                 <DynamicKeyValueList
+                                    key={selectedNode.id} // Force re-render on node change
                                     title="" // Title handled by FieldCollapse
                                     keyPlaceholder="Name"
                                     valuePlaceholder="Value"
@@ -141,7 +144,8 @@ const PropertyPanel: React.FC = () => {
                                     deleteBtnClassName="bg-white h-6 w-6 p-1"
                                     showEmptyState={false}
                                     itemContainerClassName="bg-white"
-                                    onItemsChange={(items) => console.log('Config updated:', items)}
+                                    initialItems={selectedNode.data.envConfig || []}
+                                    onItemsChange={(items) => updateNodeData(selectedNode.id, { envConfig: items })}
                                 />
                             </div>
                         </FieldCollapse>
