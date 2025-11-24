@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
-import { Play, Cpu, Box, FileText, Database, Globe, MessageSquare } from 'lucide-react';
+import { Play, Cpu, Box, FileText, Database, Globe, MessageSquare, Settings } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const icons: Record<string, React.ElementType> = {
@@ -12,6 +12,7 @@ const icons: Record<string, React.ElementType> = {
     database: Database,
     web: Globe,
     chat: MessageSquare,
+    settings: Settings,
 };
 
 const NODE_WIDTH = 'w-[240px]';

@@ -7,14 +7,14 @@ import VariableModal from './VariableModal';
 import type { EnvironmentVariable } from '../types/flow';
 
 const EnvPanel: React.FC = () => {
-    const { showEnvPanel, setShowEnvPanel, environmentVariables, setEnvironmentVariables, envSecrets, setEnvSecrets } = useFlowStore();
+    const { environmentVariables, setEnvironmentVariables, envSecrets, setEnvSecrets, setSelectedNode } = useFlowStore();
     const [editingVar, setEditingVar] = useState<EnvironmentVariable | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    if (!showEnvPanel) return null;
+    // Note: showEnvPanel check removed as this component is now rendered by PropertyPanel based on selection
 
     const handleClose = () => {
-        setShowEnvPanel(false);
+        setSelectedNode(null);
     };
 
     const handleEdit = (variable: EnvironmentVariable) => {
@@ -34,19 +34,24 @@ const EnvPanel: React.FC = () => {
     };
 
     return (
-        <div className="absolute right-0 top-0 z-40 h-full w-[420px] rounded-l-2xl border-l border-components-panel-border bg-components-panel-bg-alt shadow-xl transition-transform duration-300 ease-in-out">
+        <div className="absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200"
+            style={{
+                minWidth: '400px',
+                maxWidth: '720px',
+                width: '400px',
+            }}
+        >
             <div className="flex h-full flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-components-panel-border p-4">
+                <div className="flex items-center justify-between border-b border-components-panel-border px-5 py-4">
                     <div>
-                        <h2 className="text-lg font-semibold text-text-primary">Environment Variables</h2>
-                        <p className="text-xs text-text-tertiary">Manage global variables for your workflow</p>
+                        <h2 className="text-base font-semibold text-text-primary">Config / Secret Variables</h2>
                     </div>
                     <button
                         onClick={handleClose}
-                        className="rounded-lg p-1 text-text-tertiary hover:bg-state-base-hover hover:text-text-primary"
+                        className="flex items-center justify-center rounded-md p-1 text-text-secondary hover:bg-state-base-hover transition-colors"
                     >
-                        <X className="h-5 w-5" />
+                        <X size={20} />
                     </button>
                 </div>
 

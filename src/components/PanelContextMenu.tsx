@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useFlowStore } from '../stores/flowStore';
-import { Plus, FileText, Play, Clipboard, Download, Upload, ChevronRight } from 'lucide-react';
+import { Plus, FileText, Play, Clipboard, Download, Upload, ChevronRight, Settings } from 'lucide-react';
 import BlockSelector from './BlockSelector';
 
 const PanelContextMenu: React.FC = () => {
@@ -48,6 +48,35 @@ const PanelContextMenu: React.FC = () => {
             ref={ref}
             onContextMenu={(e) => e.preventDefault()}
         >
+            <div className="p-1">
+                {/* Create Config/Secret Node */}
+                <div
+                    className="flex h-8 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-text-secondary hover:bg-state-base-hover"
+                    onClick={() => {
+                        const id = Math.random().toString(36).substr(2, 9);
+                        addNode({
+                            id,
+                            type: 'custom',
+                            position: { x: panelMenu.left + 50, y: panelMenu.top + 50 },
+                            data: {
+                                label: 'Config/Secret',
+                                description: 'Manage global environment variables',
+                                icon: 'settings',
+                                componentType: 'config-secret',
+                            },
+                        });
+                        setPanelMenu(null);
+                    }}
+                >
+                    <div className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        <span>Config/Secret Node</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="my-1 h-[0.5px] bg-components-panel-border" />
+
             <div className="p-1">
                 {/* Add Block */}
                 <div
@@ -119,6 +148,7 @@ const PanelContextMenu: React.FC = () => {
                     </div>
                 </div>
             </div>
+
         </div>
     );
 };

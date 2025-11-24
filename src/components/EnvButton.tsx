@@ -13,8 +13,8 @@ const EnvButton: React.FC = () => {
         <button
             onClick={handleClick}
             className={`flex items-center justify-center rounded-md p-2 transition-colors ${showEnvPanel
-                    ? 'bg-state-accent-soft text-state-accent-solid hover:bg-state-accent-soft-hover'
-                    : 'text-text-secondary hover:bg-state-base-hover hover:text-text-primary'
+                ? 'bg-state-accent-soft text-state-accent-solid hover:bg-state-accent-soft-hover'
+                : 'text-text-secondary hover:bg-state-base-hover hover:text-text-primary'
                 }`}
             title="Environment Variables"
         >
