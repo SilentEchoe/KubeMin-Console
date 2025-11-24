@@ -3,13 +3,13 @@ import { X } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
 import VariableTrigger from './VariableTrigger';
 import EnvItem from './EnvItem';
-import VariableModal from './VariableModal';
+import VariableForm from './VariableForm';
 import type { EnvironmentVariable } from '../types/flow';
 
 const EnvPanel: React.FC = () => {
     const { environmentVariables, setEnvironmentVariables, envSecrets, setEnvSecrets, setSelectedNode } = useFlowStore();
     const [editingVar, setEditingVar] = useState<EnvironmentVariable | null>(null);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
 
     // Note: showEnvPanel check removed as this component is now rendered by PropertyPanel based on selection
 
@@ -19,7 +19,7 @@ const EnvPanel: React.FC = () => {
 
     const handleEdit = (variable: EnvironmentVariable) => {
         setEditingVar(variable);
-        setIsEditModalOpen(true);
+        setIsAdding(false); // Ensure we are not in add mode
     };
 
     const handleDelete = (variable: EnvironmentVariable) => {
@@ -31,6 +31,16 @@ const EnvPanel: React.FC = () => {
             delete newSecrets[variable.key];
             setEnvSecrets(newSecrets);
         }
+    };
+
+    const handleSave = () => {
+        setIsAdding(false);
+        setEditingVar(null);
+    };
+
+    const handleCancel = () => {
+        setIsAdding(false);
+        setEditingVar(null);
     };
 
     return (
@@ -57,38 +67,54 @@ const EnvPanel: React.FC = () => {
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-4">
-                    <div className="mb-4">
-                        <VariableTrigger />
-                    </div>
+                    {!isAdding && !editingVar && (
+                        <div className="mb-4">
+                            <div onClick={() => setIsAdding(true)}>
+                                <VariableTrigger />
+                            </div>
+                        </div>
+                    )}
+
+                    {isAdding && (
+                        <VariableForm
+                            onSave={handleSave}
+                            onCancel={handleCancel}
+                        />
+                    )}
+
+                    {editingVar && (
+                        <VariableForm
+                            initialData={editingVar}
+                            onSave={handleSave}
+                            onCancel={handleCancel}
+                        />
+                    )}
 
                     <div className="space-y-2">
-                        {environmentVariables.length === 0 ? (
+                        {environmentVariables.length === 0 && !isAdding ? (
                             <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <p className="text-sm text-text-tertiary">No environment variables yet</p>
                             </div>
                         ) : (
                             environmentVariables.map((variable) => (
-                                <EnvItem
-                                    key={variable.key}
-                                    variable={variable}
-                                    onEdit={handleEdit}
-                                    onDelete={handleDelete}
-                                />
+                                // Hide the item if it's being edited, as the form is shown above (or we could replace it in place, but showing above is simpler for now as per plan)
+                                // Actually, if we are editing, we probably want to hide the list or just show the form.
+                                // Let's just show the list, but maybe disable interaction?
+                                // Or better: if editingVar matches, don't show the item?
+                                // Let's hide the item if it's being edited.
+                                editingVar?.key === variable.key ? null : (
+                                    <EnvItem
+                                        key={variable.key}
+                                        variable={variable}
+                                        onEdit={handleEdit}
+                                        onDelete={handleDelete}
+                                    />
+                                )
                             ))
                         )}
                     </div>
                 </div>
             </div>
-
-            {/* Edit Modal */}
-            <VariableModal
-                isOpen={isEditModalOpen}
-                onClose={() => {
-                    setIsEditModalOpen(false);
-                    setEditingVar(null);
-                }}
-                initialData={editingVar}
-            />
         </div>
     );
 };

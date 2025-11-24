@@ -26,6 +26,7 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
         { type: 'if-else', title: 'If/Else', category: 'Logic' },
         { type: 'code', title: 'Code', category: 'Logic' },
         { type: 'http', title: 'HTTP Request', category: 'Transform' },
+        { type: 'config-secret', title: 'Config/Secret Node', category: 'Logic' },
     ];
 
     return (

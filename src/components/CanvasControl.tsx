@@ -24,14 +24,17 @@ const CanvasControl: React.FC = () => {
 
     const handleAddBlock = (type: string) => {
         const id = Math.random().toString(36).substr(2, 9);
+        const isConfigSecret = type === 'config-secret';
+
         addNode({
             id,
             type: 'custom',
             position: { x: Math.random() * 500 + 100, y: Math.random() * 500 + 100 },
             data: {
-                label: type.charAt(0).toUpperCase() + type.slice(1),
-                description: '',
-                icon: 'box',
+                label: isConfigSecret ? 'Config/Secret' : type.charAt(0).toUpperCase() + type.slice(1),
+                description: isConfigSecret ? 'Manage global environment variables' : '',
+                icon: isConfigSecret ? 'settings' : 'box',
+                componentType: isConfigSecret ? 'config-secret' : undefined,
             },
         });
         setShowAddBlock(false);
@@ -39,10 +42,10 @@ const CanvasControl: React.FC = () => {
 
     return (
         <div className="pointer-events-none absolute left-4 top-4 z-50 flex flex-col items-start gap-2">
-            <div className="pointer-events-auto flex flex-col items-center rounded-lg border-[0.5px] border-components-actionbar-border bg-components-actionbar-bg p-0.5 text-text-tertiary shadow-lg">
+            <div className="pointer-events-auto flex items-center rounded-lg border-[0.5px] border-components-actionbar-border bg-components-actionbar-bg p-0.5 text-text-tertiary shadow-lg">
                 {/* Pointer Mode */}
                 <div
-                    className={`mb-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition-colors ${controlMode === ControlMode.Pointer
+                    className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition-colors ${controlMode === ControlMode.Pointer
                         ? 'bg-state-accent-active text-text-accent'
                         : 'hover:bg-state-base-hover hover:text-text-secondary'
                         } `}
@@ -63,11 +66,12 @@ const CanvasControl: React.FC = () => {
                 >
                     <Hand className="h-4 w-4" />
                 </div>
-            </div>
 
-            {/* Add Block Button */}
-            <div className="relative" ref={addBlockRef}>
-                <div className="pointer-events-auto flex flex-col items-center rounded-lg border-[0.5px] border-components-actionbar-border bg-components-actionbar-bg p-0.5 text-text-tertiary shadow-lg">
+                {/* Divider */}
+                <div className="mx-1 h-4 w-[1px] bg-divider-regular" />
+
+                {/* Add Block Button */}
+                <div className="relative" ref={addBlockRef}>
                     <div
                         className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition-colors ${showAddBlock
                             ? 'bg-state-accent-active text-text-accent'
@@ -78,14 +82,14 @@ const CanvasControl: React.FC = () => {
                     >
                         <Plus className="h-4 w-4" />
                     </div>
-                </div>
 
-                {/* Block Selector Popup */}
-                {showAddBlock && (
-                    <div className="pointer-events-auto absolute left-full top-0 ml-2 z-50">
-                        <BlockSelector onSelect={handleAddBlock} onClose={() => setShowAddBlock(false)} />
-                    </div>
-                )}
+                    {/* Block Selector Popup */}
+                    {showAddBlock && (
+                        <div className="pointer-events-auto absolute left-0 top-full mt-2 z-50">
+                            <BlockSelector onSelect={handleAddBlock} onClose={() => setShowAddBlock(false)} />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
