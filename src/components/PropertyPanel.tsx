@@ -7,6 +7,7 @@ import EnvPanel from './EnvPanel';
 import FlexRow from './FlexRow';
 import DropdownButton from './ui/DropdownButton';
 import DynamicInputList from './base/DynamicInputList';
+import DynamicKeyValueList from './base/DynamicKeyValueList';
 import FieldCollapse from './base/FieldCollapse';
 import { Play, RotateCw, Trash2 } from 'lucide-react';
 
@@ -124,6 +125,23 @@ const PropertyPanel: React.FC = () => {
                                     showEmptyState={false}
                                     itemContainerClassName="bg-white"
                                     onItemsChange={(items) => console.log('Properties updated:', items)}
+                                />
+                            </div>
+                        </FieldCollapse>
+
+                        <FieldCollapse title="ENV" defaultOpen={true}>
+                            {/* Config (Dynamic Key-Value List) */}
+                            <div>
+                                <DynamicKeyValueList
+                                    title="" // Title handled by FieldCollapse
+                                    keyPlaceholder="Name"
+                                    valuePlaceholder="Value"
+                                    btnText="Add Config"
+                                    inputClassName="bg-white focus:bg-gray-50 text-[12px]"
+                                    deleteBtnClassName="bg-white h-6 w-6 p-1"
+                                    showEmptyState={false}
+                                    itemContainerClassName="bg-white"
+                                    onItemsChange={(items) => console.log('Config updated:', items)}
                                 />
                             </div>
                         </FieldCollapse>
