@@ -4,9 +4,10 @@ import { Plus, FileText, Play, Clipboard, Download, Upload, ChevronRight, Settin
 import BlockSelector from './BlockSelector';
 
 const PanelContextMenu: React.FC = () => {
-    const { panelMenu, setPanelMenu, addNode } = useFlowStore();
+    const { panelMenu, setPanelMenu, addNode, nodes } = useFlowStore();
     const ref = useRef<HTMLDivElement>(null);
     const [showAddBlock, setShowAddBlock] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -35,6 +36,98 @@ const PanelContextMenu: React.FC = () => {
                 icon: 'box',
             },
         });
+        setPanelMenu(null);
+    };
+
+    const handleExportDSL = () => {
+        const components = nodes
+            .map(node => {
+                const ports = node.data.properties?.map(p => ({ port: parseInt(p.value) || 0 })) || [];
+                const env = node.data.envConfig?.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {}) || {};
+
+                return {
+                    name: node.data.label || 'component',
+                    type: node.data.componentType || 'webservice',
+                    replicas: node.data.replicas || 1,
+                    image: node.data.image || 'nginx:latest',
+                    properties: {
+                        ports: ports,
+                        env: env
+                    }
+                };
+            });
+
+        const dsl = {
+            name: "project-export", // Placeholder
+            alias: "project",
+            version: "1.0.0",
+            project: "",
+            description: "Exported Project",
+            component: components
+        };
+
+        const blob = new Blob([JSON.stringify(dsl, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'dsl.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setPanelMenu(null);
+    };
+
+    const handleImportDSL = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const content = e.target?.result as string;
+                const dsl = JSON.parse(content);
+
+                if (dsl.component && Array.isArray(dsl.component)) {
+                    dsl.component.forEach((comp: any, index: number) => {
+                        const id = Math.random().toString(36).substr(2, 9);
+
+                        // Map properties
+                        const properties = comp.properties?.ports?.map((p: any) => ({
+                            id: `prop-${Math.random().toString(36).substr(2, 9)}`,
+                            value: p.port.toString()
+                        })) || [];
+
+                        // Map env
+                        const envConfig = comp.properties?.env ? Object.entries(comp.properties.env).map(([key, value]) => ({
+                            id: `env-${Math.random().toString(36).substr(2, 9)}`,
+                            key,
+                            value: String(value)
+                        })) : [];
+
+                        addNode({
+                            id,
+                            type: 'custom',
+                            position: { x: panelMenu.left + (index * 50), y: panelMenu.top + (index * 50) },
+                            data: {
+                                label: comp.name || 'Component',
+                                description: 'Imported component',
+                                icon: 'box',
+                                componentType: comp.type || 'webservice',
+                                image: comp.image,
+                                replicas: comp.replicas,
+                                properties,
+                                envConfig
+                            },
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to import DSL:', error);
+                alert('Invalid DSL file');
+            }
+        };
+        reader.readAsText(file);
         setPanelMenu(null);
     };
 
@@ -127,7 +220,10 @@ const PanelContextMenu: React.FC = () => {
 
             <div className="p-1">
                 {/* Export */}
-                <div className="flex h-8 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-text-secondary hover:bg-state-base-hover">
+                <div
+                    className="flex h-8 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-text-secondary hover:bg-state-base-hover"
+                    onClick={handleExportDSL}
+                >
                     <div className="flex items-center gap-2">
                         <Download className="h-4 w-4" />
                         <span>Export</span>
@@ -135,12 +231,22 @@ const PanelContextMenu: React.FC = () => {
                 </div>
 
                 {/* Import DSL */}
-                <div className="flex h-8 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-text-secondary hover:bg-state-base-hover">
+                <div
+                    className="flex h-8 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-text-secondary hover:bg-state-base-hover"
+                    onClick={() => fileInputRef.current?.click()}
+                >
                     <div className="flex items-center gap-2">
                         <Upload className="h-4 w-4" />
                         <span>Import DSL</span>
                     </div>
                 </div>
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept=".json"
+                    onChange={handleImportDSL}
+                />
             </div>
 
         </div>
