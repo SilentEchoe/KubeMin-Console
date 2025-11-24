@@ -5,7 +5,8 @@ import { cn } from '../utils/cn';
 import EnvironmentVariableManager from './EnvironmentVariableManager';
 import EnvPanel from './EnvPanel';
 import FlexRow from './FlexRow';
-import DropdownButton, { type DropdownItem } from './ui/DropdownButton';
+import DropdownButton from './ui/DropdownButton';
+import DynamicInputList from './base/DynamicInputList';
 import { Play, RotateCw, Trash2 } from 'lucide-react';
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
@@ -130,6 +131,16 @@ const PropertyPanel: React.FC = () => {
                             >
                                 Manage Service
                             </DropdownButton>
+                        </div>
+
+                        {/* Tags (Dynamic Input List) */}
+                        <div className="mb-4">
+                            <DynamicInputList
+                                title="Tags"
+                                placeholder="Enter tag name"
+                                btnText="Add Tag"
+                                onItemsChange={(items) => console.log('Tags updated:', items)}
+                            />
                         </div>
                     </>
                 )}
