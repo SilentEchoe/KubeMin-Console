@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Button, type ButtonProps } from '../ui/Button';
 import Input from './Input';
+import { cn } from '../../utils/cn';
 
 export type InputItem = {
     id: string;
@@ -17,6 +18,10 @@ type DynamicInputListProps = {
     initialItems?: InputItem[];
     onItemsChange?: (items: InputItem[]) => void;
     inputType?: React.HTMLInputTypeAttribute;
+    inputClassName?: string;
+    deleteBtnClassName?: string;
+    showEmptyState?: boolean;
+    itemContainerClassName?: string;
 };
 
 const DynamicInputList = ({
@@ -27,6 +32,10 @@ const DynamicInputList = ({
     initialItems = [],
     onItemsChange,
     inputType = 'text',
+    inputClassName,
+    deleteBtnClassName,
+    showEmptyState = true,
+    itemContainerClassName,
 }: DynamicInputListProps) => {
     const [items, setItems] = useState<InputItem[]>(initialItems);
 
@@ -73,12 +82,12 @@ const DynamicInputList = ({
                 {items.map((item) => (
                     <div
                         key={item.id}
-                        className="bg-components-input-bg-normal rounded-lg p-3"
+                        className={cn("bg-components-input-bg-normal rounded-lg p-3", itemContainerClassName)}
                     >
                         <div className="flex items-center gap-2">
                             <Input
                                 type={inputType}
-                                className="flex-1"
+                                className={cn("flex-1", inputClassName)}
                                 placeholder={item.placeholder}
                                 value={item.value}
                                 onChange={(e) => handleChange(item.id, e.target.value)}
@@ -86,6 +95,7 @@ const DynamicInputList = ({
                             <Button
                                 variant="ghost"
                                 size="small"
+                                className={deleteBtnClassName}
                                 onClick={() => handleRemove(item.id)}
                             >
                                 <X className="h-4 w-4 text-text-tertiary" />
@@ -95,7 +105,7 @@ const DynamicInputList = ({
                 ))}
 
                 {/* Empty State */}
-                {items.length === 0 && (
+                {showEmptyState && items.length === 0 && (
                     <div className="bg-components-input-bg-normal rounded-lg p-4 text-center">
                         <div className="text-sm text-text-tertiary">
                             No content, click add button to create

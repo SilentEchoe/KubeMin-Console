@@ -56,11 +56,11 @@ const PropertyPanel: React.FC = () => {
             {/* Content */}
             <div className={PANEL_CONTENT_STYLES}>
                 {/* Component Type Selection */}
-                <div className="mb-4">
-                    <label className={LABEL_STYLES}>
+                <div className="mb-4 flex items-center justify-between">
+                    <label className={cn(LABEL_STYLES, "mb-0")}>
                         Component Type
                     </label>
-                    <div className="relative">
+                    <div className="relative w-[180px]">
                         <select
                             className={cn(INPUT_CONTAINER_STYLES, "w-full appearance-none flex items-center justify-between outline-none focus:ring-1 focus:ring-state-accent-solid")}
                             value={selectedNode.data.componentType || 'webservice'}
@@ -80,30 +80,22 @@ const PropertyPanel: React.FC = () => {
                 {/* Conditional Controls */}
                 {(!selectedNode.data.componentType || selectedNode.data.componentType === 'webservice') && (
                     <>
-                        <FieldCollapse title="Basic Settings" defaultOpen={true}>
-                            {/* Image */}
-                            <div className="mb-4">
-                                <label className={LABEL_STYLES}>Image</label>
-                                <input
-                                    type="text"
-                                    className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
-                                    placeholder="e.g. nginx:latest"
-                                    value={selectedNode.data.image || ''}
-                                    onChange={(e) => updateNodeData(selectedNode.id, { image: e.target.value })}
-                                />
-                            </div>
+                        {/* Image - Moved to second row */}
+                        <div className="mb-4">
+                            <label className={LABEL_STYLES}>
+                                Image <span className="text-red-500 ml-0.5">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                placeholder="e.g. nginx:latest"
+                                value={selectedNode.data.image || ''}
+                                onChange={(e) => updateNodeData(selectedNode.id, { image: e.target.value })}
+                            />
+                        </div>
 
-                            {/* Namespace */}
-                            <div className="mb-4">
-                                <label className={LABEL_STYLES}>Namespace</label>
-                                <input
-                                    type="text"
-                                    className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
-                                    placeholder="default"
-                                    value={selectedNode.data.namespace || ''}
-                                    onChange={(e) => updateNodeData(selectedNode.id, { namespace: e.target.value })}
-                                />
-                            </div>
+                        <FieldCollapse title="Basic Settings" defaultOpen={true}>
+                            {/* Namespace Removed */}
 
                             {/* Replicas */}
                             <FlexRow className="justify-between">
@@ -127,6 +119,10 @@ const PropertyPanel: React.FC = () => {
                                     placeholder="Enter port"
                                     btnText="Add Properties"
                                     inputType="number"
+                                    inputClassName="bg-white focus:bg-gray-50 text-[12px]"
+                                    deleteBtnClassName="bg-white h-6 w-6 p-1"
+                                    showEmptyState={false}
+                                    itemContainerClassName="bg-white"
                                     onItemsChange={(items) => console.log('Properties updated:', items)}
                                 />
                             </div>
