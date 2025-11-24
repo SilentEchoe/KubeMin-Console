@@ -20,13 +20,13 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
     ];
 
     const blocks = [
-        { type: 'llm', title: 'LLM', category: 'Model' },
+        // { type: 'llm', title: 'LLM', category: 'Model' },
         { type: 'component', title: 'Component', category: 'Model' },
-        { type: 'knowledge', title: 'Knowledge Retrieval', category: 'Knowledge' },
-        { type: 'if-else', title: 'If/Else', category: 'Logic' },
-        { type: 'code', title: 'Code', category: 'Logic' },
-        { type: 'http', title: 'HTTP Request', category: 'Transform' },
-        { type: 'config-secret', title: 'Config/Secret Node', category: 'Logic' },
+        // { type: 'knowledge', title: 'Knowledge Retrieval', category: 'Knowledge' },
+        // { type: 'if-else', title: 'If/Else', category: 'Logic' },
+        // { type: 'code', title: 'Code', category: 'Logic' },
+        // { type: 'http', title: 'HTTP Request', category: 'Transform' },
+        { type: 'config-secret', title: 'Config/Secret Node', category: 'Model' },
     ];
 
     return (

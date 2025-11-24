@@ -46,7 +46,7 @@ const VariableForm: React.FC<VariableFormProps> = ({ initialData, onSave, onCanc
             key: formData.key,
             value: formData.isSecret ? '[__HIDDEN__]' : formData.value,
             isSecret: formData.isSecret,
-            description: formData.description,
+            // description removed
         };
 
         if (existingIndex >= 0 && initialData) {
@@ -107,24 +107,23 @@ const VariableForm: React.FC<VariableFormProps> = ({ initialData, onSave, onCanc
                         </span>
                     )}
                 </label>
-                <input
-                    type={formData.isSecret ? "password" : "text"}
-                    value={formData.value}
-                    onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                    className="w-full rounded-lg border border-components-panel-border bg-white p-2 text-sm text-text-primary outline-none focus:border-state-accent-solid"
-                    placeholder={formData.isSecret ? "Enter secret value" : "Enter value"}
-                />
-            </div>
-
-            <div>
-                <label className="mb-1 block text-sm font-medium text-text-secondary">Description</label>
-                <textarea
-                    value={formData.description || ''}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full rounded-lg border border-components-panel-border bg-white p-2 text-sm text-text-primary outline-none focus:border-state-accent-solid"
-                    rows={3}
-                    placeholder="Optional description"
-                />
+                {formData.isSecret ? (
+                    <input
+                        type="password"
+                        value={formData.value}
+                        onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                        className="w-full rounded-lg border border-components-panel-border bg-white p-2 text-sm text-text-primary outline-none focus:border-state-accent-solid"
+                        placeholder="Enter secret value"
+                    />
+                ) : (
+                    <textarea
+                        value={formData.value}
+                        onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                        className="w-full resize-none rounded-lg border border-components-panel-border bg-white p-2 text-sm text-text-primary outline-none focus:border-state-accent-solid"
+                        placeholder="Enter value"
+                        rows={3}
+                    />
+                )}
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
