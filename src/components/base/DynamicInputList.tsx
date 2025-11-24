@@ -16,6 +16,7 @@ type DynamicInputListProps = {
     btnProps?: ButtonProps;
     initialItems?: InputItem[];
     onItemsChange?: (items: InputItem[]) => void;
+    inputType?: React.HTMLInputTypeAttribute;
 };
 
 const DynamicInputList = ({
@@ -25,6 +26,7 @@ const DynamicInputList = ({
     btnProps,
     initialItems = [],
     onItemsChange,
+    inputType = 'text',
 }: DynamicInputListProps) => {
     const [items, setItems] = useState<InputItem[]>(initialItems);
 
@@ -75,6 +77,7 @@ const DynamicInputList = ({
                     >
                         <div className="flex items-center gap-2">
                             <Input
+                                type={inputType}
                                 className="flex-1"
                                 placeholder={item.placeholder}
                                 value={item.value}

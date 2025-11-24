@@ -117,7 +117,7 @@ const PropertyPanel: React.FC = () => {
                         </FlexRow>
 
                         {/* Actions Dropdown */}
-                        <div className="mb-4">
+                        {/* <div className="mb-4">
                             <label className={LABEL_STYLES}>Actions</label>
                             <DropdownButton
                                 variant="secondary"
@@ -131,15 +131,16 @@ const PropertyPanel: React.FC = () => {
                             >
                                 Manage Service
                             </DropdownButton>
-                        </div>
+                        </div> */}
 
                         {/* Tags (Dynamic Input List) */}
                         <div className="mb-4">
                             <DynamicInputList
-                                title="Tags"
-                                placeholder="Enter tag name"
-                                btnText="Add Tag"
-                                onItemsChange={(items) => console.log('Tags updated:', items)}
+                                title="properties"
+                                placeholder="Enter port"
+                                btnText="Add Properties"
+                                inputType="number"
+                                onItemsChange={(items) => console.log('Properties updated:', items)}
                             />
                         </div>
                     </>
