@@ -9,7 +9,7 @@ const VariableTrigger: React.FC = () => {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-state-accent-solid py-2 text-sm font-medium text-white transition-colors hover:bg-state-accent-solid-hover"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-state-accent-solid py-2 text-[15px] font-medium text-white transition-colors hover:bg-state-accent-solid-hover"
             >
                 <Plus className="h-4 w-4" />
                 Add Variable

@@ -94,7 +94,7 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
         <div className="space-y-3">
             {/* 添加新变量表单 */}
             <div className="space-y-2 p-3 bg-components-panel-bg rounded-lg border border-components-panel-border">
-                <div className="text-sm font-medium text-text-secondary">添加环境变量</div>
+                <div className="text-[15px] font-medium text-text-secondary">添加环境变量</div>
                 <div className="space-y-2">
                     <input
                         type="text"
@@ -102,7 +102,7 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                         value={newKey}
                         onChange={(e) => setNewKey(e.target.value)}
                         onKeyPress={(e) => handleKeyPress(e, 'add')}
-                        className="w-full px-3 py-2 text-sm border border-components-panel-border rounded-md bg-white focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none"
+                        className="w-full px-3 py-2 text-[15px] border border-components-panel-border rounded-md bg-white focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none"
                     />
                     <div className="flex gap-2">
                         <textarea
@@ -110,9 +110,9 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                             value={newValue}
                             onChange={(e) => setNewValue(e.target.value)}
                             rows={3}
-                            className="flex-1 px-3 py-2 text-sm border border-components-panel-border rounded-md bg-white focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none resize-vertical min-h-[60px] max-h-[200px]"
+                            className="flex-1 px-3 py-2 text-[15px] border border-components-panel-border rounded-md bg-white focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none resize-vertical min-h-[60px] max-h-[200px]"
                         />
-                        <label className="flex items-center gap-1 px-2 py-2 text-sm">
+                        <label className="flex items-center gap-1 px-2 py-2 text-[15px]">
                             <input
                                 type="checkbox"
                                 checked={isSecret}
@@ -125,7 +125,7 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                     <button
                         onClick={addVariable}
                         disabled={!newKey.trim() || !newValue.trim()}
-                        className="px-4 py-2 text-sm bg-state-accent-solid text-white rounded-md hover:bg-state-accent-solid-hover disabled:bg-state-accent-disabled disabled:cursor-not-allowed transition-colors"
+                        className="px-4 py-2 text-[15px] bg-state-accent-solid text-white rounded-md hover:bg-state-accent-solid-hover disabled:bg-state-accent-disabled disabled:cursor-not-allowed transition-colors"
                     >
                         添加变量
                     </button>
@@ -135,7 +135,7 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
             {/* 现有变量列表 */}
             {variables.length > 0 && (
                 <div className="space-y-2">
-                    <div className="text-sm font-medium text-text-secondary">
+                    <div className="text-[15px] font-medium text-text-secondary">
                         环境变量列表 ({variables.length})
                     </div>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -148,7 +148,7 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                                             type="text"
                                             value={editKey}
                                             onChange={(e) => setEditKey(e.target.value)}
-                                            className="w-full px-2 py-1 text-sm border border-components-panel-border rounded focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none"
+                                            className="w-full px-2 py-1 text-[15px] border border-components-panel-border rounded focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none"
                                         />
                                         <div className="flex gap-2">
                                             <textarea
@@ -156,9 +156,9 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                                                 value={editValue}
                                                 onChange={(e) => setEditValue(e.target.value)}
                                                 rows={3}
-                                                className="flex-1 px-2 py-1 text-sm border border-components-panel-border rounded focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none resize-vertical min-h-[60px] max-h-[150px]"
+                                                className="flex-1 px-2 py-1 text-[15px] border border-components-panel-border rounded focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none resize-vertical min-h-[60px] max-h-[150px]"
                                             />
-                                            <label className="flex items-center gap-1 text-xs">
+                                            <label className="flex items-center gap-1 text-[15px]">
                                                 <input
                                                     type="checkbox"
                                                     checked={editIsSecret}
@@ -170,13 +170,13 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={saveEdit}
-                                                className="px-3 py-1 text-xs bg-state-accent-solid text-white rounded hover:bg-state-accent-solid-hover transition-colors"
+                                                className="px-3 py-1 text-[15px] bg-state-accent-solid text-white rounded hover:bg-state-accent-solid-hover transition-colors"
                                             >
                                                 保存
                                             </button>
                                             <button
                                                 onClick={cancelEdit}
-                                                className="px-3 py-1 text-xs bg-components-badge-bg-dimm text-text-secondary rounded hover:bg-state-base-hover transition-colors"
+                                                className="px-3 py-1 text-[15px] bg-components-badge-bg-dimm text-text-secondary rounded hover:bg-state-base-hover transition-colors"
                                             >
                                                 取消
                                             </button>
@@ -188,15 +188,15 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                                         <div className="flex items-center justify-between">
                                             <div className="flex grow items-center gap-2">
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="system-sm-medium text-text-primary truncate">
+                                                    <div className="text-[15px] font-medium text-text-primary truncate">
                                                         {variable.key}
                                                     </div>
-                                                    <div className="system-xs-regular text-text-tertiary mt-0.5">
+                                                    <div className="text-[15px] text-text-tertiary mt-0.5">
                                                         {variable.isSecret ? '••••••••' : variable.value}
                                                     </div>
                                                 </div>
                                                 {variable.isSecret && (
-                                                    <span className="px-2 py-0.5 text-xs bg-red-100 text-red-700 rounded-full">
+                                                    <span className="px-2 py-0.5 text-[15px] bg-red-100 text-red-700 rounded-full">
                                                         密文
                                                     </span>
                                                 )}
@@ -236,8 +236,8 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
 
             {variables.length === 0 && (
                 <div className="text-center py-8 text-text-tertiary">
-                    <div className="text-sm">暂无环境变量</div>
-                    <div className="text-xs mt-1">使用上方表单添加环境变量</div>
+                    <div className="text-[15px]">暂无环境变量</div>
+                    <div className="text-[15px] mt-1">使用上方表单添加环境变量</div>
                 </div>
             )}
         </div>

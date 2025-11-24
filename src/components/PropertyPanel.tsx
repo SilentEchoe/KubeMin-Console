@@ -7,15 +7,16 @@ import EnvPanel from './EnvPanel';
 import FlexRow from './FlexRow';
 import DropdownButton from './ui/DropdownButton';
 import DynamicInputList from './base/DynamicInputList';
+import FieldCollapse from './base/FieldCollapse';
 import { Play, RotateCw, Trash2 } from 'lucide-react';
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
 const PANEL_HEADER_STYLES = 'flex items-center justify-between border-b border-components-panel-border px-5 py-4';
-const PANEL_TITLE_STYLES = 'text-base font-semibold text-text-primary';
+const PANEL_TITLE_STYLES = 'text-[15px] font-semibold text-text-primary';
 const PANEL_CLOSE_BUTTON_STYLES = 'flex items-center justify-center rounded-md p-1 text-text-secondary hover:bg-state-base-hover transition-colors';
 const PANEL_CONTENT_STYLES = 'flex-1 overflow-y-auto p-4';
-const LABEL_STYLES = 'mb-1 block text-xs font-medium text-text-tertiary uppercase';
-const INPUT_CONTAINER_STYLES = 'rounded-lg border border-components-panel-border bg-components-badge-bg-dimm p-2 hover:bg-state-base-hover transition-colors cursor-pointer';
+const LABEL_STYLES = 'mb-1 block text-[12px] font-medium text-text-tertiary uppercase';
+const INPUT_CONTAINER_STYLES = 'rounded-lg border border-components-panel-border bg-components-badge-bg-dimm p-2 text-[15px] hover:bg-state-base-hover transition-colors cursor-pointer';
 
 const PropertyPanel: React.FC = () => {
     const { nodes, selectedNodeId, setSelectedNode, updateNodeData } = useFlowStore();
@@ -79,70 +80,57 @@ const PropertyPanel: React.FC = () => {
                 {/* Conditional Controls */}
                 {(!selectedNode.data.componentType || selectedNode.data.componentType === 'webservice') && (
                     <>
-                        {/* Image */}
-                        <div className="mb-4">
-                            <label className={LABEL_STYLES}>Image</label>
-                            <input
-                                type="text"
-                                className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
-                                placeholder="e.g. nginx:latest"
-                                value={selectedNode.data.image || ''}
-                                onChange={(e) => updateNodeData(selectedNode.id, { image: e.target.value })}
-                            />
-                        </div>
+                        <FieldCollapse title="Basic Settings" defaultOpen={true}>
+                            {/* Image */}
+                            <div className="mb-4">
+                                <label className={LABEL_STYLES}>Image</label>
+                                <input
+                                    type="text"
+                                    className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                    placeholder="e.g. nginx:latest"
+                                    value={selectedNode.data.image || ''}
+                                    onChange={(e) => updateNodeData(selectedNode.id, { image: e.target.value })}
+                                />
+                            </div>
 
-                        {/* Namespace */}
-                        <div className="mb-4">
-                            <label className={LABEL_STYLES}>Namespace</label>
-                            <input
-                                type="text"
-                                className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
-                                placeholder="default"
-                                value={selectedNode.data.namespace || ''}
-                                onChange={(e) => updateNodeData(selectedNode.id, { namespace: e.target.value })}
-                            />
-                        </div>
+                            {/* Namespace */}
+                            <div className="mb-4">
+                                <label className={LABEL_STYLES}>Namespace</label>
+                                <input
+                                    type="text"
+                                    className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                    placeholder="default"
+                                    value={selectedNode.data.namespace || ''}
+                                    onChange={(e) => updateNodeData(selectedNode.id, { namespace: e.target.value })}
+                                />
+                            </div>
 
-                        {/* Replicas */}
-                        <FlexRow className="justify-between">
-                            <label className={cn(LABEL_STYLES, "mb-0")}>Replicas</label>
-                            <input
-                                type="number"
-                                className={cn(INPUT_CONTAINER_STYLES, "w-24 outline-none focus:ring-1 focus:ring-state-accent-solid text-right")}
-                                placeholder="1"
-                                min={1}
-                                value={selectedNode.data.replicas || 1}
-                                onChange={(e) => updateNodeData(selectedNode.id, { replicas: parseInt(e.target.value) || 1 })}
-                            />
-                        </FlexRow>
+                            {/* Replicas */}
+                            <FlexRow className="justify-between">
+                                <label className={cn(LABEL_STYLES, "mb-0")}>Replicas</label>
+                                <input
+                                    type="number"
+                                    className={cn(INPUT_CONTAINER_STYLES, "w-24 outline-none focus:ring-1 focus:ring-state-accent-solid text-right")}
+                                    placeholder="1"
+                                    min={1}
+                                    value={selectedNode.data.replicas || 1}
+                                    onChange={(e) => updateNodeData(selectedNode.id, { replicas: parseInt(e.target.value) || 1 })}
+                                />
+                            </FlexRow>
+                        </FieldCollapse>
 
-                        {/* Actions Dropdown */}
-                        {/* <div className="mb-4">
-                            <label className={LABEL_STYLES}>Actions</label>
-                            <DropdownButton
-                                variant="secondary"
-                                className="w-full"
-                                items={[
-                                    { key: 'deploy', label: 'Deploy', icon: <Play size={14} /> },
-                                    { key: 'restart', label: 'Restart', icon: <RotateCw size={14} /> },
-                                    { key: 'delete', label: 'Delete', icon: <Trash2 size={14} />, className: 'text-red-600 hover:bg-red-50' },
-                                ]}
-                                onSelect={(key) => console.log('Selected action:', key)}
-                            >
-                                Manage Service
-                            </DropdownButton>
-                        </div> */}
-
-                        {/* Tags (Dynamic Input List) */}
-                        <div className="mb-4">
-                            <DynamicInputList
-                                title="properties"
-                                placeholder="Enter port"
-                                btnText="Add Properties"
-                                inputType="number"
-                                onItemsChange={(items) => console.log('Properties updated:', items)}
-                            />
-                        </div>
+                        <FieldCollapse title="Properties" defaultOpen={true}>
+                            {/* Tags (Dynamic Input List) */}
+                            <div>
+                                <DynamicInputList
+                                    title="" // Title handled by FieldCollapse
+                                    placeholder="Enter port"
+                                    btnText="Add Properties"
+                                    inputType="number"
+                                    onItemsChange={(items) => console.log('Properties updated:', items)}
+                                />
+                            </div>
+                        </FieldCollapse>
                     </>
                 )}
 

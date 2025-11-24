@@ -63,7 +63,7 @@ const DynamicInputList = ({
             {/* Title (Optional) */}
             {title && (
                 <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-text-secondary">{title}</span>
+                    <span className="text-[15px] font-semibold text-text-secondary">{title}</span>
                     <span className="text-xs text-text-tertiary">{items.length} Items</span>
                 </div>
             )}

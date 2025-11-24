@@ -55,7 +55,7 @@ const EnvPanel: React.FC = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-components-panel-border px-5 py-4">
                     <div>
-                        <h2 className="text-base font-semibold text-text-primary">Config / Secret Variables</h2>
+                        <h2 className="text-[15px] font-semibold text-text-primary">Config / Secret Variables</h2>
                     </div>
                     <button
                         onClick={handleClose}
@@ -93,7 +93,7 @@ const EnvPanel: React.FC = () => {
                     <div className="space-y-2">
                         {environmentVariables.length === 0 && !isAdding ? (
                             <div className="flex flex-col items-center justify-center py-8 text-center">
-                                <p className="text-sm text-text-tertiary">No environment variables yet</p>
+                                <p className="text-[15px] text-text-tertiary">No environment variables yet</p>
                             </div>
                         ) : (
                             environmentVariables.map((variable) => (

@@ -32,8 +32,8 @@ const EnvItem: React.FC<EnvItemProps> = ({ variable, onEdit, onDelete }) => {
                     <div className="flex h-6 w-6 items-center justify-center rounded bg-components-panel-bg-alt">
                         {getIcon()}
                     </div>
-                    <span className="text-sm font-medium text-text-primary">{variable.key}</span>
-                    <span className="text-xs text-text-tertiary">
+                    <span className="text-[15px] font-medium text-text-primary">{variable.key}</span>
+                    <span className="text-[15px] text-text-tertiary">
                         {variable.isSecret ? 'Secret' : 'String'}
                     </span>
                 </div>
@@ -53,11 +53,11 @@ const EnvItem: React.FC<EnvItemProps> = ({ variable, onEdit, onDelete }) => {
                 </div>
             </div>
             <div className="pl-8">
-                <div className="truncate text-xs font-mono text-text-secondary">
+                <div className="truncate text-[15px] font-mono text-text-secondary">
                     {getValue()}
                 </div>
                 {variable.description && (
-                    <div className="mt-1 truncate text-xs text-text-tertiary">
+                    <div className="mt-1 truncate text-[15px] text-text-tertiary">
                         {variable.description}
                     </div>
                 )}
