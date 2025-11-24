@@ -80,8 +80,8 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
                             </div>
                         ))}
 
-                        <div className="text-xs font-medium text-text-tertiary px-2 mt-2">Logic</div>
-                        {blocks.filter(b => b.category === 'Logic').map(block => (
+                        <div className="text-xs font-medium text-text-tertiary px-2 mt-2">Other</div>
+                        {blocks.filter(b => b.category === 'Other').map(block => (
                             <div
                                 key={block.type}
                                 className="flex h-8 w-full cursor-pointer items-center rounded-lg px-2 hover:bg-state-base-hover"

@@ -98,13 +98,7 @@ const PanelContextMenu: React.FC = () => {
                     )}
                 </div>
 
-                {/* Add Note */}
-                <div className="flex h-8 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-text-secondary hover:bg-state-base-hover">
-                    <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        <span>Add Note</span>
-                    </div>
-                </div>
+
 
                 {/* Run */}
                 <div className="flex h-8 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-text-secondary hover:bg-state-base-hover">
