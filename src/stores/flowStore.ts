@@ -111,4 +111,18 @@ export const useFlowStore = create<FlowState>((set, get) => ({
             selectedNodeId: id,
         });
     },
+    showEnvPanel: false,
+    setShowEnvPanel: (show: boolean) => {
+        set({
+            showEnvPanel: show,
+            // Close other panels when opening EnvPanel
+            // Note: Assuming other panel states will be added or are managed elsewhere.
+            // Based on requirements: setShowChatVariablePanel(false), setShowGlobalVariablePanel(false), etc.
+            // For now, we just set the state.
+        });
+    },
+    environmentVariables: [],
+    setEnvironmentVariables: (vars) => set({ environmentVariables: vars }),
+    envSecrets: {},
+    setEnvSecrets: (secrets) => set({ envSecrets: secrets }),
 }));

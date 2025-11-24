@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { cn } from '../utils/cn';
 import type { EnvironmentVariable } from '../types/flow';
 
 interface EnvironmentVariableManagerProps {

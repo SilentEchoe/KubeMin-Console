@@ -4,6 +4,7 @@ export type EnvironmentVariable = {
     key: string;
     value: string;
     isSecret?: boolean;
+    description?: string;
 };
 
 export type FlowNodeData = {
@@ -46,4 +47,10 @@ export type FlowState = {
     deleteSelectedElements: () => void;
     copyNode: () => void;
     pasteNode: () => void;
+    showEnvPanel: boolean;
+    setShowEnvPanel: (show: boolean) => void;
+    environmentVariables: EnvironmentVariable[];
+    setEnvironmentVariables: (vars: EnvironmentVariable[]) => void;
+    envSecrets: Record<string, string>;
+    setEnvSecrets: (secrets: Record<string, string>) => void;
 };
