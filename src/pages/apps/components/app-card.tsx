@@ -9,6 +9,12 @@ interface AppCardProps {
     onUpdate: () => void;
 }
 
+// Default icon when icon is empty
+const DEFAULT_ICON = '📦';
+
+// Default icon background colors
+const ICON_BACKGROUNDS = ['#dbeafe', '#fce7f3', '#fef3c7', '#ddd6fe', '#d1fae5', '#fecaca'];
+
 export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
     const navigate = useNavigate();
     const [isHovered, setIsHovered] = React.useState(false);
@@ -73,6 +79,14 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
         return date.toLocaleDateString();
     };
 
+    // Use app icon or default icon
+    const displayIcon = app.icon || DEFAULT_ICON;
+
+    // Generate a consistent background color based on app id
+    const iconBackground = ICON_BACKGROUNDS[
+        Math.abs(app.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % ICON_BACKGROUNDS.length
+    ];
+
     return (
         <div
             className="group relative bg-white rounded-xl border border-gray-200 hover:border-primary-500 hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden"
@@ -86,18 +100,18 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
                 <div className="flex items-start gap-3 mb-3">
                     <div
                         className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl flex-shrink-0"
-                        style={{ backgroundColor: app.iconBackground }}
+                        style={{ backgroundColor: iconBackground }}
                     >
-                        {app.icon}
+                        {displayIcon}
                     </div>
                     <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-gray-900 text-base truncate mb-1">
                             {app.name}
                         </h3>
                         <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <span>{app.createdBy}</span>
+                            <span className="truncate">{app.alias}</span>
                             <span>•</span>
-                            <span>{formatDate(app.updatedAt)}</span>
+                            <span>{formatDate(app.updateTime)}</span>
                         </div>
                     </div>
                 </div>
@@ -107,20 +121,9 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
                     {app.description}
                 </p>
 
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1.5">
-                    {app.tags.map(tag => (
-                        <span
-                            key={tag.id}
-                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                            style={{
-                                backgroundColor: `${tag.color}15`,
-                                color: tag.color,
-                            }}
-                        >
-                            {tag.name}
-                        </span>
-                    ))}
+                {/* Additional Info */}
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <span>Created: {formatDate(app.createTime)}</span>
                 </div>
             </div>
 

@@ -7,6 +7,7 @@ const App: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<AppsPage />} />
+      <Route path="/apps" element={<AppsPage />} />
       <Route path="/workflow/:appId" element={<WorkflowPage />} />
     </Routes>
   );

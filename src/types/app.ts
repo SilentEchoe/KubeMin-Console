@@ -7,14 +7,13 @@ export interface Tag {
 export interface App {
   id: string;
   name: string;
+  alias: string;
+  project: string;
   description: string;
+  createTime: string;
+  updateTime: string;
   icon: string;
-  iconBackground: string;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-  tags: Tag[];
-  isPublic: boolean;
+  workflow_id: string;
 }
 
 export interface AppListResponse {
