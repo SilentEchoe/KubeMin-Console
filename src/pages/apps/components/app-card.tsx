@@ -89,23 +89,23 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
 
     return (
         <div
-            className="group relative bg-white rounded-xl border border-gray-200 hover:border-primary-500 hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden"
+            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-primary-500 hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden w-[290px] h-[160px]"
             onClick={handleCardClick}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             {/* Card Content */}
-            <div className="p-4">
+            <div className="p-3">
                 {/* Header */}
-                <div className="flex items-start gap-3 mb-3">
+                <div className="flex items-start gap-2 mb-2">
                     <div
-                        className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl flex-shrink-0"
+                        className="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0"
                         style={{ backgroundColor: iconBackground }}
                     >
                         {displayIcon}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-base truncate mb-1">
+                        <h3 className="font-semibold text-gray-900 text-sm truncate mb-0.5">
                             {app.name}
                         </h3>
                         <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -117,7 +117,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
                 </div>
 
                 {/* Description */}
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2 h-10">
+                <p className="text-xs text-gray-600 mb-2 line-clamp-2">
                     {app.description}
                 </p>
 
