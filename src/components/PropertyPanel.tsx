@@ -5,13 +5,14 @@ import { cn } from '../utils/cn';
 import EnvironmentVariableManager from './EnvironmentVariableManager';
 import EnvPanel from './EnvPanel';
 import FlexRow from './FlexRow';
-import DropdownButton from './ui/DropdownButton';
+// import DropdownButton from './ui/DropdownButton';
 import DynamicInputList from './base/DynamicInputList';
 import DynamicKeyValueList from './base/DynamicKeyValueList';
 import FieldCollapse from './base/FieldCollapse';
 
 import { Settings } from 'lucide-react';
 import { Button } from './ui/Button';
+import TraitsPanel from './TraitsPanel';
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
 const PANEL_HEADER_STYLES = 'flex items-center justify-between border-b border-components-panel-border px-5 py-4';
@@ -31,7 +32,7 @@ const PropertyPanel: React.FC = () => {
         return null;
     }
 
-    if (selectedNode.data.componentType === 'config-secret') {
+    if (selectedNode.data.componentType === 'config' || selectedNode.data.componentType === 'secret') {
         return <EnvPanel />;
     }
 
@@ -50,7 +51,7 @@ const PropertyPanel: React.FC = () => {
                     }}
                 >
                     <div className={PANEL_HEADER_STYLES}>
-                        <div className={PANEL_TITLE_STYLES}>Configuration</div>
+                        <div className={PANEL_TITLE_STYLES}>Traits</div>
                         <button
                             onClick={() => setShowConfigPanel(false)}
                             className={PANEL_CLOSE_BUTTON_STYLES}
@@ -59,9 +60,7 @@ const PropertyPanel: React.FC = () => {
                         </button>
                     </div>
                     <div className={PANEL_CONTENT_STYLES}>
-                        <div className="text-sm text-text-secondary">
-                            Configuration options will appear here.
-                        </div>
+                        <TraitsPanel node={selectedNode} />
                     </div>
                 </div>
             )}
@@ -87,7 +86,7 @@ const PropertyPanel: React.FC = () => {
                             onClick={() => setShowConfigPanel(!showConfigPanel)}
                         >
                             <Settings className="mr-2 h-4 w-4" />
-                            Configure
+                            Add Traits
                         </Button>
                         <button
                             onClick={() => setSelectedNode(null)}
@@ -110,13 +109,11 @@ const PropertyPanel: React.FC = () => {
                                 className={cn(INPUT_CONTAINER_STYLES, "w-full appearance-none flex items-center justify-between outline-none focus:ring-1 focus:ring-state-accent-solid")}
                                 value={selectedNode.data.componentType || 'webservice'}
                                 onChange={(e) => {
-                                    updateNodeData(selectedNode.id, { componentType: e.target.value });
+                                    updateNodeData(selectedNode.id, { componentType: e.target.value as any });
                                 }}
                             >
                                 <option value="webservice">webservice</option>
                                 <option value="store">store</option>
-                                <option value="config">config</option>
-                                <option value="secret">secret</option>
                             </select>
                             <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary pointer-events-none" />
                         </div>
@@ -196,17 +193,7 @@ const PropertyPanel: React.FC = () => {
                         </>
                     )}
 
-                    {(selectedNode.data.componentType === 'config' || selectedNode.data.componentType === 'secret') && (
-                        <div className="mb-4">
-                            <label className={LABEL_STYLES}>
-                                {selectedNode.data.componentType === 'secret' ? 'Secret Variables' : '环境变量'}
-                            </label>
-                            <EnvironmentVariableManager
-                                variables={selectedNode.data.environmentVariables || []}
-                                onChange={(variables) => updateNodeData(selectedNode.id, { environmentVariables: variables })}
-                            />
-                        </div>
-                    )}
+
                 </div>
             </div>
 

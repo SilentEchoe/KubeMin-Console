@@ -19,19 +19,67 @@ export type EnvConfigItem = {
     value: string;
 };
 
-export type FlowNodeData = {
+export interface TraitEnv {
+    name: string;
+    valueFrom?: {
+        secret?: {
+            name: string;
+            key: string;
+        };
+        field?: {
+            fieldPath: string;
+        };
+    };
+}
+
+export interface TraitProbe {
+    type: 'liveness' | 'readiness';
+    exec?: {
+        command: string[];
+    };
+    initialDelaySeconds?: number;
+    periodSeconds?: number;
+    timeoutSeconds?: number;
+}
+
+export interface TraitStorage {
+    type: 'persistent' | 'ephemeral' | 'config';
+    name: string;
+    mountPath: string;
+    subPath?: string;
+    size?: string;
+    sourceName?: string; // For config type
+}
+
+export interface TraitContainer {
+    name: string;
+    image?: string;
+    command?: string[];
+    traits?: Traits;
+}
+
+export interface Traits {
+    envs?: TraitEnv[];
+    probes?: TraitProbe[];
+    storage?: TraitStorage[];
+    sidecar?: TraitContainer[];
+    init?: TraitContainer[];
+}
+
+export interface FlowNodeData extends Record<string, unknown> {
     label: string;
     description?: string;
     icon?: string;
-    componentType?: string;
+    componentType?: 'webservice' | 'store' | 'config' | 'secret';
     image?: string;
     namespace?: string;
     replicas?: number;
     content?: string;
     environmentVariables?: EnvironmentVariable[];
-    properties?: PropertyItem[];
-    envConfig?: EnvConfigItem[];
-};
+    properties?: any[];
+    envConfig?: any[];
+    traits?: Traits;
+}
 
 export type FlowNode = Node<FlowNodeData>;
 export type FlowEdge = Edge;
