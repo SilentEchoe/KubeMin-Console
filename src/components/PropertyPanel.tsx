@@ -2,6 +2,7 @@ import React from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
 import { cn } from '../utils/cn';
+import EnvironmentVariableManager from './EnvironmentVariableManager';
 
 import EnvPanel from './EnvPanel';
 import FlexRow from './FlexRow';
@@ -32,7 +33,7 @@ const PropertyPanel: React.FC = () => {
         return null;
     }
 
-    if (selectedNode.data.componentType === 'config' || selectedNode.data.componentType === 'secret') {
+    if ((selectedNode.data.componentType as any) === 'config-secret') {
         return <EnvPanel />;
     }
 
@@ -191,6 +192,18 @@ const PropertyPanel: React.FC = () => {
                                 </div>
                             </FieldCollapse>
                         </>
+                    )}
+
+                    {(selectedNode.data.componentType === 'config' || selectedNode.data.componentType === 'secret') && (
+                        <div className="mb-4">
+                            <label className={LABEL_STYLES}>
+                                {selectedNode.data.componentType === 'secret' ? 'Secret Variables' : '环境变量'}
+                            </label>
+                            <EnvironmentVariableManager
+                                variables={selectedNode.data.environmentVariables || []}
+                                onChange={(variables) => updateNodeData(selectedNode.id, { environmentVariables: variables })}
+                            />
+                        </div>
                     )}
 
 
