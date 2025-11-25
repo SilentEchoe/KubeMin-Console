@@ -76,6 +76,7 @@ const TraitsPanel: React.FC<TraitsPanelProps> = ({ node }) => {
                         title="Sidecar Containers"
                         containers={traits.sidecar || []}
                         onChange={(sidecar) => updateTraits({ sidecar })}
+                        variant="sidecar"
                     />
                 )}
                 {activeTab === 'init' && (
@@ -83,6 +84,7 @@ const TraitsPanel: React.FC<TraitsPanelProps> = ({ node }) => {
                         title="Init Containers"
                         containers={traits.init || []}
                         onChange={(init) => updateTraits({ init })}
+                        variant="init"
                     />
                 )}
             </div>

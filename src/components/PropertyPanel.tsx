@@ -2,7 +2,7 @@ import React from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
 import { cn } from '../utils/cn';
-import EnvironmentVariableManager from './EnvironmentVariableManager';
+
 import EnvPanel from './EnvPanel';
 import FlexRow from './FlexRow';
 // import DropdownButton from './ui/DropdownButton';

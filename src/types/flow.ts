@@ -55,6 +55,11 @@ export interface TraitContainer {
     name: string;
     image?: string;
     command?: string[];
+    properties?: {
+        image?: string;
+        command?: string[];
+        env?: Record<string, string>;
+    };
     traits?: Traits;
 }
 

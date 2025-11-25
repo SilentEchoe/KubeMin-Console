@@ -8,9 +8,10 @@ interface TraitsContainerListProps {
     title: string;
     containers: TraitContainer[];
     onChange: (containers: TraitContainer[]) => void;
+    variant?: 'sidecar' | 'init';
 }
 
-const TraitsContainerList: React.FC<TraitsContainerListProps> = ({ title, containers, onChange }) => {
+const TraitsContainerList: React.FC<TraitsContainerListProps> = ({ title, containers, onChange, variant = 'sidecar' }) => {
     const [isAdding, setIsAdding] = useState(false);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
@@ -28,15 +29,25 @@ const TraitsContainerList: React.FC<TraitsContainerListProps> = ({ title, contai
 
     const handleAdd = () => {
         if (!name) return;
+
         const newContainer: TraitContainer = {
             name,
-            image,
-            command: command ? command.split('\n') : undefined,
             traits: {
                 envs: [],
                 storage: []
             }
         };
+
+        if (variant === 'init') {
+            newContainer.properties = {
+                image,
+                command: command ? command.split('\n') : undefined
+            };
+        } else {
+            newContainer.image = image;
+            newContainer.command = command ? command.split('\n') : undefined;
+        }
+
         onChange([...containers, newContainer]);
         resetForm();
     };
@@ -137,14 +148,27 @@ const TraitsContainerList: React.FC<TraitsContainerListProps> = ({ title, contai
                                     <label className="text-xs font-medium text-text-secondary uppercase">Basic Info</label>
                                     <input
                                         type="text"
-                                        value={container.image || ''}
-                                        onChange={(e) => handleUpdateContainer(index, { image: e.target.value })}
+                                        value={(variant === 'init' ? container.properties?.image : container.image) || ''}
+                                        onChange={(e) => {
+                                            if (variant === 'init') {
+                                                handleUpdateContainer(index, { properties: { ...container.properties, image: e.target.value } });
+                                            } else {
+                                                handleUpdateContainer(index, { image: e.target.value });
+                                            }
+                                        }}
                                         placeholder="Image"
                                         className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none"
                                     />
                                     <textarea
-                                        value={container.command?.join('\n') || ''}
-                                        onChange={(e) => handleUpdateContainer(index, { command: e.target.value.split('\n') })}
+                                        value={(variant === 'init' ? container.properties?.command : container.command)?.join('\n') || ''}
+                                        onChange={(e) => {
+                                            const cmd = e.target.value.split('\n');
+                                            if (variant === 'init') {
+                                                handleUpdateContainer(index, { properties: { ...container.properties, command: cmd } });
+                                            } else {
+                                                handleUpdateContainer(index, { command: cmd });
+                                            }
+                                        }}
                                         placeholder="Command (one per line)"
                                         rows={2}
                                         className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none resize-vertical"
