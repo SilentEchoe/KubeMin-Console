@@ -52,6 +52,27 @@ export const fetchApps = async (
     }
 };
 
+export const fetchApp = async (id: string): Promise<App> => {
+    try {
+        // Since backend doesn't support single app fetch, we fetch all and filter
+        const response = await fetch(`${API_BASE_URL}/applications`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch applications');
+        }
+        const data = await response.json();
+        const app = (data.applications || []).find((a: App) => a.id === id);
+
+        if (!app) {
+            throw new Error('Application not found');
+        }
+
+        return app;
+    } catch (error) {
+        console.error('Error fetching app:', error);
+        throw error;
+    }
+};
+
 export const deleteApp = async (id: string): Promise<void> => {
     // TODO: Implement delete API call
     console.log('Delete app:', id);

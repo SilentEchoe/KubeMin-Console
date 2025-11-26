@@ -1,9 +1,29 @@
 import React from 'react';
-import { AppWindow, GitBranch } from 'lucide-react';
+import { GitBranch } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import useSWR from 'swr';
 import Modal from './base/Modal';
+import { fetchApp } from '../api/apps';
+
+// Default icon background colors (matching AppCard)
+const ICON_BACKGROUNDS = ['#dbeafe', '#fce7f3', '#fef3c7', '#ddd6fe', '#d1fae5', '#fecaca'];
+const DEFAULT_ICON = '📦';
 
 const Sidebar: React.FC = () => {
+    const { appId } = useParams<{ appId: string }>();
     const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+    const { data: app, isLoading } = useSWR(
+        appId ? ['app', appId] : null,
+        ([_, id]) => fetchApp(id)
+    );
+
+    // Generate a consistent background color based on app id
+    const iconBackground = app?.id ? ICON_BACKGROUNDS[
+        Math.abs(app.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0)) % ICON_BACKGROUNDS.length
+    ] : ICON_BACKGROUNDS[0];
+
+    const displayIcon = app?.icon || DEFAULT_ICON;
 
     return (
         <div style={{
@@ -23,18 +43,35 @@ const Sidebar: React.FC = () => {
                     <div style={{
                         width: '40px',
                         height: '40px',
-                        background: '#eff6ff',
+                        background: iconBackground,
                         borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: '#2563eb'
+                        fontSize: '20px',
                     }}>
-                        <AppWindow size={24} />
+                        {isLoading ? (
+                            <div className="animate-spin w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full" />
+                        ) : (
+                            displayIcon
+                        )}
                     </div>
-                    <div>
-                        <div style={{ fontWeight: 600, color: '#0f172a' }}>APP1</div>
-                        <div style={{ fontSize: '12px', color: '#64748b' }}>App Description</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        {isLoading ? (
+                            <div className="space-y-2">
+                                <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+                                <div className="h-3 w-32 bg-gray-200 rounded animate-pulse" />
+                            </div>
+                        ) : (
+                            <>
+                                <div style={{ fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {app?.name || 'Loading...'}
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {app?.description || 'No description'}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -68,14 +105,14 @@ const Sidebar: React.FC = () => {
                     <input
                         className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         placeholder="Enter app name"
-                        defaultValue="APP1"
+                        defaultValue={app?.name}
                     />
 
                     <label className="block text-sm font-medium text-gray-700 mt-4 mb-1">Description</label>
                     <textarea
                         className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         placeholder="Enter description"
-                        defaultValue="App Description"
+                        defaultValue={app?.description}
                         rows={3}
                     />
 
