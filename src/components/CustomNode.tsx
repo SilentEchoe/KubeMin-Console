@@ -35,6 +35,13 @@ const CustomNode = ({ data, selected }: NodeProps) => {
             )}
         >
             <div className={NODE_BODY_STYLES}>
+                {/* Node Name - Displayed prominently */}
+                {data.name && (
+                    <div className="text-sm font-bold text-text-primary mb-1 truncate">
+                        {String(data.name)}
+                    </div>
+                )}
+
                 {/* Header */}
                 <div className={NODE_HEADER_STYLES}>
                     <div className={NODE_ICON_CONTAINER_STYLES}>

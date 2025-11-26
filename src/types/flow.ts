@@ -72,6 +72,7 @@ export interface Traits {
 }
 
 export interface FlowNodeData extends Record<string, unknown> {
+    name?: string;
     label: string;
     description?: string;
     icon?: string;

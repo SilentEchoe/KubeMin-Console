@@ -100,6 +100,63 @@ const PropertyPanel: React.FC = () => {
 
                 {/* Content */}
                 <div className={PANEL_CONTENT_STYLES}>
+                    {/* Node Name Input */}
+                    <div className="mb-4">
+                        <label className={LABEL_STYLES}>
+                            Node Name <span className="text-red-500 ml-0.5">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                            placeholder="Enter node name"
+                            value={selectedNode.data.name || ''}
+                            onChange={(e) => {
+                                const newName = e.target.value;
+                                // Check if name is unique (excluding current node)
+                                const isDuplicate = nodes.some(
+                                    n => n.id !== selectedNode.id && n.data.name === newName
+                                );
+
+                                if (!isDuplicate || newName === '') {
+                                    updateNodeData(selectedNode.id, { name: newName });
+                                }
+                            }}
+                            onBlur={(e) => {
+                                // Ensure name is not empty on blur
+                                if (!e.target.value.trim()) {
+                                    const baseName = selectedNode.data.label || 'Component';
+                                    const existingNames = nodes
+                                        .filter(n => n.id !== selectedNode.id)
+                                        .map(n => n.data.name)
+                                        .filter(Boolean) as string[];
+
+                                    // Generate a unique name
+                                    const cleanBaseName = baseName.replace(/\d+$/, '');
+                                    const existingNumbers = existingNames
+                                        .filter(name => name.startsWith(cleanBaseName))
+                                        .map(name => {
+                                            const match = name.match(/(\d+)$/);
+                                            return match ? parseInt(match[1]) : 0;
+                                        })
+                                        .filter(num => !isNaN(num));
+
+                                    let nextNumber = 1;
+                                    while (existingNumbers.includes(nextNumber)) {
+                                        nextNumber++;
+                                    }
+
+                                    updateNodeData(selectedNode.id, { name: `${cleanBaseName}${nextNumber}` });
+                                }
+                            }}
+                        />
+                        {/* Show error if duplicate */}
+                        {nodes.some(n => n.id !== selectedNode.id && n.data.name === selectedNode.data.name) && selectedNode.data.name && (
+                            <div className="mt-1 text-xs text-red-500">
+                                This name already exists. Please choose a unique name.
+                            </div>
+                        )}
+                    </div>
+
                     {/* Component Type Selection */}
                     <div className="mb-4 flex items-center justify-between">
                         <label className={cn(LABEL_STYLES, "mb-0")}>

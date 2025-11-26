@@ -12,6 +12,29 @@ import type {
 import type { FlowState, FlowNode, FlowNodeData } from '../types/flow';
 import { ControlMode } from '../types/flow';
 
+// Helper function to generate unique node names
+const generateUniqueName = (baseName: string, existingNames: string[]): string => {
+    // Remove any existing numbers from the base name
+    const cleanBaseName = baseName.replace(/\d+$/, '');
+
+    // Find all names with the same base
+    const existingNumbers = existingNames
+        .filter(name => name.startsWith(cleanBaseName))
+        .map(name => {
+            const match = name.match(/(\d+)$/);
+            return match ? parseInt(match[1]) : 0;
+        })
+        .filter(num => !isNaN(num));
+
+    // Find the next available number
+    let nextNumber = 1;
+    while (existingNumbers.includes(nextNumber)) {
+        nextNumber++;
+    }
+
+    return `${cleanBaseName}${nextNumber}`;
+};
+
 export const useFlowStore = create<FlowState>((set, get) => ({
     nodes: [],
     edges: [],
@@ -34,8 +57,17 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         });
     },
     addNode: (node: FlowNode) => {
+        const { nodes } = get();
+
+        // Auto-generate unique name if not provided
+        if (!node.data.name) {
+            const baseName = node.data.label || 'Component';
+            const existingNames = nodes.map(n => n.data.name).filter(Boolean) as string[];
+            node.data.name = generateUniqueName(baseName, existingNames);
+        }
+
         set({
-            nodes: [...get().nodes, node],
+            nodes: [...nodes, node],
         });
     },
     setSelectedNode: (id: string | null) => {
