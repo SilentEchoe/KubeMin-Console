@@ -1,5 +1,18 @@
-import React from 'react';
-import { GitBranch } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
+    GitBranch,
+    Package,
+    Database,
+    Server,
+    Cloud,
+    Box,
+    Layers,
+    Cpu,
+    Globe,
+    Layout,
+    Terminal,
+    Settings
+} from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import useSWR from 'swr';
 import Modal from './base/Modal';
@@ -9,21 +22,48 @@ import { fetchApp } from '../api/apps';
 const ICON_BACKGROUNDS = ['#dbeafe', '#fce7f3', '#fef3c7', '#ddd6fe', '#d1fae5', '#fecaca'];
 const DEFAULT_ICON = '📦';
 
+const AVAILABLE_ICONS: Record<string, React.ElementType> = {
+    Package,
+    Database,
+    Server,
+    Cloud,
+    Box,
+    Layers,
+    Cpu,
+    Globe,
+    Layout,
+    Terminal,
+    Settings
+};
+
 const Sidebar: React.FC = () => {
     const { appId } = useParams<{ appId: string }>();
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedIcon, setSelectedIcon] = useState<string>('');
 
     const { data: app, isLoading } = useSWR(
         appId ? ['app', appId] : null,
         ([_, id]) => fetchApp(id)
     );
 
+    useEffect(() => {
+        if (app?.icon) {
+            setSelectedIcon(app.icon);
+        }
+    }, [app]);
+
     // Generate a consistent background color based on app id
     const iconBackground = app?.id ? ICON_BACKGROUNDS[
         Math.abs(app.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0)) % ICON_BACKGROUNDS.length
     ] : ICON_BACKGROUNDS[0];
 
-    const displayIcon = app?.icon || DEFAULT_ICON;
+    const renderDisplayIcon = () => {
+        if (app?.icon && AVAILABLE_ICONS[app.icon]) {
+            const IconComponent = AVAILABLE_ICONS[app.icon];
+            return <IconComponent size={20} />;
+        }
+        return app?.icon || DEFAULT_ICON;
+    };
 
     return (
         <div style={{
@@ -53,7 +93,7 @@ const Sidebar: React.FC = () => {
                         {isLoading ? (
                             <div className="animate-spin w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full" />
                         ) : (
-                            displayIcon
+                            renderDisplayIcon()
                         )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -100,21 +140,65 @@ const Sidebar: React.FC = () => {
                 onClose={() => setIsModalOpen(false)}
                 title="Edit App Info"
             >
-                <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">App Name</label>
-                    <input
-                        className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder="Enter app name"
-                        defaultValue={app?.name}
-                    />
+                <div className="mt-4 space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">App Name</label>
+                        <input
+                            className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            placeholder="Enter app name"
+                            defaultValue={app?.name}
+                        />
+                    </div>
 
-                    <label className="block text-sm font-medium text-gray-700 mt-4 mb-1">Description</label>
-                    <textarea
-                        className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder="Enter description"
-                        defaultValue={app?.description}
-                        rows={3}
-                    />
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Alias</label>
+                        <input
+                            className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            placeholder="Enter alias"
+                            defaultValue={app?.alias}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Project</label>
+                        <input
+                            className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            placeholder="Enter project"
+                            defaultValue={app?.project}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Icon</label>
+                        <div className="grid grid-cols-6 gap-2">
+                            {Object.entries(AVAILABLE_ICONS).map(([name, Icon]) => (
+                                <button
+                                    key={name}
+                                    onClick={() => setSelectedIcon(name)}
+                                    className={`
+                                        p-2 rounded-lg flex items-center justify-center transition-all
+                                        ${selectedIcon === name
+                                            ? 'bg-blue-100 text-blue-600 ring-2 ring-blue-500 ring-offset-1'
+                                            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                        }
+                                    `}
+                                    title={name}
+                                >
+                                    <Icon size={20} />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                            className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            placeholder="Enter description"
+                            defaultValue={app?.description}
+                            rows={3}
+                        />
+                    </div>
 
                     <div className="mt-6 flex justify-end gap-3">
                         <button
