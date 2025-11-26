@@ -132,36 +132,13 @@ export const List: React.FC = () => {
         >
             {/* Header */}
             <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Apps</h1>
-                <p className="text-gray-600">
-                    Manage and create your workflow applications
-                </p>
+
             </div>
 
             {/* Filters */}
             <div className="mb-6 flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search apps..."
-                        value={searchInput}
-                        onChange={e => setSearchInput(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                </div>
 
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setMyApps(!myApps)}
-                        className={`px-4 py-2.5 rounded-lg border transition-colors ${myApps
-                            ? 'bg-primary-50 border-primary-500 text-primary-700'
-                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                    >
-                        <Filter className="w-4 h-4 inline mr-2" />
-                        My Apps
-                    </button>
                 </div>
             </div>
 
