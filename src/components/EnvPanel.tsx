@@ -6,10 +6,18 @@ import EnvItem from './EnvItem';
 import VariableForm from './VariableForm';
 import type { EnvironmentVariable } from '../types/flow';
 
-const EnvPanel: React.FC = () => {
-    const { environmentVariables, setEnvironmentVariables, envSecrets, setEnvSecrets, setSelectedNode } = useFlowStore();
+interface EnvPanelProps {
+    variables?: EnvironmentVariable[];
+    onUpdate?: (vars: EnvironmentVariable[]) => void;
+}
+
+const EnvPanel: React.FC<EnvPanelProps> = ({ variables: propVariables, onUpdate }) => {
+    const { environmentVariables: storeVariables, setEnvironmentVariables, envSecrets, setEnvSecrets, setSelectedNode } = useFlowStore();
     const [editingVar, setEditingVar] = useState<EnvironmentVariable | null>(null);
     const [isAdding, setIsAdding] = useState(false);
+
+    // Use props if provided, otherwise fall back to store
+    const variables = propVariables || storeVariables;
 
     // Note: showEnvPanel check removed as this component is now rendered by PropertyPanel based on selection
 
@@ -23,13 +31,17 @@ const EnvPanel: React.FC = () => {
     };
 
     const handleDelete = (variable: EnvironmentVariable) => {
-        const newVars = environmentVariables.filter(v => v.key !== variable.key);
-        setEnvironmentVariables(newVars);
+        const newVars = variables.filter(v => v.key !== variable.key);
 
-        if (variable.isSecret) {
-            const newSecrets = { ...envSecrets };
-            delete newSecrets[variable.key];
-            setEnvSecrets(newSecrets);
+        if (onUpdate) {
+            onUpdate(newVars);
+        } else {
+            setEnvironmentVariables(newVars);
+            if (variable.isSecret) {
+                const newSecrets = { ...envSecrets };
+                delete newSecrets[variable.key];
+                setEnvSecrets(newSecrets);
+            }
         }
     };
 
@@ -79,6 +91,17 @@ const EnvPanel: React.FC = () => {
                         <VariableForm
                             onSave={handleSave}
                             onCancel={handleCancel}
+                            onSubmit={(newVar: EnvironmentVariable) => {
+                                const newVars = [...variables, newVar];
+                                if (onUpdate) {
+                                    onUpdate(newVars);
+                                } else {
+                                    setEnvironmentVariables(newVars);
+                                    if (newVar.isSecret) {
+                                        setEnvSecrets({ ...envSecrets, [newVar.key]: newVar.value });
+                                    }
+                                }
+                            }}
                         />
                     )}
 
@@ -87,16 +110,27 @@ const EnvPanel: React.FC = () => {
                             initialData={editingVar}
                             onSave={handleSave}
                             onCancel={handleCancel}
+                            onSubmit={(updatedVar: EnvironmentVariable) => {
+                                const newVars = variables.map(v => v.key === editingVar.key ? updatedVar : v);
+                                if (onUpdate) {
+                                    onUpdate(newVars);
+                                } else {
+                                    setEnvironmentVariables(newVars);
+                                    if (updatedVar.isSecret) {
+                                        setEnvSecrets({ ...envSecrets, [updatedVar.key]: updatedVar.value });
+                                    }
+                                }
+                            }}
                         />
                     )}
 
                     <div className="space-y-2">
-                        {environmentVariables.length === 0 && !isAdding ? (
+                        {variables.length === 0 && !isAdding ? (
                             <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <p className="text-[15px] text-text-tertiary">No environment variables yet</p>
                             </div>
                         ) : (
-                            environmentVariables.map((variable) => (
+                            variables.map((variable) => (
                                 // Hide the item if it's being edited, as the form is shown above (or we could replace it in place, but showing above is simpler for now as per plan)
                                 // Actually, if we are editing, we probably want to hide the list or just show the form.
                                 // Let's just show the list, but maybe disable interaction?

@@ -36,11 +36,43 @@ const PanelContextMenu: React.FC = () => {
                 })) || [];
 
                 // Map env
-                const envConfig = comp.properties?.env ? Object.entries(comp.properties.env).map(([key, value]) => ({
+                let envConfig = comp.properties?.env ? Object.entries(comp.properties.env).map(([key, value]) => ({
                     id: `env-${Math.random().toString(36).substr(2, 9)}`,
                     key,
                     value: String(value)
                 })) : [];
+
+                let componentType = (comp.type as any) || 'webservice';
+                let environmentVariables: any[] = [];
+
+                // Handle config/secret types
+                if (comp.type === 'config' || comp.type === 'secret') {
+                    componentType = 'config-secret';
+
+                    // Map conf properties
+                    if (comp.properties?.conf) {
+                        Object.entries(comp.properties.conf).forEach(([key, value]) => {
+                            environmentVariables.push({
+                                key,
+                                value: String(value),
+                                isSecret: false,
+                                description: 'Imported config'
+                            });
+                        });
+                    }
+
+                    // Map secret properties
+                    if (comp.properties?.secret) {
+                        Object.entries(comp.properties.secret).forEach(([key, value]) => {
+                            environmentVariables.push({
+                                key,
+                                value: String(value),
+                                isSecret: true,
+                                description: 'Imported secret'
+                            });
+                        });
+                    }
+                }
 
                 addNode({
                     id,
@@ -49,12 +81,13 @@ const PanelContextMenu: React.FC = () => {
                     data: {
                         label: comp.name || 'Component',
                         description: comp.description || `Imported ${comp.type}`,
-                        icon: 'box',
-                        componentType: (comp.type as any) || 'webservice',
+                        icon: componentType === 'config-secret' ? 'settings' : 'box',
+                        componentType,
                         image: comp.properties?.image || '',
                         replicas: comp.replicas || 1,
                         properties,
                         envConfig,
+                        environmentVariables, // Add populated environment variables
                         traits: comp.traits || {}
                     },
                 });

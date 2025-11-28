@@ -34,7 +34,10 @@ const PropertyPanel: React.FC = () => {
     }
 
     if ((selectedNode.data.componentType as any) === 'config-secret') {
-        return <EnvPanel />;
+        return <EnvPanel
+            variables={selectedNode.data.environmentVariables || []}
+            onUpdate={(vars) => updateNodeData(selectedNode.id, { environmentVariables: vars })}
+        />;
     }
 
     return (

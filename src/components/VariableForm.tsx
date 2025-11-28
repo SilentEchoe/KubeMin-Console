@@ -7,9 +7,10 @@ interface VariableFormProps {
     initialData?: EnvironmentVariable | null;
     onSave: () => void;
     onCancel: () => void;
+    onSubmit?: (variable: EnvironmentVariable) => void;
 }
 
-const VariableForm: React.FC<VariableFormProps> = ({ initialData, onSave, onCancel }) => {
+const VariableForm: React.FC<VariableFormProps> = ({ initialData, onSave, onCancel, onSubmit }) => {
     const { environmentVariables, setEnvironmentVariables, envSecrets, setEnvSecrets } = useFlowStore();
     const [formData, setFormData] = useState<EnvironmentVariable>({
         key: '',
@@ -39,15 +40,21 @@ const VariableForm: React.FC<VariableFormProps> = ({ initialData, onSave, onCanc
 
         if (!formData.key) return;
 
-        const newVars = [...environmentVariables];
-        const existingIndex = newVars.findIndex(v => v.key === (initialData?.key || formData.key));
-
         const newVar: EnvironmentVariable = {
             key: formData.key,
             value: formData.isSecret ? '[__HIDDEN__]' : formData.value,
             isSecret: formData.isSecret,
             // description removed
         };
+
+        if (onSubmit) {
+            onSubmit({ ...newVar, value: formData.value }); // Pass actual value, not masked
+            onSave();
+            return;
+        }
+
+        const newVars = [...environmentVariables];
+        const existingIndex = newVars.findIndex(v => v.key === (initialData?.key || formData.key));
 
         if (existingIndex >= 0 && initialData) {
             newVars[existingIndex] = newVar;
