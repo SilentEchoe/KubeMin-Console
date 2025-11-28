@@ -131,9 +131,20 @@ const PanelContextMenu: React.FC = () => {
                         }
                     });
 
+                    // Determine the actual type based on what data exists
+                    const hasConf = Object.keys(conf).length > 0;
+                    const hasSecret = Object.keys(secret).length > 0;
+
+                    let actualType = 'config-secret';
+                    if (hasSecret && !hasConf) {
+                        actualType = 'secret';
+                    } else if (hasConf && !hasSecret) {
+                        actualType = 'config';
+                    }
+
                     return {
                         name: node.data.name || node.data.label || 'component',
-                        type: node.data.componentType || 'webservice',
+                        type: actualType,
                         replicas: node.data.replicas || 1,
                         image: node.data.image || '',
                         properties: {
