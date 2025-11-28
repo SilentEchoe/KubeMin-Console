@@ -24,7 +24,45 @@ const PanelContextMenu: React.FC = () => {
 
     if (!panelMenu) return null;
 
-    const handleAddBlock = (type: string) => {
+    const handleAddBlock = (type: string, data?: any) => {
+        if (type === 'template' && Array.isArray(data)) {
+            data.forEach((comp: any, index: number) => {
+                const id = Math.random().toString(36).substr(2, 9);
+
+                // Map properties (ports)
+                const properties = comp.properties?.ports?.map((p: any) => ({
+                    id: `prop-${Math.random().toString(36).substr(2, 9)}`,
+                    value: p.port.toString()
+                })) || [];
+
+                // Map env
+                const envConfig = comp.properties?.env ? Object.entries(comp.properties.env).map(([key, value]) => ({
+                    id: `env-${Math.random().toString(36).substr(2, 9)}`,
+                    key,
+                    value: String(value)
+                })) : [];
+
+                addNode({
+                    id,
+                    type: 'custom',
+                    position: { x: panelMenu.left + (index * 50), y: panelMenu.top + (index * 50) },
+                    data: {
+                        label: comp.name || 'Component',
+                        description: comp.description || `Imported ${comp.type}`,
+                        icon: 'box',
+                        componentType: (comp.type as any) || 'webservice',
+                        image: comp.properties?.image || '',
+                        replicas: comp.replicas || 1,
+                        properties,
+                        envConfig,
+                        traits: comp.traits || {}
+                    },
+                });
+            });
+            setPanelMenu(null);
+            return;
+        }
+
         const id = Math.random().toString(36).substr(2, 9);
         addNode({
             id,
@@ -34,6 +72,7 @@ const PanelContextMenu: React.FC = () => {
                 label: type.toUpperCase(),
                 description: `New ${type} node`,
                 icon: 'box',
+                componentType: type === 'component' ? 'webservice' : (type as any),
             },
         });
         setPanelMenu(null);

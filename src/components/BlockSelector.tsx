@@ -6,7 +6,7 @@ import type { App } from '../types/app';
 type TabKey = 'start' | 'blocks' | 'tools' | 'sources' | 'tmp';
 
 interface BlockSelectorProps {
-    onSelect: (type: string) => void;
+    onSelect: (type: string, data?: any) => void;
     onClose: () => void;
 }
 
@@ -32,6 +32,16 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
             loadTemplates();
         }
     }, [activeTab]);
+
+    const handleTemplateClick = async (template: App) => {
+        try {
+            // Fetch components for the selected template
+            const components = await import('../api/apps').then(mod => mod.fetchAppComponents(template.id));
+            onSelect('template', components);
+        } catch (error) {
+            console.error('Failed to load template components:', error);
+        }
+    };
 
     const tabs: { key: TabKey; name: string }[] = [
         { key: 'start', name: 'Start' },
@@ -126,7 +136,7 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
                                 <div
                                     key={template.id}
                                     className="flex h-8 w-full cursor-pointer items-center rounded-lg px-2 hover:bg-state-base-hover"
-                                    onClick={() => onSelect(template.alias || template.name)}
+                                    onClick={() => handleTemplateClick(template)}
                                 >
                                     <LayoutTemplate className="mr-2 h-4 w-4 text-text-secondary" />
                                     <span className="text-sm text-text-secondary">{template.alias || template.name}</span>

@@ -76,7 +76,7 @@ export interface FlowNodeData extends Record<string, unknown> {
     label: string;
     description?: string;
     icon?: string;
-    componentType?: 'webservice' | 'store' | 'config' | 'secret';
+    componentType?: 'webservice' | 'store' | 'config' | 'secret' | 'config-secret';
     image?: string;
     namespace?: string;
     replicas?: number;

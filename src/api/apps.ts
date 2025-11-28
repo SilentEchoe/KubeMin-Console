@@ -66,6 +66,20 @@ export const fetchTemplates = async (): Promise<App[]> => {
     }
 };
 
+export const fetchAppComponents = async (appId: string): Promise<any[]> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/applications/${appId}/components`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch app components');
+        }
+        const data = await response.json();
+        return data.components || [];
+    } catch (error) {
+        console.error('Error fetching app components:', error);
+        return [];
+    }
+};
+
 export const fetchApp = async (id: string): Promise<App> => {
     try {
         // Since backend doesn't support single app fetch, we fetch all and filter
