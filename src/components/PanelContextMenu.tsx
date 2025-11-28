@@ -117,8 +117,38 @@ const PanelContextMenu: React.FC = () => {
                 const ports = node.data.properties?.map(p => ({ port: parseInt(p.value) || 0 })) || [];
                 const env = node.data.envConfig?.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {}) || {};
 
+                // Handle config-secret type nodes
+                if (node.data.componentType === 'config-secret') {
+                    const conf: Record<string, string> = {};
+                    const secret: Record<string, string> = {};
+
+                    // Separate environmentVariables into conf and secret
+                    node.data.environmentVariables?.forEach((envVar: any) => {
+                        if (envVar.isSecret) {
+                            secret[envVar.key] = envVar.value;
+                        } else {
+                            conf[envVar.key] = envVar.value;
+                        }
+                    });
+
+                    return {
+                        name: node.data.name || node.data.label || 'component',
+                        type: node.data.componentType || 'webservice',
+                        replicas: node.data.replicas || 1,
+                        image: node.data.image || '',
+                        properties: {
+                            ports: null,
+                            env: null,
+                            conf: Object.keys(conf).length > 0 ? conf : null,
+                            secret: Object.keys(secret).length > 0 ? secret : null,
+                            command: null,
+                            labels: null
+                        }
+                    };
+                }
+
                 return {
-                    name: node.data.label || 'component',
+                    name: node.data.name || node.data.label || 'component',
                     type: node.data.componentType || 'webservice',
                     replicas: node.data.replicas || 1,
                     image: node.data.image || 'nginx:latest',
@@ -177,19 +207,51 @@ const PanelContextMenu: React.FC = () => {
                             value: String(value)
                         })) : [];
 
+                        let componentType = comp.type || 'webservice';
+                        let environmentVariables: any[] = [];
+
+                        // Handle config-secret type nodes from DSL
+                        if (comp.type === 'config-secret') {
+                            // Map conf properties
+                            if (comp.properties?.conf) {
+                                Object.entries(comp.properties.conf).forEach(([key, value]) => {
+                                    environmentVariables.push({
+                                        key,
+                                        value: String(value),
+                                        isSecret: false,
+                                        description: 'Imported config'
+                                    });
+                                });
+                            }
+
+                            // Map secret properties
+                            if (comp.properties?.secret) {
+                                Object.entries(comp.properties.secret).forEach(([key, value]) => {
+                                    environmentVariables.push({
+                                        key,
+                                        value: String(value),
+                                        isSecret: true,
+                                        description: 'Imported secret'
+                                    });
+                                });
+                            }
+                        }
+
                         addNode({
                             id,
                             type: 'custom',
                             position: { x: panelMenu.left + (index * 50), y: panelMenu.top + (index * 50) },
                             data: {
+                                name: comp.name || 'Component',
                                 label: comp.name || 'Component',
                                 description: 'Imported component',
-                                icon: 'box',
-                                componentType: comp.type || 'webservice',
+                                icon: componentType === 'config-secret' ? 'settings' : 'box',
+                                componentType,
                                 image: comp.image,
                                 replicas: comp.replicas,
                                 properties,
-                                envConfig
+                                envConfig,
+                                environmentVariables,
                             },
                         });
                     });
