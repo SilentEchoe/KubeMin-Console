@@ -52,6 +52,20 @@ export const fetchApps = async (
     }
 };
 
+export const fetchTemplates = async (): Promise<App[]> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/applications/templates`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch templates');
+        }
+        const data = await response.json();
+        return data.applications || [];
+    } catch (error) {
+        console.error('Error fetching templates:', error);
+        return [];
+    }
+};
+
 export const fetchApp = async (id: string): Promise<App> => {
     try {
         // Since backend doesn't support single app fetch, we fetch all and filter

@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { Search, Box, Wrench } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Box, Wrench, LayoutTemplate } from 'lucide-react';
+import { fetchTemplates } from '../api/apps';
+import type { App } from '../types/app';
 
-type TabKey = 'start' | 'blocks' | 'tools' | 'sources';
+type TabKey = 'start' | 'blocks' | 'tools' | 'sources' | 'tmp';
 
 interface BlockSelectorProps {
     onSelect: (type: string) => void;
@@ -11,12 +13,32 @@ interface BlockSelectorProps {
 const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
     const [activeTab, setActiveTab] = useState<TabKey>('blocks');
     const [search, setSearch] = useState('');
+    const [templates, setTemplates] = useState<App[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (activeTab === 'tmp') {
+            const loadTemplates = async () => {
+                setIsLoading(true);
+                try {
+                    const data = await fetchTemplates();
+                    setTemplates(data);
+                } catch (error) {
+                    console.error('Failed to load templates:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            loadTemplates();
+        }
+    }, [activeTab]);
 
     const tabs: { key: TabKey; name: string }[] = [
         { key: 'start', name: 'Start' },
         { key: 'blocks', name: 'Blocks' },
         { key: 'tools', name: 'Tools' },
         { key: 'sources', name: 'Sources' },
+        { key: 'tmp', name: 'Tmp' },
     ];
 
     const blocks = [
@@ -93,7 +115,31 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
                         ))}
                     </div>
                 )}
-                {activeTab !== 'blocks' && (
+                {activeTab === 'tmp' && (
+                    <div className="space-y-2">
+                        {isLoading ? (
+                            <div className="flex items-center justify-center h-20 text-sm text-text-tertiary">
+                                Loading...
+                            </div>
+                        ) : templates.length > 0 ? (
+                            templates.map(template => (
+                                <div
+                                    key={template.id}
+                                    className="flex h-8 w-full cursor-pointer items-center rounded-lg px-2 hover:bg-state-base-hover"
+                                    onClick={() => onSelect(template.alias || template.name)}
+                                >
+                                    <LayoutTemplate className="mr-2 h-4 w-4 text-text-secondary" />
+                                    <span className="text-sm text-text-secondary">{template.alias || template.name}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="flex items-center justify-center h-20 text-sm text-text-tertiary">
+                                No templates found
+                            </div>
+                        )}
+                    </div>
+                )}
+                {activeTab !== 'blocks' && activeTab !== 'tmp' && (
                     <div className="flex items-center justify-center h-20 text-sm text-text-tertiary">
                         Coming soon...
                     </div>

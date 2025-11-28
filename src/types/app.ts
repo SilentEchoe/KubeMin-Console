@@ -14,6 +14,7 @@ export interface App {
   updateTime: string;
   icon: string;
   workflow_id: string;
+  tmp_enable?: boolean;
 }
 
 export interface AppListResponse {
