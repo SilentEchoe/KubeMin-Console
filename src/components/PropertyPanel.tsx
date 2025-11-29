@@ -13,7 +13,9 @@ import FieldCollapse from './base/FieldCollapse';
 
 import { Settings } from 'lucide-react';
 import { Button } from './ui/Button';
+
 import TraitsPanel from './TraitsPanel';
+import Switch from './base/switch';
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
 const PANEL_HEADER_STYLES = 'flex items-center justify-between border-b border-components-panel-border px-5 py-4';
@@ -199,6 +201,16 @@ const PropertyPanel: React.FC = () => {
 
                             <FieldCollapse title="Basic Settings" defaultOpen={true}>
                                 {/* Namespace Removed */}
+
+                                {/* Enabled Toggle */}
+                                <FlexRow className="justify-between mb-4">
+                                    <label className={cn(LABEL_STYLES, "mb-0")}>Enabled</label>
+                                    <Switch
+                                        checked={selectedNode.data.enabled !== false}
+                                        onChange={(checked) => updateNodeData(selectedNode.id, { enabled: checked })}
+                                        size="md"
+                                    />
+                                </FlexRow>
 
                                 {/* Replicas */}
                                 <FlexRow className="justify-between">

@@ -84,6 +84,7 @@ export interface FlowNodeData extends Record<string, unknown> {
     environmentVariables?: EnvironmentVariable[];
     properties?: any[];
     envConfig?: any[];
+    enabled?: boolean;
     traits?: Traits;
 }
 

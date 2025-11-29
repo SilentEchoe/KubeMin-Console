@@ -45,7 +45,7 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
 
     const tabs: { key: TabKey; name: string }[] = [
         { key: 'start', name: 'Start' },
-        { key: 'blocks', name: 'Blocks' },
+        { key: 'Component', name: 'Blocks' },
         { key: 'tools', name: 'Tools' },
         { key: 'sources', name: 'Sources' },
         { key: 'tmp', name: 'Tmp' },
