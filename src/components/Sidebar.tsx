@@ -107,9 +107,6 @@ const Sidebar: React.FC = () => {
                                 <div style={{ fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {app?.name || 'Loading...'}
                                 </div>
-                                <div style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {app?.description || 'No description'}
-                                </div>
                             </>
                         )}
                     </div>
