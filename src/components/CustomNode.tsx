@@ -2,7 +2,10 @@ import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
 import { Play, Cpu, Box, FileText, Database, Globe, MessageSquare, Settings } from 'lucide-react';
+
 import { cn } from '../utils/cn';
+import componentIcon from '../assets/component.svg';
+import configIcon from '../assets/config.svg';
 
 const icons: Record<string, React.ElementType> = {
     play: Play,
@@ -37,7 +40,12 @@ const CustomNode = ({ data, selected }: NodeProps) => {
             <div className={NODE_BODY_STYLES}>
                 {/* Node Name - Displayed prominently */}
                 {data.name && (
-                    <div className="text-sm font-bold text-text-primary mb-1 truncate">
+                    <div className="text-sm font-bold text-text-primary mb-1 truncate flex items-center gap-1">
+                        <img
+                            src={(data.componentType as string)?.includes('config') || (data.componentType as string)?.includes('secret') ? configIcon : componentIcon}
+                            alt="icon"
+                            className="w-5 h-5"
+                        />
                         {String(data.name)}
                     </div>
                 )}
@@ -45,7 +53,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
                 {/* Header */}
                 <div className={NODE_HEADER_STYLES}>
                     <div className={NODE_ICON_CONTAINER_STYLES}>
-                        <Icon size={14} className="text-text-primary" />
+                        {/* <Icon size={14} className="text-text-primary" /> */}
                         <span className="text-xs font-semibold text-text-primary truncate max-w-[120px]">
                             {data.label as string}
                         </span>
@@ -55,10 +63,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
                     </div>
                 </div>
 
-                {/* Description */}
-                <div className="text-xs text-text-tertiary line-clamp-2">
-                    {data.description as string || 'No description provided.'}
-                </div>
+
             </div>
 
             {/* Handles */}

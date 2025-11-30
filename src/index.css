@@ -31,12 +31,20 @@
   --color-state-success-solid: #22c55e;
   --color-state-destructive-solid: #ef4444;
   --color-state-warning-solid: #f59e0b;
-  
+
   /* Switch Component Colors */
   --color-components-toggle-bg: #2563eb;
   --color-components-toggle-bg-unchecked: #e2e8f0;
   --color-components-toggle-knob: #ffffff;
-  
+  --color-components-toggle-knob: #ffffff;
+
+  /* Workflow Link Line Colors */
+  --color-workflow-link-line-success-handle: #17B26A;
+  --color-workflow-link-line-error-handle: #F04438;
+  --color-workflow-link-line-failure-handle: #F79009;
+  --color-workflow-link-line-handle: #296DFF;
+  --color-workflow-link-line-normal: #D0D5DC;
+
   /* Primary color theme */
   --color-primary-50: #eff6ff;
   --color-primary-100: #dbeafe;

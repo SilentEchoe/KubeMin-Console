@@ -19,11 +19,21 @@ import CanvasControl from './CanvasControl';
 import { ControlMode } from '../types/flow';
 import type { FlowNode } from '../types/flow';
 import PanelContextMenu from './PanelContextMenu';
+import CustomEdge from './workflow/CustomEdge';
+import CustomConnectionLine from './workflow/CustomConnectionLine';
 
 import { useShortcuts } from '../hooks/useShortcuts';
 
 const nodeTypes: NodeTypes = {
     custom: CustomNode,
+};
+
+const edgeTypes = {
+    custom: CustomEdge,
+};
+
+const defaultEdgeOptions = {
+    type: 'custom',
 };
 
 const ZoomIndicator = () => {
@@ -91,6 +101,9 @@ const FlowCanvas: React.FC = () => {
                 onPaneClick={onPaneClick}
                 onPaneContextMenu={handlePaneContextMenu}
                 nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
+                defaultEdgeOptions={defaultEdgeOptions}
+                connectionLineComponent={CustomConnectionLine}
                 defaultViewport={{ x: 0, y: 0, zoom: 0.75 }}
                 fitView={false}
                 deleteKeyCode={null} // Disable default delete to use custom shortcuts
