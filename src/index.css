@@ -43,7 +43,7 @@
   --color-workflow-link-line-error-handle: #F04438;
   --color-workflow-link-line-failure-handle: #F79009;
   --color-workflow-link-line-handle: #296DFF;
-  --color-workflow-link-line-normal: #D0D5DC;
+  --color-workflow-link-line-normal: #296DFF;
 
   /* Primary color theme */
   --color-primary-50: #eff6ff;

@@ -22,7 +22,7 @@ const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
         <g>
             <path
                 fill="none"
-                stroke="#D0D5DD"
+                stroke="#296DFF"
                 strokeWidth={2}
                 d={edgePath}
             />
