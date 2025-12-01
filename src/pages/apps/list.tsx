@@ -141,7 +141,7 @@ export const List: React.FC = () => {
                 <Empty isLoading={false} />
             ) : (
                 <>
-                    <div className="grid gap-6 grid-cols-5">
+                    <div className="flex flex-wrap gap-6">
                         {/* New App Card */}
                         <NewAppCard
                             onCreateBlank={handleCreateBlank}

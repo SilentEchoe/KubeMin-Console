@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Edit,
     Package,
     Database,
     Server,
@@ -11,7 +10,6 @@ import {
     Globe,
     Layout,
     Terminal,
-    Settings,
     Eye,
     FileText
 } from 'lucide-react';
@@ -20,6 +18,8 @@ import useSWR from 'swr';
 import Modal from './base/Modal';
 import { fetchApp } from '../api/apps';
 import GameIcon from '../assets/game.svg';
+import ArrangementIcon from '../assets/arrangement.svg';
+import SetIcon from '../assets/set.svg';
 
 // Default icon background colors (matching AppCard)
 const ICON_BACKGROUNDS = ['#dbeafe', '#fce7f3', '#fef3c7', '#ddd6fe', '#d1fae5', '#fecaca'];
@@ -34,8 +34,7 @@ const AVAILABLE_ICONS: Record<string, React.ElementType> = {
     Cpu,
     Globe,
     Layout,
-    Terminal,
-    Settings
+    Terminal
 };
 
 const Sidebar: React.FC = () => {
@@ -104,22 +103,39 @@ const Sidebar: React.FC = () => {
                     </div>
                 ) : (
                     <>
-                        {/* Icon */}
-                        <span
-                            style={{
-                                width: '40px',
-                                height: '40px',
-                                background: iconBackground,
-                                borderRadius: '12px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                padding: '8px',
-                                marginBottom: '8px'
-                            }}
-                        >
-                            {renderDisplayIcon()}
-                        </span>
+                        {/* Icon and Settings Row */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: '8px'
+                        }}>
+                            <span
+                                style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    background: iconBackground,
+                                    borderRadius: '12px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '8px'
+                                }}
+                            >
+                                {renderDisplayIcon()}
+                            </span>
+
+                            {/* Settings Icon */}
+                            <img
+                                src={SetIcon}
+                                alt="Settings"
+                                style={{
+                                    width: '20px',
+                                    height: '20px',
+                                    cursor: 'pointer'
+                                }}
+                            />
+                        </div>
 
                         {/* App Name */}
                         <div style={{
@@ -133,6 +149,7 @@ const Sidebar: React.FC = () => {
                         }}>
                             {app?.name ?? 'Kubernetes Agent'}
                         </div>
+
                     </>
                 )}
             </div>
@@ -145,63 +162,18 @@ const Sidebar: React.FC = () => {
                         alignItems: 'center',
                         gap: '12px',
                         padding: '10px 16px',
-                        background: '#eff3ff',
+                        margin: '0 8px',
+                        background: '#dbeafe',
                         color: '#155eef',
                         cursor: 'pointer',
                         fontSize: '13px',
                         fontWeight: 400,
+                        borderRadius: '8px',
                         transition: 'background-color 0.2s, color 0.2s'
                     }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#155eef';
-                        e.currentTarget.style.color = '#ffffff';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#eff3ff';
-                        e.currentTarget.style.color = '#155eef';
-                    }}
                 >
-                    <Edit size={16} />
-                    <span>编辑</span>
-                </div>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '10px 16px',
-                    color: '#1f1f1f',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 400
-                }}>
-                    <Globe size={16} />
-                    <span>访问 API</span>
-                </div>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '10px 16px',
-                    color: '#1f1f1f',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 400
-                }}>
-                    <FileText size={16} />
-                    <span>日志与标记</span>
-                </div>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '10px 16px',
-                    color: '#1f1f1f',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 400
-                }}>
-                    <Eye size={16} />
-                    <span>监测</span>
+                    <img src={ArrangementIcon} alt="Arrangement" style={{ width: '16px', height: '16px' }} />
+                    <span>Arrangement</span>
                 </div>
             </div>
 
