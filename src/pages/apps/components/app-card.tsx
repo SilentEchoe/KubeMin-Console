@@ -118,7 +118,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
             onClick={handleCardClick}
         >
             {/* More Options Button */}
-            <div className="absolute top-4 right-4" ref={menuRef}>
+            <div className="absolute bottom-4 right-4" ref={menuRef}>
                 <button
                     onClick={handleMenuToggle}
                     className="p-1 hover:bg-gray-100 rounded-md transition-colors"
