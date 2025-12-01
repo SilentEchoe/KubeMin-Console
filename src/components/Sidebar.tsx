@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-    GitBranch,
+    Edit,
     Package,
     Database,
     Server,
@@ -11,16 +11,18 @@ import {
     Globe,
     Layout,
     Terminal,
-    Settings
+    Settings,
+    Eye,
+    FileText
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import useSWR from 'swr';
 import Modal from './base/Modal';
 import { fetchApp } from '../api/apps';
+import GameIcon from '../assets/game.svg';
 
 // Default icon background colors (matching AppCard)
 const ICON_BACKGROUNDS = ['#dbeafe', '#fce7f3', '#fef3c7', '#ddd6fe', '#d1fae5', '#fecaca'];
-const DEFAULT_ICON = '📦';
 
 const AVAILABLE_ICONS: Record<string, React.ElementType> = {
     Package,
@@ -40,6 +42,7 @@ const Sidebar: React.FC = () => {
     const { appId } = useParams<{ appId: string }>();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedIcon, setSelectedIcon] = useState<string>('');
+    const [isHovering, setIsHovering] = useState(false);
 
     const { data: app, isLoading } = useSWR(
         appId ? ['app', appId] : null,
@@ -57,78 +60,148 @@ const Sidebar: React.FC = () => {
         Math.abs(app.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0)) % ICON_BACKGROUNDS.length
     ] : ICON_BACKGROUNDS[0];
 
+    // Use app icon or default game.svg icon
+    const displayIcon = app?.icon || GameIcon;
+
     const renderDisplayIcon = () => {
         if (app?.icon && AVAILABLE_ICONS[app.icon]) {
             const IconComponent = AVAILABLE_ICONS[app.icon];
-            return <IconComponent size={20} />;
+            return <IconComponent size={32} />;
         }
-        return app?.icon || DEFAULT_ICON;
+        if (typeof displayIcon === 'string' && displayIcon.startsWith('/')) {
+            return <img src={displayIcon} alt="App icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+        }
+        return <img src={displayIcon} alt="App icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
     };
 
     return (
         <div style={{
-            width: '240px',
+            width: '200px',
             height: '100%',
-            borderRight: '1px solid #e2e8f0',
-            background: '#f8fafc',
+            borderRight: '1px solid #e5e5e5',
+            background: '#ffffff',
             display: 'flex',
             flexDirection: 'column',
         }}>
-            {/* App Info */}
-            <div style={{ padding: '20px', borderBottom: '1px solid #e2e8f0' }}>
-                <div
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', cursor: 'pointer' }}
-                    onClick={() => setIsModalOpen(true)}
-                >
-                    <div style={{
-                        width: '40px',
-                        height: '40px',
-                        background: iconBackground,
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '20px',
-                    }}>
-                        {isLoading ? (
-                            <div className="animate-spin w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full" />
-                        ) : (
-                            renderDisplayIcon()
-                        )}
+            {/* App Icon and Name Area */}
+            <div
+                style={{
+                    width: '200px',
+                    padding: '10px 16px 12px 16px',
+                    borderBottom: '1px solid #f0f0f0',
+                    cursor: 'pointer',
+                    backgroundColor: isHovering ? '#f5f5f5' : 'transparent',
+                    transition: 'background-color 0.2s ease'
+                }}
+                onClick={() => setIsModalOpen(true)}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+            >
+                {isLoading ? (
+                    <div className="space-y-2">
+                        <div className="h-10 w-10 bg-gray-200 rounded-xl animate-pulse" />
+                        <div className="h-5 w-24 bg-gray-200 rounded animate-pulse" />
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                        {isLoading ? (
-                            <div className="space-y-2">
-                                <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-                                <div className="h-3 w-32 bg-gray-200 rounded animate-pulse" />
-                            </div>
-                        ) : (
-                            <>
-                                <div style={{ fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {app?.name || 'Loading...'}
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
+                ) : (
+                    <>
+                        {/* Icon */}
+                        <span
+                            style={{
+                                width: '40px',
+                                height: '40px',
+                                background: iconBackground,
+                                borderRadius: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '8px',
+                                marginBottom: '8px'
+                            }}
+                        >
+                            {renderDisplayIcon()}
+                        </span>
+
+                        {/* App Name */}
+                        <div style={{
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            lineHeight: '20px',
+                            color: '#354052',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }}>
+                            {app?.name ?? 'Kubernetes Agent'}
+                        </div>
+                    </>
+                )}
             </div>
 
-            {/* Navigation */}
-            <div style={{ padding: '16px 12px' }}>
+            {/* Navigation Menu */}
+            <div style={{ padding: '8px 0' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '10px 16px',
+                        background: '#eff3ff',
+                        color: '#155eef',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        fontWeight: 400,
+                        transition: 'background-color 0.2s, color 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#155eef';
+                        e.currentTarget.style.color = '#ffffff';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#eff3ff';
+                        e.currentTarget.style.color = '#155eef';
+                    }}
+                >
+                    <Edit size={16} />
+                    <span>编辑</span>
+                </div>
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
-                    padding: '10px 12px',
-                    background: '#eff6ff',
-                    color: '#2563eb',
-                    borderRadius: '8px',
+                    gap: '12px',
+                    padding: '10px 16px',
+                    color: '#1f1f1f',
                     cursor: 'pointer',
-                    fontWeight: 500,
-                    fontSize: '14px'
+                    fontSize: '13px',
+                    fontWeight: 400
                 }}>
-                    <GitBranch size={18} />
-                    <span>编排</span>
+                    <Globe size={16} />
+                    <span>访问 API</span>
+                </div>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '10px 16px',
+                    color: '#1f1f1f',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 400
+                }}>
+                    <FileText size={16} />
+                    <span>日志与标记</span>
+                </div>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '10px 16px',
+                    color: '#1f1f1f',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 400
+                }}>
+                    <Eye size={16} />
+                    <span>监测</span>
                 </div>
             </div>
 
@@ -143,7 +216,7 @@ const Sidebar: React.FC = () => {
                         <input
                             className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Enter app name"
-                            defaultValue={app?.name}
+                            defaultValue={app?.name ?? ''}
                         />
                     </div>
 
@@ -152,7 +225,7 @@ const Sidebar: React.FC = () => {
                         <input
                             className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Enter alias"
-                            defaultValue={app?.alias}
+                            defaultValue={app?.alias ?? ''}
                         />
                     </div>
 
@@ -161,7 +234,7 @@ const Sidebar: React.FC = () => {
                         <input
                             className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Enter project"
-                            defaultValue={app?.project}
+                            defaultValue={app?.project ?? ''}
                         />
                     </div>
 
@@ -192,7 +265,7 @@ const Sidebar: React.FC = () => {
                         <textarea
                             className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Enter description"
-                            defaultValue={app?.description}
+                            defaultValue={app?.description ?? ''}
                             rows={3}
                         />
                     </div>

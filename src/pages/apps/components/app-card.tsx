@@ -182,7 +182,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                         <span className="truncate">{app.alias}</span>
                         <span>•</span>
-                        <span>{formatDate(app.updateTime)}</span>
+                        <span>{app.project}</span>
                     </div>
                 </div>
             </div>
