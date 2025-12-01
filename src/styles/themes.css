@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    /* Text Colors */
+    --color-text-primary: #111827;
+    --color-text-secondary: #374151;
+    --color-text-tertiary: #6B7280;
+    --color-text-quaternary: #9CA3AF;
+    --color-text-placeholder: #D1D5DB;
+    --color-text-disabled: #E5E7EB;
+
+    /* Background Colors */
+    --color-background-body: #F9FAFB;
+    --color-background-default: #FFFFFF;
+    --color-background-surface-white: #FFFFFF;
+    --color-background-neutral-subtle: #F3F4F6;
+
+    /* State Colors */
+    --color-state-base-hover: #F3F4F6;
+    --color-state-accent-hover: #EEF2FF;
+    --color-state-accent-solid: #4F46E5;
+
+    /* Button Colors - Primary */
+    --color-components-button-primary-bg: #155EEF;
+    --color-components-button-primary-bg-hover: #175CD3;
+    --color-components-button-primary-bg-disabled: #B2DDFF;
+    --color-components-button-primary-border: #155EEF;
+    --color-components-button-primary-border-hover: #175CD3;
+    --color-components-button-primary-border-disabled: #B2DDFF;
+    --color-components-button-primary-text: #FFFFFF;
+    --color-components-button-primary-text-disabled: #FFFFFF;
+
+    /* Button Colors - Secondary */
+    --color-components-button-secondary-bg: #FFFFFF;
+    --color-components-button-secondary-bg-hover: #F9FAFB;
+    --color-components-button-secondary-bg-disabled: #FFFFFF;
+    --color-components-button-secondary-border: #D0D5DD;
+    --color-components-button-secondary-border-hover: #D0D5DD;
+    --color-components-button-secondary-border-disabled: #EAECF0;
+    --color-components-button-secondary-text: #344054;
+    --color-components-button-secondary-text-disabled: #D0D5DD;
+    --color-components-button-secondary-accent-text: #155EEF;
+    --color-components-button-secondary-accent-text-disabled: #B2DDFF;
+
+    /* Button Colors - Tertiary */
+    --color-components-button-tertiary-bg: #FFFFFF;
+    --color-components-button-tertiary-bg-hover: #F9FAFB;
+    --color-components-button-tertiary-text: #344054;
+    --color-components-button-tertiary-text-disabled: #D0D5DD;
+
+    /* Button Colors - Ghost */
+    --color-components-button-ghost-bg-hover: #F3F4F6;
+    --color-components-button-ghost-text: #667085;
+    --color-components-button-ghost-text-disabled: #D0D5DD;
+    --color-components-button-ghost-accent-text: #155EEF;
+    --color-components-button-ghost-accent-text-disabled: #B2DDFF;
+
+    /* Button Colors - Warning */
+    --color-components-button-warning-text: #DC6803;
+    --color-components-button-warning-border: #DC6803;
+    --color-components-button-warning-bg-hover: #FEF0C7;
+
+    /* Button Colors - Destructive */
+    --color-components-button-destructive-bg: #D92D20;
+    --color-components-button-destructive-bg-hover: #B42318;
+    --color-components-button-destructive-text: #FFFFFF;
+
+    /* Panel Colors */
+    --color-components-panel-bg: #FFFFFF;
+    --color-components-panel-bg-blur: rgba(255, 255, 255, 0.9);
+    --color-components-panel-border: #E5E7EB;
+    --color-components-panel-border-subtle: #F3F4F6;
+
+    /* Borders */
+    --color-divider-subtle: #F3F4F6;
+    --color-divider-regular: #E5E7EB;
+
+    /* Shadows */
+    --color-shadow-shadow-1: 0px 1px 2px rgba(16, 24, 40, 0.05);
+    --color-shadow-shadow-2: 0px 1px 3px rgba(16, 24, 40, 0.1), 0px 1px 2px rgba(16, 24, 40, 0.06);
+    --color-shadow-shadow-3: 0px 4px 6px -1px rgba(16, 24, 40, 0.1), 0px 2px 4px -1px rgba(16, 24, 40, 0.06);
+    --color-shadow-shadow-6: 0px 20px 24px -4px rgba(16, 24, 40, 0.08), 0px 8px 8px -4px rgba(16, 24, 40, 0.03);
+}
+
+.dark {
+    /* Text Colors */
+    --color-text-primary: #F9FAFB;
+    --color-text-secondary: #D1D5DB;
+    --color-text-tertiary: #9CA3AF;
+    --color-text-quaternary: #6B7280;
+    --color-text-placeholder: #4B5563;
+    --color-text-disabled: #374151;
+
+    /* Background Colors */
+    --color-background-body: #111827;
+    --color-background-default: #1F2937;
+    --color-background-surface-white: #1F2937;
+    --color-background-neutral-subtle: #374151;
+
+    /* State Colors */
+    --color-state-base-hover: #374151;
+    --color-state-accent-hover: #312E81;
+    --color-state-accent-solid: #6366F1;
+
+    /* Button Colors - Primary */
+    --color-components-button-primary-bg: #155EEF;
+    --color-components-button-primary-bg-hover: #175CD3;
+    --color-components-button-primary-bg-disabled: #1E3A8A;
+    --color-components-button-primary-border: #155EEF;
+    --color-components-button-primary-border-hover: #175CD3;
+    --color-components-button-primary-border-disabled: #1E3A8A;
+    --color-components-button-primary-text: #FFFFFF;
+    --color-components-button-primary-text-disabled: #9CA3AF;
+
+    /* Button Colors - Secondary */
+    --color-components-button-secondary-bg: #1F2937;
+    --color-components-button-secondary-bg-hover: #374151;
+    --color-components-button-secondary-bg-disabled: #1F2937;
+    --color-components-button-secondary-border: #4B5563;
+    --color-components-button-secondary-border-hover: #4B5563;
+    --color-components-button-secondary-border-disabled: #374151;
+    --color-components-button-secondary-text: #D1D5DB;
+    --color-components-button-secondary-text-disabled: #4B5563;
+    --color-components-button-secondary-accent-text: #6366F1;
+    --color-components-button-secondary-accent-text-disabled: #312E81;
+
+    /* Button Colors - Tertiary */
+    --color-components-button-tertiary-bg: #1F2937;
+    --color-components-button-tertiary-bg-hover: #374151;
+    --color-components-button-tertiary-text: #D1D5DB;
+    --color-components-button-tertiary-text-disabled: #4B5563;
+
+    /* Button Colors - Ghost */
+    --color-components-button-ghost-bg-hover: #374151;
+    --color-components-button-ghost-text: #9CA3AF;
+    --color-components-button-ghost-text-disabled: #4B5563;
+    --color-components-button-ghost-accent-text: #6366F1;
+    --color-components-button-ghost-accent-text-disabled: #312E81;
+
+    /* Button Colors - Warning */
+    --color-components-button-warning-text: #FDB022;
+    --color-components-button-warning-border: #FDB022;
+    --color-components-button-warning-bg-hover: #451A03;
+
+    /* Button Colors - Destructive */
+    --color-components-button-destructive-bg: #D92D20;
+    --color-components-button-destructive-bg-hover: #B42318;
+    --color-components-button-destructive-text: #FFFFFF;
+
+    /* Panel Colors */
+    --color-components-panel-bg: #1F2937;
+    --color-components-panel-bg-blur: rgba(31, 41, 55, 0.9);
+    --color-components-panel-border: #374151;
+    --color-components-panel-border-subtle: #374151;
+
+    /* Borders */
+    --color-divider-subtle: #374151;
+    --color-divider-regular: #4B5563;
+
+    /* Shadows */
+    --color-shadow-shadow-1: 0px 1px 2px rgba(0, 0, 0, 0.3);
+    --color-shadow-shadow-2: 0px 1px 3px rgba(0, 0, 0, 0.3), 0px 1px 2px rgba(0, 0, 0, 0.2);
+    --color-shadow-shadow-3: 0px 4px 6px -1px rgba(0, 0, 0, 0.3), 0px 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --color-shadow-shadow-6: 0px 20px 24px -4px rgba(0, 0, 0, 0.3), 0px 8px 8px -4px rgba(0, 0, 0, 0.2);
+}

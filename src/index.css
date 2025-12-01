@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "./styles/themes.css";
+@import "./components/ui/Button.css";
 
 @theme {
   --color-components-panel-bg: #ffffff;

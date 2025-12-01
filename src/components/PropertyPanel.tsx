@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, MoreHorizontal, Check } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
 import { cn } from '../utils/cn';
 import EnvironmentVariableManager from './EnvironmentVariableManager';
@@ -13,6 +13,11 @@ import FieldCollapse from './base/FieldCollapse';
 
 import { Settings } from 'lucide-react';
 import { Button } from './ui/Button';
+import {
+    PortalToFollowElem,
+    PortalToFollowElemContent,
+    PortalToFollowElemTrigger,
+} from './ui/PortalToFollowElem';
 
 import TraitsPanel from './TraitsPanel';
 import Switch from './base/switch';
@@ -58,12 +63,13 @@ const PropertyPanel: React.FC = () => {
                 >
                     <div className={PANEL_HEADER_STYLES}>
                         <div className={PANEL_TITLE_STYLES}>Traits</div>
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setShowConfigPanel(false)}
-                            className={PANEL_CLOSE_BUTTON_STYLES}
                         >
                             <X size={20} />
-                        </button>
+                        </Button>
                     </div>
                     <div className={PANEL_CONTENT_STYLES}>
                         <TraitsPanel node={selectedNode} />
@@ -85,21 +91,41 @@ const PropertyPanel: React.FC = () => {
                         Component Set
                     </div>
                     <div className="flex items-center gap-2">
+                        <PortalToFollowElem placement="bottom-end">
+                            <PortalToFollowElemTrigger>
+                                <Button variant="ghost" size="icon">
+                                    <MoreHorizontal size={20} />
+                                </Button>
+                            </PortalToFollowElemTrigger>
+                            <PortalToFollowElemContent className="w-32 flex flex-col gap-1 p-1">
+                                <Button variant="ghost" size="small" className="justify-start w-full">
+                                    Copy
+                                </Button>
+                                <Button variant="ghost" size="small" className="justify-start w-full">
+                                    Paste
+                                </Button>
+                                <div className="h-px bg-divider-subtle my-1" />
+                                <Button variant="ghost" size="small" className="justify-start w-full text-red-500 hover:text-red-600">
+                                    Delete
+                                </Button>
+                            </PortalToFollowElemContent>
+                        </PortalToFollowElem>
+
                         <Button
                             variant="primary"
                             size="medium"
-                            className="btn disabled:btn-disabled btn-primary btn-medium"
                             onClick={() => setShowConfigPanel(!showConfigPanel)}
                         >
                             <Settings className="mr-2 h-4 w-4" />
                             Add Traits
                         </Button>
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setSelectedNode(null)}
-                            className={PANEL_CLOSE_BUTTON_STYLES}
                         >
                             <X size={20} />
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -167,18 +193,73 @@ const PropertyPanel: React.FC = () => {
                         <label className={cn(LABEL_STYLES, "mb-0")}>
                             Component Type
                         </label>
-                        <div className="relative w-[180px]">
-                            <select
-                                className={cn(INPUT_CONTAINER_STYLES, "w-full appearance-none flex items-center justify-between outline-none focus:ring-1 focus:ring-state-accent-solid")}
-                                value={selectedNode.data.componentType || 'webservice'}
-                                onChange={(e) => {
-                                    updateNodeData(selectedNode.id, { componentType: e.target.value as any });
-                                }}
-                            >
-                                <option value="webservice">webservice</option>
-                                <option value="store">store</option>
-                            </select>
-                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary pointer-events-none" />
+
+
+                        <div className="relative w-[68px]">
+                            <PortalToFollowElem placement="bottom-end" offsetValue={4}>
+                                <PortalToFollowElemTrigger className="w-full">
+                                    <Button
+                                        variant="secondary"
+                                        size="small"
+                                        className="w-full justify-between items-center font-normal bg-white border-components-button-secondary-border text-text-primary hover:bg-state-base-hover px-2 h-[24px] text-xs rounded-md"
+                                    >
+                                        <span className="truncate leading-none">
+                                            {selectedNode.data.componentType === 'webservice' ? 'Web' :
+                                                selectedNode.data.componentType === 'store' ? 'Store' :
+                                                    (selectedNode.data.componentType || 'Store')}
+                                        </span>
+                                        <ChevronDown className="h-3 w-3 text-text-tertiary opacity-70 shrink-0 ml-1" />
+                                    </Button>
+                                </PortalToFollowElemTrigger>
+                                <PortalToFollowElemContent className="w-[280px] p-1 bg-white border border-components-panel-border shadow-lg rounded-lg">
+                                    <div className="flex flex-col gap-0.5">
+                                        {[
+                                            {
+                                                value: 'webservice',
+                                                label: 'Web Service',
+                                                desc: 'Standard web service component for handling requests.'
+                                            },
+                                            {
+                                                value: 'store',
+                                                label: 'Store',
+                                                desc: 'Persistent storage component for data retention.'
+                                            }
+                                        ].map((type) => {
+                                            const isSelected = selectedNode.data.componentType === type.value;
+                                            return (
+                                                <div
+                                                    key={type.value}
+                                                    className={cn(
+                                                        "group flex items-start gap-2.5 p-2.5 rounded-md cursor-pointer transition-colors",
+                                                        isSelected ? "bg-state-accent-active" : "hover:bg-state-base-hover"
+                                                    )}
+                                                    onClick={() => {
+                                                        updateNodeData(selectedNode.id, { componentType: type.value as any });
+                                                    }}
+                                                >
+                                                    <div className={cn(
+                                                        "mt-0.5 flex h-4 w-4 items-center justify-center shrink-0",
+                                                        isSelected ? "text-state-accent-solid" : "invisible"
+                                                    )}>
+                                                        <Check size={16} strokeWidth={2.5} />
+                                                    </div>
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className={cn(
+                                                            "text-[14px] font-medium leading-none",
+                                                            isSelected ? "text-state-accent-solid" : "text-text-primary"
+                                                        )}>
+                                                            {type.label}
+                                                        </span>
+                                                        <span className="text-[12px] leading-normal text-text-tertiary">
+                                                            {type.desc}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </PortalToFollowElemContent>
+                            </PortalToFollowElem>
                         </div>
                     </div>
 
