@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Search,
     LayoutGrid,
@@ -16,17 +17,21 @@ import {
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
+    const navigate = useNavigate();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
         <div className={`${isCollapsed ? 'w-16' : 'w-64'} h-full bg-[#F9FAFB] border-r border-gray-200 flex flex-col p-4 transition-all duration-300`}>
             {/* Brand */}
             <div className={`flex items-center gap-2 mb-6 ${isCollapsed ? 'justify-center px-0' : 'px-2'}`}>
-                <div className="w-6 h-6 bg-black rounded-md flex items-center justify-center shrink-0">
+                <div
+                    className="w-6 h-6 bg-black rounded-md flex items-center justify-center shrink-0 cursor-pointer"
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                >
                     <div className="w-3 h-3 bg-white rounded-full opacity-50" />
                     <div className="w-3 h-3 bg-white rounded-full -ml-1" />
                 </div>
-                {!isCollapsed && <span className="font-semibold text-gray-900 whitespace-nowrap">Acme Inc</span>}
+                {!isCollapsed && <span className="font-semibold text-gray-900 whitespace-nowrap">KubeMin-Cli</span>}
                 <div
                     className={`border border-gray-200 rounded p-0.5 cursor-pointer hover:bg-gray-100 ${isCollapsed ? 'absolute -right-3 top-6 bg-white shadow-sm' : 'ml-auto'}`}
                     onClick={() => setIsCollapsed(!isCollapsed)}
@@ -49,14 +54,18 @@ const Sidebar: React.FC = () => {
                     {!isCollapsed && <span className="text-xs text-gray-400 border border-gray-200 rounded px-1 group-hover:border-gray-300">/</span>}
                 </div>
                 {[
-                    { icon: LayoutGrid, label: 'Assigned to me' },
-                    { icon: FileText, label: 'Drafts' },
+                    { icon: LayoutGrid, label: 'Dashboard', path: '/dashboard' },
+                    { icon: FileText, label: 'Apps', path: '/apps' },
                     { icon: Calendar, label: 'Schedule' },
                     { icon: Users, label: 'Customers' },
                     { icon: BarChart2, label: 'Leads Report' },
                     { icon: Building2, label: 'Companies' },
                 ].map((item, index) => (
-                    <div key={index} className="flex items-center gap-3 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-md cursor-pointer">
+                    <div
+                        key={index}
+                        className="flex items-center gap-3 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-md cursor-pointer"
+                        onClick={() => item.path && navigate(item.path)}
+                    >
                         <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center w-full' : ''}`}>
                             <item.icon className="w-4 h-4 shrink-0" />
                             {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
