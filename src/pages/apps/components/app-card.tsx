@@ -1,35 +1,58 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Edit, Copy, Download, Trash2 } from 'lucide-react';
+import { Edit, Copy, Download, Trash2, MoreVertical } from 'lucide-react';
 import type { App } from '../../../types/app';
 import { duplicateApp, exportApp, deleteApp } from '../../../api/apps';
+import GameIcon from '../../../assets/game.svg';
 
 interface AppCardProps {
     app: App;
     onUpdate: () => void;
 }
 
-// Default icon when icon is empty
-const DEFAULT_ICON = '📦';
-
 // Default icon background colors
 const ICON_BACKGROUNDS = ['#dbeafe', '#fce7f3', '#fef3c7', '#ddd6fe', '#d1fae5', '#fecaca'];
 
 export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
     const navigate = useNavigate();
-    const [isHovered, setIsHovered] = React.useState(false);
+    const [showMenu, setShowMenu] = React.useState(false);
+    const menuRef = React.useRef<HTMLDivElement>(null);
+
+    // Close menu when clicking outside
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowMenu(false);
+            }
+        };
+
+        if (showMenu) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showMenu]);
 
     const handleCardClick = () => {
         navigate(`/workflow/${app.id}`);
     };
 
+    const handleMenuToggle = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowMenu(!showMenu);
+    };
+
     const handleEdit = (e: React.MouseEvent) => {
         e.stopPropagation();
+        setShowMenu(false);
         navigate(`/workflow/${app.id}`);
     };
 
     const handleDuplicate = async (e: React.MouseEvent) => {
         e.stopPropagation();
+        setShowMenu(false);
         try {
             await duplicateApp(app.id);
             onUpdate();
@@ -40,6 +63,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
 
     const handleExport = async (e: React.MouseEvent) => {
         e.stopPropagation();
+        setShowMenu(false);
         try {
             const blob = await exportApp(app.id);
             const url = URL.createObjectURL(blob);
@@ -55,6 +79,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
 
     const handleDelete = async (e: React.MouseEvent) => {
         e.stopPropagation();
+        setShowMenu(false);
         if (confirm(`Are you sure you want to delete "${app.name}"?`)) {
             try {
                 await deleteApp(app.id);
@@ -79,8 +104,8 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
         return date.toLocaleDateString();
     };
 
-    // Use app icon or default icon
-    const displayIcon = app.icon || DEFAULT_ICON;
+    // Use app icon or default game.svg icon
+    const displayIcon = app.icon || GameIcon;
 
     // Generate a consistent background color based on app id
     const iconBackground = ICON_BACKGROUNDS[
@@ -89,77 +114,88 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
 
     return (
         <div
-            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-primary-500 hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden w-[310px] h-[160px]"
+            className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col cursor-pointer relative w-[310px] h-[160px]"
             onClick={handleCardClick}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
         >
+            {/* More Options Button */}
+            <div className="absolute top-4 right-4" ref={menuRef}>
+                <button
+                    onClick={handleMenuToggle}
+                    className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                    title="More options"
+                >
+                    <MoreVertical className="w-4 h-4 text-gray-500" />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showMenu && (
+                    <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                        <button
+                            onClick={handleEdit}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                            <Edit className="w-4 h-4" />
+                            <span>编辑信息</span>
+                        </button>
+                        <button
+                            onClick={handleDuplicate}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                            <Copy className="w-4 h-4" />
+                            <span>复制</span>
+                        </button>
+                        <button
+                            onClick={handleExport}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                            <Download className="w-4 h-4" />
+                            <span>导出 DSL</span>
+                        </button>
+                        <div className="border-t border-gray-100 my-1"></div>
+                        <button
+                            onClick={handleDelete}
+                            className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            <span>删除</span>
+                        </button>
+                    </div>
+                )}
+            </div>
+
             {/* Card Content */}
-            <div className="p-3">
-                {/* Header */}
-                <div className="flex items-start gap-2 mb-2">
-                    <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0"
-                        style={{ backgroundColor: iconBackground }}
-                    >
-                        {displayIcon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-sm truncate mb-0.5">
-                            {app.name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <span className="truncate">{app.alias}</span>
-                            <span>•</span>
-                            <span>{formatDate(app.updateTime)}</span>
-                        </div>
-                    </div>
+            <div className="flex items-start gap-3 mb-3">
+                <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 p-2"
+                    style={{ backgroundColor: iconBackground }}
+                >
+                    {typeof displayIcon === 'string' && displayIcon.startsWith('/') ? (
+                        <img src={displayIcon} alt="App icon" className="w-full h-full object-contain" />
+                    ) : (
+                        <img src={displayIcon} alt="App icon" className="w-full h-full object-contain" />
+                    )}
                 </div>
-
-                {/* Description */}
-                <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-                    {app.description}
-                </p>
-
-                {/* Additional Info */}
-                <div className="flex items-center gap-2 text-xs text-gray-400">
-                    <span>Created: {formatDate(app.createTime)}</span>
+                <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 text-sm truncate mb-0.5">
+                        {app.name}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <span className="truncate">{app.alias}</span>
+                        <span>•</span>
+                        <span>{formatDate(app.updateTime)}</span>
+                    </div>
                 </div>
             </div>
 
-            {/* Hover Actions */}
-            {isHovered && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end justify-end p-4 gap-2">
-                    <button
-                        onClick={handleEdit}
-                        className="p-2 bg-white/90 hover:bg-white rounded-lg transition-colors"
-                        title="Edit"
-                    >
-                        <Edit className="w-4 h-4 text-gray-700" />
-                    </button>
-                    <button
-                        onClick={handleDuplicate}
-                        className="p-2 bg-white/90 hover:bg-white rounded-lg transition-colors"
-                        title="Duplicate"
-                    >
-                        <Copy className="w-4 h-4 text-gray-700" />
-                    </button>
-                    <button
-                        onClick={handleExport}
-                        className="p-2 bg-white/90 hover:bg-white rounded-lg transition-colors"
-                        title="Export"
-                    >
-                        <Download className="w-4 h-4 text-gray-700" />
-                    </button>
-                    <button
-                        onClick={handleDelete}
-                        className="p-2 bg-white/90 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete"
-                    >
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                    </button>
-                </div>
-            )}
+            {/* Description */}
+            <p className="text-xs text-gray-600 mb-2 line-clamp-2 flex-1">
+                {app.description || '暂无描述'}
+            </p>
+
+            {/* Additional Info */}
+            <div className="flex items-center gap-2 text-xs text-gray-400 mt-auto">
+                <span>创建于 {formatDate(app.createTime)}</span>
+            </div>
         </div>
     );
 };
