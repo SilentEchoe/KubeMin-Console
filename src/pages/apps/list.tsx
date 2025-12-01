@@ -131,8 +131,14 @@ export const List: React.FC = () => {
             onDrop={handleDrop}
         >
             {/* Header */}
-            <div className="mb-6">
-
+            <div className="mb-6 flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-gray-900">Apps</h1>
+                <button
+                    onClick={() => navigate('/dashboard')}
+                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                    Go to Dashboard
+                </button>
             </div>
 
             {/* Filters */}
