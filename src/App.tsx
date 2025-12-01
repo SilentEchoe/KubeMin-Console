@@ -8,9 +8,9 @@ import { ButtonPopupExample } from './examples/ButtonPopupExample';
 const App: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<AppsPage />} />
-      <Route path="/apps" element={<AppsPage />} />
+      <Route path="/" element={<DashboardPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/apps" element={<AppsPage />} />
       <Route path="/workflow/:appId" element={<WorkflowPage />} />
       <Route path="/button-popup-example" element={<ButtonPopupExample />} />
     </Routes>

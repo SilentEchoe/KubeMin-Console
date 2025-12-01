@@ -131,21 +131,9 @@ export const List: React.FC = () => {
             onDrop={handleDrop}
         >
             {/* Header */}
-            <div className="mb-6 flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Apps</h1>
-                <button
-                    onClick={() => navigate('/dashboard')}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                    Go to Dashboard
-                </button>
-            </div>
-
-            {/* Filters */}
-            <div className="mb-6 flex flex-col sm:flex-row gap-4">
-                <div className="flex-1 relative">
-
-                </div>
+            <div className="flex items-center gap-2 mb-8">
+                <h1 className="text-sm font-medium text-gray-900">Apps</h1>
+                <span className="text-xs text-gray-400">{apps.length} AVAILABLE</span>
             </div>
 
             {/* Apps Grid */}
@@ -153,7 +141,7 @@ export const List: React.FC = () => {
                 <Empty isLoading={false} />
             ) : (
                 <>
-                    <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, 290px)' }}>
+                    <div className="grid gap-6 grid-cols-5">
                         {/* New App Card */}
                         <NewAppCard
                             onCreateBlank={handleCreateBlank}
@@ -178,9 +166,6 @@ export const List: React.FC = () => {
                     <div ref={observerTarget} className="h-4 mt-6" />
                 </>
             )}
-
-            {/* Footer */}
-            <Footer />
 
             {/* Drag & Drop Overlay */}
             {isDragging && (

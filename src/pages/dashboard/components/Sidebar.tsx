@@ -16,9 +16,22 @@ import {
     ChevronRight
 } from 'lucide-react';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+    activeSection?: string;
+    onSectionChange?: (section: string) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ activeSection = 'widgets', onSectionChange }) => {
     const navigate = useNavigate();
     const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const handleSectionClick = (section: string, path?: string) => {
+        if (onSectionChange) {
+            onSectionChange(section);
+        } else if (path) {
+            navigate(path);
+        }
+    };
 
     return (
         <div className={`${isCollapsed ? 'w-16' : 'w-64'} h-full bg-[#F9FAFB] border-r border-gray-200 flex flex-col p-4 transition-all duration-300`}>
@@ -54,17 +67,20 @@ const Sidebar: React.FC = () => {
                     {!isCollapsed && <span className="text-xs text-gray-400 border border-gray-200 rounded px-1 group-hover:border-gray-300">/</span>}
                 </div>
                 {[
-                    { icon: LayoutGrid, label: 'Dashboard', path: '/dashboard' },
-                    { icon: FileText, label: 'Apps', path: '/apps' },
-                    { icon: Calendar, label: 'Schedule' },
-                    { icon: Users, label: 'Customers' },
-                    { icon: BarChart2, label: 'Leads Report' },
-                    { icon: Building2, label: 'Companies' },
+                    { icon: LayoutGrid, label: 'Dashboard', section: 'widgets' },
+                    { icon: FileText, label: 'Apps', section: 'apps', path: '/apps' },
+                    { icon: Calendar, label: 'Schedule', section: 'schedule' },
+                    { icon: Users, label: 'Customers', section: 'customers' },
+                    { icon: BarChart2, label: 'Leads Report', section: 'leads' },
+                    { icon: Building2, label: 'Companies', section: 'companies' },
                 ].map((item, index) => (
                     <div
                         key={index}
-                        className="flex items-center gap-3 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-md cursor-pointer"
-                        onClick={() => item.path && navigate(item.path)}
+                        className={`flex items-center gap-3 px-2 py-1.5 text-sm rounded-md cursor-pointer ${activeSection === item.section
+                            ? 'text-gray-900 bg-gray-100 font-medium'
+                            : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                        onClick={() => handleSectionClick(item.section, item.path)}
                     >
                         <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center w-full' : ''}`}>
                             <item.icon className="w-4 h-4 shrink-0" />
@@ -72,7 +88,13 @@ const Sidebar: React.FC = () => {
                         </div>
                     </div>
                 ))}
-                <div className="flex items-center gap-3 px-2 py-1.5 text-sm text-gray-900 bg-gray-100 rounded-md cursor-pointer font-medium">
+                <div
+                    className={`flex items-center gap-3 px-2 py-1.5 text-sm rounded-md cursor-pointer ${activeSection === 'widgets'
+                        ? 'text-gray-900 bg-gray-100 font-medium'
+                        : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                    onClick={() => handleSectionClick('widgets')}
+                >
                     <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center w-full' : ''}`}>
                         <Layout className="w-4 h-4 shrink-0" />
                         {!isCollapsed && <span>Widget</span>}

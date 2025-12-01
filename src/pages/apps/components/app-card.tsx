@@ -89,7 +89,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
 
     return (
         <div
-            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-primary-500 hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden w-[290px] h-[160px]"
+            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-primary-500 hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden w-[310px] h-[160px]"
             onClick={handleCardClick}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
