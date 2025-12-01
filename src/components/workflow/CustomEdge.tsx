@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BaseEdge, getBezierPath, EdgeLabelRenderer, type EdgeProps } from '@xyflow/react';
 import { Plus } from 'lucide-react';
 import { getEdgeColor, EdgeStatus } from '../../utils/edge';
+import { useFlowStore } from '../../stores/flowStore';
 
 const CustomEdge: React.FC<EdgeProps> = ({
     id,
@@ -86,8 +87,15 @@ const CustomEdge: React.FC<EdgeProps> = ({
                             className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm hover:bg-blue-700 focus:outline-none"
                             onClick={(event) => {
                                 event.stopPropagation();
-                                console.log('Insert node clicked on edge:', id);
-                                // Add logic to open node selector or insert node
+                                const container = document.querySelector('.react-flow');
+                                if (container) {
+                                    const { left, top } = container.getBoundingClientRect();
+                                    useFlowStore.getState().setPanelMenu({
+                                        top: event.clientY - top,
+                                        left: event.clientX - left,
+                                        edgeId: id,
+                                    });
+                                }
                             }}
                         >
                             <Plus size={10} strokeWidth={3} />

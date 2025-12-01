@@ -70,6 +70,43 @@ export const useFlowStore = create<FlowState>((set, get) => ({
             nodes: [...nodes, node],
         });
     },
+    insertNodeOnEdge: (edgeId: string, node: FlowNode) => {
+        const { edges, nodes } = get();
+        const targetEdge = edges.find(e => e.id === edgeId);
+        if (!targetEdge) return;
+
+        // Auto-generate unique name if not provided
+        if (!node.data.name) {
+            const baseName = node.data.label || 'Component';
+            const existingNames = nodes.map(n => n.data.name).filter(Boolean) as string[];
+            node.data.name = generateUniqueName(baseName, existingNames);
+        }
+
+        const newEdge1 = {
+            id: `e-${targetEdge.source}-${node.id}`,
+            source: targetEdge.source,
+            target: node.id,
+            type: 'custom',
+            sourceHandle: targetEdge.sourceHandle,
+        };
+
+        const newEdge2 = {
+            id: `e-${node.id}-${targetEdge.target}`,
+            source: node.id,
+            target: targetEdge.target,
+            type: 'custom',
+            targetHandle: targetEdge.targetHandle,
+        };
+
+        set({
+            nodes: [...nodes, node],
+            edges: [
+                ...edges.filter(e => e.id !== edgeId),
+                newEdge1,
+                newEdge2
+            ]
+        });
+    },
     setSelectedNode: (id: string | null) => {
         set({ selectedNodeId: id });
     },

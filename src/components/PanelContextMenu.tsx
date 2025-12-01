@@ -1,10 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useFlowStore } from '../stores/flowStore';
-import { Plus, FileText, Play, Clipboard, Download, Upload, ChevronRight, Settings } from 'lucide-react';
+import { Plus, Play, Clipboard, Download, Upload, ChevronRight, Settings } from 'lucide-react';
 import BlockSelector from './BlockSelector';
 
 const PanelContextMenu: React.FC = () => {
-    const { panelMenu, setPanelMenu, addNode, nodes } = useFlowStore();
+    const { panelMenu, setPanelMenu, addNode, insertNodeOnEdge, nodes } = useFlowStore();
     const ref = useRef<HTMLDivElement>(null);
     const [showAddBlock, setShowAddBlock] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,7 +97,7 @@ const PanelContextMenu: React.FC = () => {
         }
 
         const id = Math.random().toString(36).substr(2, 9);
-        addNode({
+        const newNode = {
             id,
             type: 'custom',
             position: { x: panelMenu.left + 50, y: panelMenu.top + 50 }, // Offset slightly
@@ -105,9 +105,15 @@ const PanelContextMenu: React.FC = () => {
                 label: type.toUpperCase(),
                 description: `New ${type} node`,
                 icon: 'box',
-                componentType: type === 'component' ? 'webservice' : (type as any),
+                componentType: (type === 'component' ? 'webservice' : type) as any,
             },
-        });
+        };
+
+        if (panelMenu.edgeId) {
+            insertNodeOnEdge(panelMenu.edgeId, newNode);
+        } else {
+            addNode(newNode);
+        }
         setPanelMenu(null);
     };
 
@@ -292,7 +298,7 @@ const PanelContextMenu: React.FC = () => {
                     className="flex h-8 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-text-secondary hover:bg-state-base-hover"
                     onClick={() => {
                         const id = Math.random().toString(36).substr(2, 9);
-                        addNode({
+                        const newNode = {
                             id,
                             type: 'custom',
                             position: { x: panelMenu.left + 50, y: panelMenu.top + 50 },
@@ -300,9 +306,15 @@ const PanelContextMenu: React.FC = () => {
                                 label: 'Config/Secret',
                                 description: 'Manage global environment variables',
                                 icon: 'settings',
-                                componentType: 'config-secret',
+                                componentType: 'config-secret' as const,
                             },
-                        });
+                        };
+
+                        if (panelMenu.edgeId) {
+                            insertNodeOnEdge(panelMenu.edgeId, newNode);
+                        } else {
+                            addNode(newNode);
+                        }
                         setPanelMenu(null);
                     }}
                 >
