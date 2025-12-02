@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import type { ComponentSetSectionKey } from '../PropertyPanel';
+import type { Traits } from '../../types/flow';
 import { ChevronDown, Check, X } from 'lucide-react';
 import { useFlowStore } from '../../stores/flowStore';
 import EnvironmentVariableManager from '../EnvironmentVariableManager';
@@ -21,15 +22,20 @@ interface ComponentSetMenuProps {
     onChange: (key: ComponentSetSectionKey) => void;
     onEnvAddClick?: () => void;
     onEnvListClick?: () => void;
+    onTraitsEnvAddClick?: () => void;
+    onTraitsStorageAddClick?: () => void;
+    onTraitsSidecarAddClick?: () => void;
+    onTraitsInitAddClick?: () => void;
 }
 
-const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeKey, onChange: _onChange, onEnvAddClick, onEnvListClick }) => {
+const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeKey, onChange: _onChange, onEnvAddClick, onEnvListClick, onTraitsEnvAddClick, onTraitsStorageAddClick, onTraitsSidecarAddClick, onTraitsInitAddClick }) => {
     const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
     const [portInput, setPortInput] = useState('');
     const [ports, setPorts] = useState<string[]>([]);
     const [isComponentTypeOpen, setIsComponentTypeOpen] = useState(false);
     const [activeEnvButton, setActiveEnvButton] = useState<'add' | 'list'>('add');
+
 
     useEffect(() => {
         if (selectedNode) {
@@ -553,6 +559,171 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                         <span className="text-[13px] text-text-tertiary shrink-0">秒</span>
                                     </div>
                                 </FlexRow>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Traits Env Section */}
+                    <div className="mb-4">
+                        <FlexRow className="justify-between items-center mb-2">
+                            <label className="text-[13px] font-medium text-text-primary mb-0">
+                                Traits Env
+                            </label>
+                            <Button
+                                variant="secondary"
+                                size="small"
+                                onClick={onTraitsEnvAddClick}
+                                className="h-8 px-3 text-xs whitespace-nowrap"
+                            >
+                                + Add Traits Env
+                            </Button>
+                        </FlexRow>
+                        {((selectedNode.data.traits as Traits)?.envs || []).length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {((selectedNode.data.traits as Traits)?.envs || []).map((env, index) => (
+                                    <span
+                                        key={index}
+                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-md border border-blue-200"
+                                    >
+                                        {env.name}
+                                        <span className="text-blue-400 text-[10px]">({env.valueFrom?.secret?.name})</span>
+                                        <button
+                                            onClick={() => {
+                                                const traits = (selectedNode.data.traits as Traits) || {};
+                                                updateNodeData(selectedNode.id, {
+                                                    traits: { ...traits, envs: traits.envs?.filter((_, i) => i !== index) }
+                                                });
+                                            }}
+                                            className="hover:text-blue-900 transition-colors"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Traits Storage Section */}
+                    <div className="mb-4">
+                        <FlexRow className="justify-between items-center mb-2">
+                            <label className="text-[13px] font-medium text-text-primary mb-0">
+                                Traits Storage
+                            </label>
+                            <Button
+                                variant="secondary"
+                                size="small"
+                                onClick={onTraitsStorageAddClick}
+                                className="h-8 px-3 text-xs whitespace-nowrap"
+                            >
+                                + Add Storage
+                            </Button>
+                        </FlexRow>
+                        {((selectedNode.data.traits as Traits)?.storage || []).length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {((selectedNode.data.traits as Traits)?.storage || []).map((storage, index) => (
+                                    <span
+                                        key={index}
+                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-50 text-green-700 rounded-md border border-green-200"
+                                    >
+                                        {storage.name}
+                                        <span className="text-green-400 text-[10px]">({storage.type})</span>
+                                        <span className="text-green-500 text-[10px]">{storage.mountPath}</span>
+                                        <button
+                                            onClick={() => {
+                                                const traits = (selectedNode.data.traits as Traits) || {};
+                                                updateNodeData(selectedNode.id, {
+                                                    traits: { ...traits, storage: traits.storage?.filter((_, i) => i !== index) }
+                                                });
+                                            }}
+                                            className="hover:text-green-900 transition-colors"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Traits Sidecar Section */}
+                    <div className="mb-4">
+                        <FlexRow className="justify-between items-center mb-2">
+                            <label className="text-[13px] font-medium text-text-primary mb-0">
+                                Traits Sidecar
+                            </label>
+                            <Button
+                                variant="secondary"
+                                size="small"
+                                onClick={onTraitsSidecarAddClick}
+                                className="h-8 px-3 text-xs whitespace-nowrap"
+                            >
+                                + Add Sidecar
+                            </Button>
+                        </FlexRow>
+                        {((selectedNode.data.traits as Traits)?.sidecar || []).length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {((selectedNode.data.traits as Traits)?.sidecar || []).map((sidecar, index) => (
+                                    <span
+                                        key={index}
+                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-purple-50 text-purple-700 rounded-md border border-purple-200"
+                                    >
+                                        {sidecar.name}
+                                        {sidecar.image && <span className="text-purple-400 text-[10px] max-w-[100px] truncate">({sidecar.image.split('/').pop()})</span>}
+                                        <button
+                                            onClick={() => {
+                                                const traits = (selectedNode.data.traits as Traits) || {};
+                                                updateNodeData(selectedNode.id, {
+                                                    traits: { ...traits, sidecar: traits.sidecar?.filter((_, i) => i !== index) }
+                                                });
+                                            }}
+                                            className="hover:text-purple-900 transition-colors"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Traits Init Section */}
+                    <div className="mb-4">
+                        <FlexRow className="justify-between items-center mb-2">
+                            <label className="text-[13px] font-medium text-text-primary mb-0">
+                                Traits Init
+                            </label>
+                            <Button
+                                variant="secondary"
+                                size="small"
+                                onClick={onTraitsInitAddClick}
+                                className="h-8 px-3 text-xs whitespace-nowrap"
+                            >
+                                + Add Init
+                            </Button>
+                        </FlexRow>
+                        {((selectedNode.data.traits as Traits)?.init || []).length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {((selectedNode.data.traits as Traits)?.init || []).map((init, index) => (
+                                    <span
+                                        key={index}
+                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-orange-50 text-orange-700 rounded-md border border-orange-200"
+                                    >
+                                        {init.name}
+                                        {init.properties?.image && <span className="text-orange-400 text-[10px] max-w-[100px] truncate">({init.properties.image.split('/').pop()})</span>}
+                                        <button
+                                            onClick={() => {
+                                                const traits = (selectedNode.data.traits as Traits) || {};
+                                                updateNodeData(selectedNode.id, {
+                                                    traits: { ...traits, init: traits.init?.filter((_, i) => i !== index) }
+                                                });
+                                            }}
+                                            className="hover:text-orange-900 transition-colors"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ))}
                             </div>
                         )}
                     </div>

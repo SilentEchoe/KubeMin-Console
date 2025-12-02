@@ -6,11 +6,17 @@ import EnvPanel from './EnvPanel';
 import ComponentSetMenu from './workflow/ComponentSetMenu';
 import EnvManager from './workflow/EnvManager';
 import EnvModal from './workflow/EnvModal';
+import TraitsEnvPanel from './workflow/TraitsEnvPanel';
+import TraitsStoragePanel from './workflow/TraitsStoragePanel';
+import TraitsSidecarPanel from './workflow/TraitsSidecarPanel';
+import TraitsInitPanel from './workflow/TraitsInitPanel';
 import { Button } from './ui/Button';
 import TraitsPanel from './TraitsPanel';
 import componentIcon from '../assets/component.svg';
 import configIcon from '../assets/config.svg';
-import type { EnvironmentVariable } from '../types/flow';
+import type { EnvironmentVariable, Traits, TraitEnv, TraitStorage, TraitContainer } from '../types/flow';
+
+type TraitsPanelType = 'env' | 'storage' | 'sidecar' | 'init' | null;
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
 const PANEL_TITLE_STYLES = 'text-[15px] font-semibold text-text-primary';
@@ -27,6 +33,7 @@ const PropertyPanel: React.FC = () => {
     const [showEnvModal, setShowEnvModal] = useState(false);
     const [editingEnvVar, setEditingEnvVar] = useState<EnvironmentVariable | null>(null);
     const [showEnvList, setShowEnvList] = useState(false); // EnvManager 默认关闭
+    const [activeTraitsPanel, setActiveTraitsPanel] = useState<TraitsPanelType>(null); // Current active traits panel
 
     const selectedNode = useMemo(() => {
         return nodes.find((n) => n.id === selectedNodeId);
@@ -130,6 +137,42 @@ const PropertyPanel: React.FC = () => {
         updateNodeData(selectedNode.id, { environmentVariables: variables });
     };
 
+    const handleTraitsEnvAdd = (newEnv: TraitEnv) => {
+        if (!selectedNode) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, envs: [...(traits.envs || []), newEnv] }
+        });
+        setActiveTraitsPanel(null);
+    };
+
+    const handleTraitsStorageAdd = (newStorage: TraitStorage) => {
+        if (!selectedNode) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, storage: [...(traits.storage || []), newStorage] }
+        });
+        setActiveTraitsPanel(null);
+    };
+
+    const handleTraitsSidecarAdd = (newSidecar: TraitContainer) => {
+        if (!selectedNode) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, sidecar: [...(traits.sidecar || []), newSidecar] }
+        });
+        setActiveTraitsPanel(null);
+    };
+
+    const handleTraitsInitAdd = (newInit: TraitContainer) => {
+        if (!selectedNode) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, init: [...(traits.init || []), newInit] }
+        });
+        setActiveTraitsPanel(null);
+    };
+
     return (
         <>
             {/* Env Modal */}
@@ -172,8 +215,77 @@ const PropertyPanel: React.FC = () => {
             )}
 
             <div className="absolute top-[70px] right-5 bottom-5 flex gap-4 z-20">
+                {/* Traits Panels - Left (conditionally rendered) */}
+                {activeTraitsPanel === 'env' && (
+                    <div
+                        className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl transition-all duration-200"
+                        style={{
+                            minWidth: '360px',
+                            maxWidth: '360px',
+                            width: '360px',
+                            height: '100%',
+                        }}
+                    >
+                        <TraitsEnvPanel
+                            onClose={() => setActiveTraitsPanel(null)}
+                            onAdd={handleTraitsEnvAdd}
+                        />
+                    </div>
+                )}
+
+                {activeTraitsPanel === 'storage' && (
+                    <div
+                        className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl transition-all duration-200"
+                        style={{
+                            minWidth: '360px',
+                            maxWidth: '360px',
+                            width: '360px',
+                            height: '100%',
+                        }}
+                    >
+                        <TraitsStoragePanel
+                            onClose={() => setActiveTraitsPanel(null)}
+                            onAdd={handleTraitsStorageAdd}
+                        />
+                    </div>
+                )}
+
+                {activeTraitsPanel === 'sidecar' && (
+                    <div
+                        className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl transition-all duration-200"
+                        style={{
+                            minWidth: '400px',
+                            maxWidth: '400px',
+                            width: '400px',
+                            height: '100%',
+                        }}
+                    >
+                        <TraitsSidecarPanel
+                            onClose={() => setActiveTraitsPanel(null)}
+                            onAdd={handleTraitsSidecarAdd}
+                        />
+                    </div>
+                )}
+
+                {activeTraitsPanel === 'init' && (
+                    <div
+                        className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl transition-all duration-200"
+                        style={{
+                            minWidth: '400px',
+                            maxWidth: '400px',
+                            width: '400px',
+                            height: '100%',
+                        }}
+                    >
+                        <TraitsInitPanel
+                            onClose={() => setActiveTraitsPanel(null)}
+                            onAdd={handleTraitsInitAdd}
+                        />
+                    </div>
+                )}
+
                 {/* Env Sidebar - Left (conditionally rendered) */}
-                {showEnvList && (
+                {showEnvList && !activeTraitsPanel && (
                     <div
                         className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl transition-all duration-200"
                         style={{
@@ -288,6 +400,10 @@ const PropertyPanel: React.FC = () => {
                                 onChange={setActiveSection}
                                 onEnvAddClick={handleEnvAdd}
                                 onEnvListClick={() => setShowEnvList(true)}
+                                onTraitsEnvAddClick={() => setActiveTraitsPanel('env')}
+                                onTraitsStorageAddClick={() => setActiveTraitsPanel('storage')}
+                                onTraitsSidecarAddClick={() => setActiveTraitsPanel('sidecar')}
+                                onTraitsInitAddClick={() => setActiveTraitsPanel('init')}
                             />
                         </div>
 
