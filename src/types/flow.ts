@@ -3,6 +3,7 @@ import type { Node, Edge } from '@xyflow/react';
 export type EnvironmentVariable = {
     key: string;
     value: string;
+    type?: 'String' | 'Number' | 'Secret';
     isSecret?: boolean;
     description?: string;
 };

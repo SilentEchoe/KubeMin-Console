@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import type { ComponentSetSectionKey } from '../PropertyPanel';
-import { ChevronDown, Check, X } from 'lucide-react';
+import { ChevronDown, Check, X, Plus } from 'lucide-react';
 import { useFlowStore } from '../../stores/flowStore';
 import EnvironmentVariableManager from '../EnvironmentVariableManager';
 import FlexRow from '../FlexRow';
-import DynamicKeyValueList from '../base/DynamicKeyValueList';
-import FieldCollapse from '../base/FieldCollapse';
 import { Button } from '../ui/Button';
 import {
     PortalToFollowElem,
@@ -21,9 +19,10 @@ const INPUT_CONTAINER_STYLES = 'rounded-lg border border-components-panel-border
 interface ComponentSetMenuProps {
     activeKey: ComponentSetSectionKey;
     onChange: (key: ComponentSetSectionKey) => void;
+    onEnvAddClick?: () => void;
 }
 
-const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeKey, onChange: _onChange }) => {
+const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeKey, onChange: _onChange, onEnvAddClick }) => {
     const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
     const [portInput, setPortInput] = useState('');
@@ -164,7 +163,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
 
                     {/* Enabled Toggle - Moved outside FieldCollapse */}
                     <FlexRow className="justify-between mb-4">
-                        <label className="text-[13px] font-medium text-text-primary mb-0">Enabled</label>
+                        <label className="text-[13px] font-medium text-text-primary mb-0">TmpEnabled</label>
                         <Switch
                             checked={selectedNode.data.enabled !== false}
                             onChange={(checked) => updateNodeData(selectedNode.id, { enabled: checked })}
@@ -271,24 +270,24 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                         </div>
                     </FlexRow>
 
-                    <FieldCollapse title="ENV" defaultOpen={true}>
-                        {/* Config (Dynamic Key-Value List) */}
-                        <div>
-                            <DynamicKeyValueList
-                                key={selectedNode.id} // Force re-render on node change
-                                title="" // Title handled by FieldCollapse
-                                keyPlaceholder="Name"
-                                valuePlaceholder="Value"
-                                btnText="Add Config"
-                                inputClassName="bg-white focus:bg-gray-50 text-[12px]"
-                                deleteBtnClassName="bg-white h-6 w-6 p-1"
-                                showEmptyState={false}
-                                itemContainerClassName="bg-white"
-                                initialItems={selectedNode.data.envConfig || []}
-                                onItemsChange={(items) => updateNodeData(selectedNode.id, { envConfig: items })}
-                            />
+                    {/* Env Add Button */}
+                    {onEnvAddClick && (
+                        <div className="mb-4">
+                            <button
+                                onClick={onEnvAddClick}
+                                className="flex items-center justify-center w-full rounded-lg border border-components-button-secondary-border bg-white hover:bg-state-base-hover transition-colors text-text-primary"
+                                style={{
+                                    height: '1.625rem', // Match Settings tab height (text-[13px] with pb-2.5)
+                                    padding: '0',
+                                    lineHeight: '1.625rem'
+                                }}
+                            >
+                                <Plus className="h-4 w-4 mr-1" />
+                                <span className="text-[13px] font-medium">添加环境变量</span>
+                            </button>
                         </div>
-                    </FieldCollapse>
+                    )}
+
                 </>
             )}
 
