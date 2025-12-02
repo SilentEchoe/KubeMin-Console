@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import type { ComponentSetSectionKey } from '../PropertyPanel';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, X } from 'lucide-react';
 import { useFlowStore } from '../../stores/flowStore';
 import EnvironmentVariableManager from '../EnvironmentVariableManager';
 import FlexRow from '../FlexRow';
@@ -24,85 +24,76 @@ interface ComponentSetMenuProps {
     onChange: (key: ComponentSetSectionKey) => void;
 }
 
-interface ComponentSetMenuItem {
-    key: ComponentSetSectionKey;
-    label: string;
-    count?: number;
-}
-
-const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey, onChange }) => {
+const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeKey, onChange: _onChange }) => {
     const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
+    const [portInput, setPortInput] = useState('');
+    const [ports, setPorts] = useState<string[]>([]);
+    const [isComponentTypeOpen, setIsComponentTypeOpen] = useState(false);
+
+    useEffect(() => {
+        if (selectedNode) {
+            setPorts(selectedNode.data.ports || []);
+        }
+    }, [selectedNode?.id, selectedNode?.data.ports]);
 
     if (!selectedNode) {
         return null;
     }
 
-    const menuItems: ComponentSetMenuItem[] = [
-        { key: 'system', label: 'SYSTEM', count: 0 },
-        { key: 'user', label: 'USER', count: 0 },
-        { key: 'memory', label: '记忆', count: 32 },
-        { key: 'vision', label: '视觉' },
-        { key: 'resolution', label: '分辨率' },
-    ];
+    const handleAddPort = () => {
+        const port = portInput.trim();
+        if (port && !ports.includes(port)) {
+            const newPorts = [...ports, port];
+            setPorts(newPorts);
+            updateNodeData(selectedNode.id, { ports: newPorts });
+            setPortInput('');
+        }
+    };
+
+    const handleRemovePort = (portToRemove: string) => {
+        const newPorts = ports.filter(p => p !== portToRemove);
+        setPorts(newPorts);
+        updateNodeData(selectedNode.id, { ports: newPorts });
+    };
+
+    const handlePortKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleAddPort();
+        }
+    };
 
     return (
         <div>
-            {/* 模型标签 */}
-            <div className="mb-2">
-                <span className="text-[13px] font-medium text-text-primary">
-                    模型 <span className="text-red-500">*</span>
-                </span>
-            </div>
-
-            {/* 下拉选择器 */}
-            <div className="mb-4">
-                <div className="flex items-center justify-between px-3 py-2 bg-white border border-components-panel-border rounded-lg cursor-pointer hover:bg-state-base-hover transition-colors">
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center justify-center w-5 h-5 bg-blue-500 rounded">
-                            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="8" cy="8" r="6" fill="white" />
-                            </svg>
-                        </div>
-                        <span className="text-[13px] font-medium text-text-primary">gpt-4o-mini</span>
-                        <span className="px-1.5 py-0.5 text-[10px] font-medium text-text-tertiary bg-components-badge-bg-dimm rounded">CHAT</span>
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-text-quaternary">
-                            <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
-                        </svg>
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-text-quaternary">
-                            <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                    </div>
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-text-tertiary">
-                        <path d="M4 8H12M8 4V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                </div>
-            </div>
-
             {/* Component Type Selection */}
             <div className="mb-4 flex items-center justify-between">
-                <label className={cn(LABEL_STYLES, "mb-0")}>
+                <label className="text-[13px] font-medium text-text-primary mb-0">
                     Component Type
                 </label>
 
-
                 <div className="relative w-[120px]">
-                    <PortalToFollowElem placement="bottom-end" offsetValue={4}>
-                        <PortalToFollowElemTrigger className="w-full">
-                            <Button
-                                variant="secondary"
-                                size="small"
-                                className="w-full justify-between items-center font-normal bg-white border-components-button-secondary-border text-text-primary hover:bg-state-base-hover px-2 h-[24px] text-xs rounded-md"
+                    <PortalToFollowElem
+                        placement="bottom-end"
+                        offsetValue={4}
+                        trigger="click"
+                        open={isComponentTypeOpen}
+                        onOpenChange={setIsComponentTypeOpen}
+                    >
+                        <PortalToFollowElemTrigger asChild>
+                            <button
+                                type="button"
+                                className="w-full h-[24px] px-2 flex items-center justify-between gap-2 font-normal bg-white border border-components-button-secondary-border text-text-primary hover:bg-state-base-hover text-xs rounded-md transition-colors"
                             >
-                                <span className="truncate leading-none">
+                                <span className="truncate leading-none flex-1 text-left">
                                     {selectedNode.data.componentType === 'webservice' ? 'Web' :
                                         selectedNode.data.componentType === 'store' ? 'Store' :
                                             (selectedNode.data.componentType || 'Store')}
                                 </span>
-                                <ChevronDown className="h-3 w-3 text-text-tertiary opacity-70 shrink-0 ml-1" />
-                            </Button>
+                                <ChevronDown className="h-3 w-3 text-text-tertiary opacity-70 shrink-0" />
+                            </button>
                         </PortalToFollowElemTrigger>
-                        <PortalToFollowElemContent className="w-[280px] p-1 bg-white border border-components-panel-border shadow-lg rounded-lg">
+                        <PortalToFollowElemContent className="w-[280px] p-1 bg-white border border-components-panel-border shadow-lg rounded-lg z-[100]">
                             <div className="flex flex-col gap-0.5">
                                 {[
                                     {
@@ -126,6 +117,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey, onChange
                                             )}
                                             onClick={() => {
                                                 updateNodeData(selectedNode.id, { componentType: type.value as any });
+                                                setIsComponentTypeOpen(false);
                                             }}
                                         >
                                             <div className={cn(
@@ -134,7 +126,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey, onChange
                                             )}>
                                                 <Check size={16} strokeWidth={2.5} />
                                             </div>
-                                            <div className="flex flex-col gap-0.5">
+                                            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                                                 <span className={cn(
                                                     "text-[14px] font-medium leading-none",
                                                     isSelected ? "text-state-accent-solid" : "text-text-primary"
@@ -157,32 +149,75 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey, onChange
             {/* Conditional Controls */}
             {(!selectedNode.data.componentType || selectedNode.data.componentType === 'webservice') && (
                 <>
-                    {/* Image - Moved to second row */}
-                    <div className="mb-4">
-                        <label className={LABEL_STYLES}>
+                    {/* Image - Inline with label */}
+                    <FlexRow className="justify-between mb-4">
+                        <label className="text-[13px] font-medium text-text-primary mb-0">
                             Image <span className="text-red-500 ml-0.5">*</span>
                         </label>
                         <input
                             type="text"
-                            className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                            className={cn(INPUT_CONTAINER_STYLES, "flex-1 ml-4 h-8 outline-none focus:ring-1 focus:ring-state-accent-solid")}
                             placeholder="e.g. nginx:latest"
                             value={selectedNode.data.image || ''}
                             onChange={(e) => updateNodeData(selectedNode.id, { image: e.target.value })}
                         />
+                    </FlexRow>
+
+                    {/* Enabled Toggle - Moved outside FieldCollapse */}
+                    <FlexRow className="justify-between mb-4">
+                        <label className="text-[13px] font-medium text-text-primary mb-0">Enabled</label>
+                        <Switch
+                            checked={selectedNode.data.enabled !== false}
+                            onChange={(checked) => updateNodeData(selectedNode.id, { enabled: checked })}
+                            size="md"
+                        />
+                    </FlexRow>
+
+                    {/* Port Tags */}
+                    <div className="mb-4">
+                        <label className="text-[13px] font-medium text-text-primary mb-2 block">
+                            Ports
+                        </label>
+                        <div className="flex items-center gap-2 mb-2">
+                            <input
+                                type="text"
+                                className={cn(INPUT_CONTAINER_STYLES, "flex-1 h-8 outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                placeholder="Enter port number"
+                                value={portInput}
+                                onChange={(e) => setPortInput(e.target.value)}
+                                onKeyDown={handlePortKeyDown}
+                            />
+                            <Button
+                                variant="secondary"
+                                size="small"
+                                onClick={handleAddPort}
+                                className="h-8 px-3 text-xs whitespace-nowrap"
+                            >
+                                + Port
+                            </Button>
+                        </div>
+                        {ports.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {ports.map((port) => (
+                                    <span
+                                        key={port}
+                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-components-badge-bg-dimm text-text-primary rounded-md border border-components-panel-border"
+                                    >
+                                        {port}
+                                        <button
+                                            onClick={() => handleRemovePort(port)}
+                                            className="hover:text-text-tertiary transition-colors"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <FieldCollapse title="Basic Settings" defaultOpen={true}>
                         {/* Namespace Removed */}
-
-                        {/* Enabled Toggle */}
-                        <FlexRow className="justify-between mb-4">
-                            <label className={cn(LABEL_STYLES, "mb-0")}>Enabled</label>
-                            <Switch
-                                checked={selectedNode.data.enabled !== false}
-                                onChange={(checked) => updateNodeData(selectedNode.id, { enabled: checked })}
-                                size="md"
-                            />
-                        </FlexRow>
 
                         {/* Replicas */}
                         <FlexRow className="justify-between">

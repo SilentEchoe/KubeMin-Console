@@ -85,6 +85,7 @@ export interface FlowNodeData extends Record<string, unknown> {
     properties?: any[];
     envConfig?: any[];
     enabled?: boolean;
+    ports?: string[];
     traits?: Traits;
 }
 
