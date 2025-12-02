@@ -7,6 +7,7 @@ import TaskCompletionWidget from './components/TaskCompletionWidget';
 import UserRetentionWidget from './components/UserRetentionWidget';
 import LeadsByStatusWidget from './components/LeadsByStatusWidget';
 import { List as AppsList } from '../apps/list';
+import { List as CustomersList } from '../customers/list';
 
 const DashboardPage: React.FC = () => {
     const [activeSection, setActiveSection] = useState('widgets');
@@ -17,6 +18,8 @@ const DashboardPage: React.FC = () => {
             <div className="flex-1 overflow-y-auto bg-white p-8">
                 {activeSection === 'apps' ? (
                     <AppsList />
+                ) : activeSection === 'customers' ? (
+                    <CustomersList />
                 ) : activeSection === 'widgets' ? (
                     <>
                         {/* Header */}

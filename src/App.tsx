@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import AppsPage from './pages/apps/page';
 import WorkflowPage from './pages/WorkflowPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import CustomersPage from './pages/customers/page';
 import { ButtonPopupExample } from './examples/ButtonPopupExample';
 
 const App: React.FC = () => {
@@ -11,6 +12,7 @@ const App: React.FC = () => {
       <Route path="/" element={<DashboardPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/apps" element={<AppsPage />} />
+      <Route path="/customers" element={<CustomersPage />} />
       <Route path="/workflow/:appId" element={<WorkflowPage />} />
       <Route path="/button-popup-example" element={<ButtonPopupExample />} />
     </Routes>
