@@ -101,18 +101,7 @@ export const List: React.FC = () => {
 
     return (
         <div className="relative">
-            {/* 32px Pixel Cat Demo - 您可以清楚看到32px尺寸效果 */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <h3 className="text-sm font-semibold text-blue-800 mb-3">🐱 32px 像素猫加载动画演示</h3>
-                <p className="text-xs text-blue-600 mb-3">下面的动画就是32px尺寸的像素猫，用于正常加载状态：</p>
-                <div className="flex items-center space-x-4">
-                    <div className="border-2 border-blue-300 w-8 h-8 flex items-center justify-center bg-white rounded">
-                        <PixelCatLoader32 />
-                    </div>
-                    <span className="text-xs text-gray-600">32px × 32px 实际尺寸</span>
-                </div>
-                <p className="text-xs text-blue-600 mt-3">💡 提示：在实际的客户列表加载时，您将看到这个32px的小动画</p>
-            </div>
+
 
             {/* Header */}
             <div className="flex items-center gap-2 mb-8">
@@ -135,9 +124,8 @@ export const List: React.FC = () => {
 
                 <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
-                        showFilters ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-gray-200 hover:bg-gray-50'
-                    }`}
+                    className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${showFilters ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-gray-200 hover:bg-gray-50'
+                        }`}
                 >
                     <Filter className="w-4 h-4" />
                     Filters
@@ -166,15 +154,6 @@ export const List: React.FC = () => {
                     <Plus className="w-4 h-4" />
                     Add Customer
                 </button>
-
-                <button
-                    onClick={handleTestLoadingAnimation}
-                    disabled={showTestLoader}
-                    className="flex items-center gap-2 px-4 py-2 border border-purple-500 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <Play className="w-4 h-4" />
-                    Test Animation
-                </button>
             </div>
 
             {/* Status Filters */}
@@ -186,11 +165,10 @@ export const List: React.FC = () => {
                             <button
                                 key={status}
                                 onClick={() => toggleStatusFilter(status)}
-                                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                                    statusFilter.includes(status)
-                                        ? 'border-primary-500 bg-primary-50 text-primary-700'
-                                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                                }`}
+                                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${statusFilter.includes(status)
+                                    ? 'border-primary-500 bg-primary-50 text-primary-700'
+                                    : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                                    }`}
                             >
                                 {status.charAt(0).toUpperCase() + status.slice(1)}
                             </button>
