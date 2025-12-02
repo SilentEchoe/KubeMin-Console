@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import type { ComponentSetSectionKey } from '../PropertyPanel';
-import { ChevronDown, Check, X, Plus } from 'lucide-react';
+import { ChevronDown, Check, X } from 'lucide-react';
 import { useFlowStore } from '../../stores/flowStore';
 import EnvironmentVariableManager from '../EnvironmentVariableManager';
 import FlexRow from '../FlexRow';
@@ -20,14 +20,16 @@ interface ComponentSetMenuProps {
     activeKey: ComponentSetSectionKey;
     onChange: (key: ComponentSetSectionKey) => void;
     onEnvAddClick?: () => void;
+    onEnvListClick?: () => void;
 }
 
-const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeKey, onChange: _onChange, onEnvAddClick }) => {
+const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeKey, onChange: _onChange, onEnvAddClick, onEnvListClick }) => {
     const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
     const [portInput, setPortInput] = useState('');
     const [ports, setPorts] = useState<string[]>([]);
     const [isComponentTypeOpen, setIsComponentTypeOpen] = useState(false);
+    const [activeEnvButton, setActiveEnvButton] = useState<'add' | 'list'>('add');
 
     useEffect(() => {
         if (selectedNode) {
@@ -173,27 +175,29 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
 
                     {/* Port Tags */}
                     <div className="mb-4">
-                        <label className="text-[13px] font-medium text-text-primary mb-2 block">
-                            Ports
-                        </label>
-                        <div className="flex items-center gap-2 mb-2">
-                            <input
-                                type="text"
-                                className={cn(INPUT_CONTAINER_STYLES, "flex-1 h-8 outline-none focus:ring-1 focus:ring-state-accent-solid")}
-                                placeholder="Enter port number"
-                                value={portInput}
-                                onChange={(e) => setPortInput(e.target.value)}
-                                onKeyDown={handlePortKeyDown}
-                            />
-                            <Button
-                                variant="secondary"
-                                size="small"
-                                onClick={handleAddPort}
-                                className="h-8 px-3 text-xs whitespace-nowrap"
-                            >
-                                + Port
-                            </Button>
-                        </div>
+                        <FlexRow className="justify-between items-center mb-2">
+                            <label className="text-[13px] font-medium text-text-primary mb-0">
+                                Ports
+                            </label>
+                            <div className="flex items-center gap-2 flex-1 ml-4">
+                                <input
+                                    type="text"
+                                    className={cn(INPUT_CONTAINER_STYLES, "flex-1 h-8 outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                    placeholder="Enter port number"
+                                    value={portInput}
+                                    onChange={(e) => setPortInput(e.target.value)}
+                                    onKeyDown={handlePortKeyDown}
+                                />
+                                <Button
+                                    variant="secondary"
+                                    size="small"
+                                    onClick={handleAddPort}
+                                    className="h-8 px-3 text-xs whitespace-nowrap"
+                                >
+                                    + Port
+                                </Button>
+                            </div>
+                        </FlexRow>
                         {ports.length > 0 && (
                             <div className="flex flex-wrap gap-2">
                                 {ports.map((port) => (
@@ -270,23 +274,54 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                         </div>
                     </FlexRow>
 
-                    {/* Env Add Button */}
-                    {onEnvAddClick && (
-                        <div className="mb-4">
-                            <button
-                                onClick={onEnvAddClick}
-                                className="flex items-center justify-center w-full rounded-lg border border-components-button-secondary-border bg-white hover:bg-state-base-hover transition-colors text-text-primary"
-                                style={{
-                                    height: '1.625rem', // Match Settings tab height (text-[13px] with pb-2.5)
-                                    padding: '0',
-                                    lineHeight: '1.625rem'
-                                }}
-                            >
-                                <Plus className="h-4 w-4 mr-1" />
-                                <span className="text-[13px] font-medium">添加环境变量</span>
-                            </button>
+                    {/* Env Label and Toggle Buttons */}
+                    <FlexRow className="justify-between items-center mb-4">
+                        <label className="text-[13px] font-medium text-text-primary mb-0">
+                            Env
+                        </label>
+                        <div className="flex" style={{ gap: '2px' }}>
+                            {onEnvAddClick && (
+                                <button
+                                    onClick={() => {
+                                        setActiveEnvButton('add');
+                                        onEnvAddClick();
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-center border-2 bg-white transition-colors",
+                                        activeEnvButton === 'add'
+                                            ? "border-[#1d4ed8] text-[#1d4ed8]"
+                                            : "border-gray-300 text-gray-600"
+                                    )}
+                                    style={{
+                                        width: '50px',
+                                        height: '28px',
+                                    }}
+                                >
+                                    <span className="text-[12px] font-medium">Add</span>
+                                </button>
+                            )}
+                            {onEnvListClick && (
+                                <button
+                                    onClick={() => {
+                                        setActiveEnvButton('list');
+                                        onEnvListClick();
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-center border-2 bg-white transition-colors",
+                                        activeEnvButton === 'list'
+                                            ? "border-[#1d4ed8] text-[#1d4ed8]"
+                                            : "border-gray-300 text-gray-600"
+                                    )}
+                                    style={{
+                                        width: '50px',
+                                        height: '28px',
+                                    }}
+                                >
+                                    <span className="text-[12px] font-medium">List</span>
+                                </button>
+                            )}
                         </div>
-                    )}
+                    </FlexRow>
 
                 </>
             )}

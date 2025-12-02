@@ -26,6 +26,7 @@ const PropertyPanel: React.FC = () => {
     const [editingName, setEditingName] = useState('');
     const [showEnvModal, setShowEnvModal] = useState(false);
     const [editingEnvVar, setEditingEnvVar] = useState<EnvironmentVariable | null>(null);
+    const [showEnvList, setShowEnvList] = useState(false); // EnvManager 默认关闭
 
     const selectedNode = useMemo(() => {
         return nodes.find((n) => n.id === selectedNodeId);
@@ -171,30 +172,33 @@ const PropertyPanel: React.FC = () => {
             )}
 
             <div className="absolute top-[70px] right-5 bottom-5 flex gap-4 z-20">
-                {/* Env Sidebar - Left */}
-                <div
-                    className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl transition-all duration-200"
-                    style={{
-                        minWidth: '400px',
-                        maxWidth: '400px',
-                        width: '400px',
-                        height: '100%',
-                    }}
-                >
-                    <div className="flex-1 overflow-y-auto p-4" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                        {selectedNode ? (
-                            <EnvManager
-                                key={`${selectedNode.id}-${JSON.stringify(selectedNode.data.environmentVariables || [])}`} // Force re-render when variables change
-                                variables={(selectedNode.data.environmentVariables as EnvironmentVariable[]) || []}
-                                onChange={handleEnvChange}
-                                onAddClick={handleEnvAdd}
-                                onEditClick={handleEnvEdit}
-                            />
-                        ) : (
-                            <div className="text-center py-8 text-text-tertiary text-sm">请选择一个节点</div>
-                        )}
+                {/* Env Sidebar - Left (conditionally rendered) */}
+                {showEnvList && (
+                    <div
+                        className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl transition-all duration-200"
+                        style={{
+                            minWidth: '400px',
+                            maxWidth: '400px',
+                            width: '400px',
+                            height: '100%',
+                        }}
+                    >
+                        <div className="flex-1 overflow-y-auto p-4" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                            {selectedNode ? (
+                                <EnvManager
+                                    key={`${selectedNode.id}-${JSON.stringify(selectedNode.data.environmentVariables || [])}`} // Force re-render when variables change
+                                    variables={(selectedNode.data.environmentVariables as EnvironmentVariable[]) || []}
+                                    onChange={handleEnvChange}
+                                    onAddClick={handleEnvAdd}
+                                    onEditClick={handleEnvEdit}
+                                    onClose={() => setShowEnvList(false)}
+                                />
+                            ) : (
+                                <div className="text-center py-8 text-text-tertiary text-sm">请选择一个节点</div>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Component Properties Panel - Right */}
                 <div
@@ -283,6 +287,7 @@ const PropertyPanel: React.FC = () => {
                                 activeKey={activeSection}
                                 onChange={setActiveSection}
                                 onEnvAddClick={handleEnvAdd}
+                                onEnvListClick={() => setShowEnvList(true)}
                             />
                         </div>
 

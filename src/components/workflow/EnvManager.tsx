@@ -8,9 +8,10 @@ interface EnvManagerProps {
     onChange: (variables: EnvironmentVariable[]) => void;
     onAddClick: () => void;
     onEditClick?: (variable: EnvironmentVariable) => void;
+    onClose?: () => void;
 }
 
-const EnvManager: React.FC<EnvManagerProps> = ({ variables, onChange, onAddClick, onEditClick }) => {
+const EnvManager: React.FC<EnvManagerProps> = ({ variables, onChange, onAddClick, onEditClick, onClose }) => {
     // Debug: log variables
     React.useEffect(() => {
         console.log('EnvManager received variables:', variables, 'length:', variables?.length);
@@ -31,12 +32,14 @@ const EnvManager: React.FC<EnvManagerProps> = ({ variables, onChange, onAddClick
         <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[13px] font-medium text-text-primary">环境变量</h3>
-                <button
-                    onClick={onAddClick}
-                    className="flex items-center justify-center w-6 h-6 rounded-md border border-components-button-secondary-border bg-white hover:bg-state-base-hover transition-colors"
-                >
-                    <Plus className="h-4 w-4 text-text-primary" />
-                </button>
+                {onClose && (
+                    <button
+                        onClick={onClose}
+                        className="flex items-center justify-center w-6 h-6 rounded-md border border-components-button-secondary-border bg-white hover:bg-state-base-hover transition-colors"
+                    >
+                        <X className="h-4 w-4 text-text-primary" />
+                    </button>
+                )}
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2">
