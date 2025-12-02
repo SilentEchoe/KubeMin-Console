@@ -57,7 +57,7 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
             <div
                 className="relative bg-white rounded-lg shadow-xl w-[480px] max-h-[90vh] overflow-hidden flex flex-col"
                 style={{
-                    marginTop: '70px',
+                    marginTop: '120px', // 86px + 20px
                     marginRight: 'calc(400px + 16px + 20px)' // Component panel width + gap + right margin
                 }}
                 onClick={(e) => e.stopPropagation()}
