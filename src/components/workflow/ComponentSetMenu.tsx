@@ -5,7 +5,6 @@ import { ChevronDown, Check, X } from 'lucide-react';
 import { useFlowStore } from '../../stores/flowStore';
 import EnvironmentVariableManager from '../EnvironmentVariableManager';
 import FlexRow from '../FlexRow';
-import DynamicInputList from '../base/DynamicInputList';
 import DynamicKeyValueList from '../base/DynamicKeyValueList';
 import FieldCollapse from '../base/FieldCollapse';
 import { Button } from '../ui/Button';
@@ -216,41 +215,61 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                         )}
                     </div>
 
-                    <FieldCollapse title="Basic Settings" defaultOpen={true}>
-                        {/* Namespace Removed */}
-
-                        {/* Replicas */}
-                        <FlexRow className="justify-between">
-                            <label className={cn(LABEL_STYLES, "mb-0")}>Replicas</label>
-                            <input
-                                type="number"
-                                className={cn(INPUT_CONTAINER_STYLES, "w-24 outline-none focus:ring-1 focus:ring-state-accent-solid text-right")}
-                                placeholder="1"
-                                min={1}
-                                value={selectedNode.data.replicas || 1}
-                                onChange={(e) => updateNodeData(selectedNode.id, { replicas: parseInt(e.target.value) || 1 })}
-                            />
-                        </FlexRow>
-                    </FieldCollapse>
-
-                    <FieldCollapse title="Properties" defaultOpen={true}>
-                        {/* Tags (Dynamic Input List) */}
-                        <div>
-                            <DynamicInputList
-                                key={selectedNode.id} // Force re-render on node change
-                                title="" // Title handled by FieldCollapse
-                                placeholder="Enter port"
-                                btnText="Add Properties"
-                                inputType="number"
-                                inputClassName="bg-white focus:bg-gray-50 text-[12px]"
-                                deleteBtnClassName="bg-white h-6 w-6 p-1"
-                                showEmptyState={false}
-                                itemContainerClassName="bg-white"
-                                initialItems={selectedNode.data.properties || []}
-                                onItemsChange={(items) => updateNodeData(selectedNode.id, { properties: items })}
-                            />
+                    {/* Replicas Slider */}
+                    <FlexRow className="justify-between items-center mb-4">
+                        <label className="text-[13px] font-medium text-text-primary mb-0">
+                            Replicas
+                        </label>
+                        <div className="flex items-center gap-3 flex-1 ml-4 h-8">
+                            <div className="flex-1 relative h-8 flex items-center">
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="10"
+                                    value={selectedNode.data.replicas || 1}
+                                    onChange={(e) => updateNodeData(selectedNode.id, { replicas: parseInt(e.target.value) || 1 })}
+                                    className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                    style={{
+                                        background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${((selectedNode.data.replicas || 1) - 1) / 9 * 100}%, #e5e7eb ${((selectedNode.data.replicas || 1) - 1) / 9 * 100}%, #e5e7eb 100%)`
+                                    }}
+                                />
+                                <style>{`
+                                    .slider::-webkit-slider-thumb {
+                                        appearance: none;
+                                        width: 20px;
+                                        height: 20px;
+                                        border-radius: 3px;
+                                        background: white;
+                                        cursor: pointer;
+                                        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+                                        border: none;
+                                        margin-top: -9.5px;
+                                    }
+                                    .slider::-moz-range-thumb {
+                                        width: 20px;
+                                        height: 20px;
+                                        border-radius: 3px;
+                                        background: white;
+                                        cursor: pointer;
+                                        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+                                        border: none;
+                                    }
+                                    .slider::-webkit-slider-runnable-track {
+                                        height: 1px;
+                                    }
+                                    .slider::-moz-range-track {
+                                        height: 1px;
+                                        background: transparent;
+                                    }
+                                `}</style>
+                            </div>
+                            <div className="w-12 h-8 flex items-center justify-center rounded-md bg-gray-50/80 border border-components-panel-border shrink-0">
+                                <span className="text-[13px] font-medium text-gray-700">
+                                    {selectedNode.data.replicas || 1}
+                                </span>
+                            </div>
                         </div>
-                    </FieldCollapse>
+                    </FlexRow>
 
                     <FieldCollapse title="ENV" defaultOpen={true}>
                         {/* Config (Dynamic Key-Value List) */}
