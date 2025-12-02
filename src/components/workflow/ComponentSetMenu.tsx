@@ -86,7 +86,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey, onChange
                 </label>
 
 
-                <div className="relative w-[68px]">
+                <div className="relative w-[120px]">
                     <PortalToFollowElem placement="bottom-end" offsetValue={4}>
                         <PortalToFollowElemTrigger className="w-full">
                             <Button

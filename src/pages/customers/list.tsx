@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Plus, Download, Upload } from 'lucide-react';
+import { Search, Filter, Plus, Download, Upload, Play } from 'lucide-react';
 import useSWRInfinite from 'swr/infinite';
 import { fetchCustomers } from '../../api/customers';
 import type { CustomerFilters } from '../../types/customer';
@@ -7,6 +7,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { CustomerCard } from './components/CustomerCard';
 import { Empty } from './components/Empty';
+import PixelCatLoader32 from './components/PixelCatLoader32';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -14,6 +15,7 @@ export const List: React.FC = () => {
     const [searchInput, setSearchInput] = useState('');
     const [statusFilter, setStatusFilter] = useState<string[]>([]);
     const [showFilters, setShowFilters] = useState(false);
+    const [showTestLoader, setShowTestLoader] = useState(false);
 
     const debouncedSearch = useDebounce(searchInput, 500);
 
@@ -71,6 +73,14 @@ export const List: React.FC = () => {
         // TODO: Implement customer export
     };
 
+    const handleTestLoadingAnimation = () => {
+        setShowTestLoader(true);
+        // Hide the loader after 5 seconds
+        setTimeout(() => {
+            setShowTestLoader(false);
+        }, 5000);
+    };
+
     const handleEditCustomer = (customer: any) => {
         console.log('Edit customer:', customer.id);
         // TODO: Implement customer edit modal
@@ -91,6 +101,19 @@ export const List: React.FC = () => {
 
     return (
         <div className="relative">
+            {/* 32px Pixel Cat Demo - 您可以清楚看到32px尺寸效果 */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h3 className="text-sm font-semibold text-blue-800 mb-3">🐱 32px 像素猫加载动画演示</h3>
+                <p className="text-xs text-blue-600 mb-3">下面的动画就是32px尺寸的像素猫，用于正常加载状态：</p>
+                <div className="flex items-center space-x-4">
+                    <div className="border-2 border-blue-300 w-8 h-8 flex items-center justify-center bg-white rounded">
+                        <PixelCatLoader32 />
+                    </div>
+                    <span className="text-xs text-gray-600">32px × 32px 实际尺寸</span>
+                </div>
+                <p className="text-xs text-blue-600 mt-3">💡 提示：在实际的客户列表加载时，您将看到这个32px的小动画</p>
+            </div>
+
             {/* Header */}
             <div className="flex items-center gap-2 mb-8">
                 <h1 className="text-sm font-medium text-gray-900">Customers</h1>
@@ -143,6 +166,15 @@ export const List: React.FC = () => {
                     <Plus className="w-4 h-4" />
                     Add Customer
                 </button>
+
+                <button
+                    onClick={handleTestLoadingAnimation}
+                    disabled={showTestLoader}
+                    className="flex items-center gap-2 px-4 py-2 border border-purple-500 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <Play className="w-4 h-4" />
+                    Test Animation
+                </button>
             </div>
 
             {/* Status Filters */}
@@ -167,31 +199,50 @@ export const List: React.FC = () => {
                 </div>
             )}
 
-            {/* Customers Grid */}
-            {isEmpty ? (
-                <Empty isLoading={isLoading} onCreateCustomer={handleCreateCustomer} />
-            ) : (
-                <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {customers.map(customer => (
-                            <CustomerCard
-                                key={customer.id}
-                                customer={customer}
-                                onEdit={handleEditCustomer}
-                                onDelete={handleDeleteCustomer}
-                            />
-                        ))}
+            {/* Test Loading Animation */}
+            {showTestLoader && (
+                <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
+                    <div className="text-center">
+                        <PixelCatLoader32 />
+                        <button
+                            onClick={() => setShowTestLoader(false)}
+                            className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                            Skip Animation
+                        </button>
                     </div>
+                </div>
+            )}
 
-                    {/* Loading indicator */}
-                    {isLoading && (
-                        <div className="mt-6 text-center">
-                            <div className="inline-block w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-                        </div>
+            {/* Customers Grid */}
+            {!showTestLoader && (
+                <>
+                    {isEmpty ? (
+                        <Empty isLoading={isLoading} onCreateCustomer={handleCreateCustomer} />
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {customers.map(customer => (
+                                    <CustomerCard
+                                        key={customer.id}
+                                        customer={customer}
+                                        onEdit={handleEditCustomer}
+                                        onDelete={handleDeleteCustomer}
+                                    />
+                                ))}
+                            </div>
+
+                            {/* Loading indicator - Compact 32px pixel sleeping cat */}
+                            {isLoading && (
+                                <div className="mt-6 flex justify-center">
+                                    <PixelCatLoader32 />
+                                </div>
+                            )}
+
+                            {/* Infinite scroll trigger */}
+                            <div ref={observerTarget} className="h-4 mt-6" />
+                        </>
                     )}
-
-                    {/* Infinite scroll trigger */}
-                    <div ref={observerTarget} className="h-4 mt-6" />
                 </>
             )}
         </div>

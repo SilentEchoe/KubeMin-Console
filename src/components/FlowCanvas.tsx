@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { Play, ChevronDown } from 'lucide-react';
 import {
     ReactFlow,
@@ -13,6 +13,9 @@ import {
 import type { NodeTypes } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+// Viewport type definition
+type Viewport = { x: number; y: number; zoom: number };
+
 import { useFlowStore } from '../stores/flowStore';
 import CustomNode from './CustomNode';
 import CanvasControl from './CanvasControl';
@@ -23,6 +26,11 @@ import CustomEdge from './workflow/CustomEdge';
 import CustomConnectionLine from './workflow/CustomConnectionLine';
 
 import { useShortcuts } from '../hooks/useShortcuts';
+
+// Zoom configuration constants
+const MIN_ZOOM = 0.1;  // 10%
+const MAX_ZOOM = 2.0;  // 200%
+const ZOOM_STEP = 0.01; // 1% per scroll
 
 const nodeTypes: NodeTypes = {
     custom: CustomNode,
@@ -69,6 +77,53 @@ const FlowCanvas: React.FC = () => {
         setPanelMenu,
     } = useFlowStore();
 
+    const [viewport, setViewportState] = useState<Viewport>({ x: 0, y: 0, zoom: 1.0 });
+    const containerRef = useRef<HTMLDivElement>(null);
+    const reactFlowInstanceRef = useRef<any>(null);
+
+    // Track viewport changes
+    const onMove = useCallback((_: any, viewport: Viewport) => {
+        setViewportState(viewport);
+    }, []);
+
+    // Custom wheel handler for 1% zoom step
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handleWheel = (event: WheelEvent) => {
+            // Check if it's a zoom gesture (Ctrl/Cmd + scroll)
+            if (event.ctrlKey || event.metaKey) {
+                event.preventDefault();
+                
+                if (!reactFlowInstanceRef.current) return;
+                
+                const { x, y, zoom } = viewport;
+                const rect = container.getBoundingClientRect();
+                
+                // Calculate mouse position relative to the container
+                const mouseX = event.clientX - rect.left;
+                const mouseY = event.clientY - rect.top;
+                
+                // Determine zoom direction
+                const delta = event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
+                const newZoom = Math.min(Math.max(zoom + delta, MIN_ZOOM), MAX_ZOOM);
+                
+                // Calculate new viewport position to zoom towards mouse position
+                const scale = newZoom / zoom;
+                const newX = mouseX - (mouseX - x) * scale;
+                const newY = mouseY - (mouseY - y) * scale;
+                
+                reactFlowInstanceRef.current.setViewport({ x: newX, y: newY, zoom: newZoom }, { duration: 0 });
+            }
+        };
+
+        container.addEventListener('wheel', handleWheel, { passive: false });
+        return () => {
+            container.removeEventListener('wheel', handleWheel);
+        };
+    }, [viewport]);
+
     const handlePaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
         event.preventDefault();
         const container = document.querySelector('.react-flow');
@@ -90,7 +145,7 @@ const FlowCanvas: React.FC = () => {
     }, [setSelectedNode]);
 
     return (
-        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -100,17 +155,26 @@ const FlowCanvas: React.FC = () => {
                 onNodeClick={onNodeClick}
                 onPaneClick={onPaneClick}
                 onPaneContextMenu={handlePaneContextMenu}
+                onMove={onMove}
+                onInit={(instance) => {
+                    reactFlowInstanceRef.current = instance;
+                }}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
                 connectionLineComponent={CustomConnectionLine}
-                defaultViewport={{ x: 0, y: 0, zoom: 0.75 }}
+                defaultViewport={{ x: 0, y: 0, zoom: 1.0 }} // Default to 100%
                 fitView={false}
                 deleteKeyCode={null} // Disable default delete to use custom shortcuts
                 panOnScroll={controlMode === ControlMode.Pointer}
                 panOnDrag={controlMode === ControlMode.Hand || [1, 2]}
                 selectionOnDrag={controlMode === ControlMode.Pointer}
                 panOnScrollMode={PanOnScrollMode.Free} // Free pan on scroll
+                minZoom={MIN_ZOOM}
+                maxZoom={MAX_ZOOM}
+                zoomOnScroll={false} // Disabled to use custom 1% zoom step
+                zoomOnPinch={true}
+                zoomOnDoubleClick={false}
             >
                 <Background color="#94a3b8" gap={20} size={1} variant={BackgroundVariant.Dots} />
                 <Controls />

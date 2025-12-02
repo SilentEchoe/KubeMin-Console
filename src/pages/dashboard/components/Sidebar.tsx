@@ -68,7 +68,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection = 'widgets', onSectionC
                 </div>
                 {[
                     { icon: LayoutGrid, label: 'Dashboard', section: 'widgets' },
-                    { icon: FileText, label: 'Apps', section: 'apps', path: '/apps' },
+                    { icon: FileText, label: 'Applications', section: 'apps', path: '/apps' },
                     { icon: Calendar, label: 'Schedule', section: 'schedule' },
                     { icon: Users, label: 'Customers', section: 'customers' },
                     { icon: BarChart2, label: 'Leads Report', section: 'leads' },
@@ -88,18 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection = 'widgets', onSectionC
                         </div>
                     </div>
                 ))}
-                <div
-                    className={`flex items-center gap-3 px-2 py-1.5 text-sm rounded-md cursor-pointer ${activeSection === 'widgets'
-                        ? 'text-gray-900 bg-gray-100 font-medium'
-                        : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                    onClick={() => handleSectionClick('widgets')}
-                >
-                    <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center w-full' : ''}`}>
-                        <Layout className="w-4 h-4 shrink-0" />
-                        {!isCollapsed && <span>Widget</span>}
-                    </div>
-                </div>
+
             </div>
 
             {/* Favorites */}

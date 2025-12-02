@@ -1,5 +1,6 @@
 import React from 'react';
 import { Users, Plus } from 'lucide-react';
+import PixelCatLoader32 from './PixelCatLoader32';
 
 interface EmptyProps {
     isLoading?: boolean;
@@ -9,9 +10,8 @@ interface EmptyProps {
 export const Empty: React.FC<EmptyProps> = ({ isLoading, onCreateCustomer }) => {
     if (isLoading) {
         return (
-            <div className="text-center py-12">
-                <div className="inline-block w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-                <p className="mt-4 text-gray-500">Loading customers...</p>
+            <div className="flex justify-center py-12">
+                <PixelCatLoader32 />
             </div>
         );
     }
