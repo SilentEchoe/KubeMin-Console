@@ -194,7 +194,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
 
             {/* Additional Info */}
             <div className="flex items-center gap-2 text-xs text-gray-400 mt-auto">
-                <span>创建于 {formatDate(app.createTime)}</span>
+                <span>generated on {formatDate(app.createTime)}</span>
             </div>
         </div>
     );

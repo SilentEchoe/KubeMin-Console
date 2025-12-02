@@ -1,38 +1,22 @@
 import React from 'react';
-import { X, ChevronDown, MoreHorizontal, Check } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
 import { cn } from '../utils/cn';
-import EnvironmentVariableManager from './EnvironmentVariableManager';
-
 import EnvPanel from './EnvPanel';
-import FlexRow from './FlexRow';
-// import DropdownButton from './ui/DropdownButton';
-import DynamicInputList from './base/DynamicInputList';
-import DynamicKeyValueList from './base/DynamicKeyValueList';
-import FieldCollapse from './base/FieldCollapse';
-
-import { Settings } from 'lucide-react';
+import ComponentSetMenu from './workflow/ComponentSetMenu';
 import { Button } from './ui/Button';
-import {
-    PortalToFollowElem,
-    PortalToFollowElemContent,
-    PortalToFollowElemTrigger,
-} from './ui/PortalToFollowElem';
-
 import TraitsPanel from './TraitsPanel';
-import Switch from './base/switch';
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
-const PANEL_HEADER_STYLES = 'flex items-center justify-between border-b border-components-panel-border px-5 py-4';
 const PANEL_TITLE_STYLES = 'text-[15px] font-semibold text-text-primary';
-const PANEL_CLOSE_BUTTON_STYLES = 'flex items-center justify-center rounded-md p-1 text-text-secondary hover:bg-state-base-hover transition-colors';
 const PANEL_CONTENT_STYLES = 'flex-1 overflow-y-auto p-4';
-const LABEL_STYLES = 'mb-1 block text-[12px] font-medium text-text-tertiary uppercase';
-const INPUT_CONTAINER_STYLES = 'rounded-lg border border-components-panel-border bg-components-badge-bg-dimm p-2 text-[15px] hover:bg-state-base-hover transition-colors cursor-pointer';
+
+export type ComponentSetSectionKey = 'system' | 'user' | 'memory' | 'vision' | 'resolution';
 
 const PropertyPanel: React.FC = () => {
-    const { nodes, selectedNodeId, setSelectedNode, updateNodeData } = useFlowStore();
+    const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
     const [showConfigPanel, setShowConfigPanel] = React.useState(false);
+    const [activeSection, setActiveSection] = React.useState<ComponentSetSectionKey>('system');
 
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
@@ -61,7 +45,7 @@ const PropertyPanel: React.FC = () => {
                         maxHeight: 'calc(100vh - 100px)',
                     }}
                 >
-                    <div className={PANEL_HEADER_STYLES}>
+                    <div className="flex items-center justify-between border-b border-components-panel-border px-5 py-4">
                         <div className={PANEL_TITLE_STYLES}>Traits</div>
                         <Button
                             variant="ghost"
@@ -85,281 +69,37 @@ const PropertyPanel: React.FC = () => {
                     width: '400px', // Default width, could be dynamic
                 }}
             >
-                {/* Header */}
-                <div className={PANEL_HEADER_STYLES}>
-                    <div className={PANEL_TITLE_STYLES}>
-                        Component Set
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <PortalToFollowElem placement="bottom-end">
-                            <PortalToFollowElemTrigger>
-                                <Button variant="ghost" size="icon">
-                                    <MoreHorizontal size={20} />
-                                </Button>
-                            </PortalToFollowElemTrigger>
-                            <PortalToFollowElemContent className="w-32 flex flex-col gap-1 p-1">
-                                <Button variant="ghost" size="small" className="justify-start w-full">
-                                    Copy
-                                </Button>
-                                <Button variant="ghost" size="small" className="justify-start w-full">
-                                    Paste
-                                </Button>
-                                <div className="h-px bg-divider-subtle my-1" />
-                                <Button variant="ghost" size="small" className="justify-start w-full text-red-500 hover:text-red-600">
-                                    Delete
-                                </Button>
-                            </PortalToFollowElemContent>
-                        </PortalToFollowElem>
+                {/* Header with Tabs */}
+                <div className="border-b border-components-panel-border">
+                    <div className="flex items-center justify-between px-5 pt-4">
+                        <div className="flex items-center gap-6">
+                            <button className="text-[13px] font-medium text-text-primary pb-2.5 border-b-2 border-text-primary relative">
+                                设置
+                            </button>
+                            <button className="text-[13px] font-medium text-text-tertiary pb-2.5 border-b-2 border-transparent hover:text-text-secondary transition-colors">
+                                上次运行
+                            </button>
+                        </div>
 
-                        <Button
-                            variant="primary"
-                            size="medium"
-                            onClick={() => setShowConfigPanel(!showConfigPanel)}
-                        >
-                            <Settings className="mr-2 h-4 w-4" />
-                            Add Traits
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setSelectedNode(null)}
-                        >
-                            <X size={20} />
-                        </Button>
                     </div>
                 </div>
 
                 {/* Content */}
                 <div className={PANEL_CONTENT_STYLES}>
-                    {/* Node Name Input */}
+                    {/* Component Set 菜单栏（一比一复刻在内容顶部） */}
                     <div className="mb-4">
-                        <label className={LABEL_STYLES}>
-                            Node Name <span className="text-red-500 ml-0.5">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
-                            placeholder="Enter node name"
-                            value={selectedNode.data.name || ''}
-                            onChange={(e) => {
-                                const newName = e.target.value;
-                                // Check if name is unique (excluding current node)
-                                const isDuplicate = nodes.some(
-                                    n => n.id !== selectedNode.id && n.data.name === newName
-                                );
-
-                                if (!isDuplicate || newName === '') {
-                                    updateNodeData(selectedNode.id, { name: newName });
-                                }
-                            }}
-                            onBlur={(e) => {
-                                // Ensure name is not empty on blur
-                                if (!e.target.value.trim()) {
-                                    const baseName = selectedNode.data.label || 'Component';
-                                    const existingNames = nodes
-                                        .filter(n => n.id !== selectedNode.id)
-                                        .map(n => n.data.name)
-                                        .filter(Boolean) as string[];
-
-                                    // Generate a unique name
-                                    const cleanBaseName = baseName.replace(/\d+$/, '');
-                                    const existingNumbers = existingNames
-                                        .filter(name => name.startsWith(cleanBaseName))
-                                        .map(name => {
-                                            const match = name.match(/(\d+)$/);
-                                            return match ? parseInt(match[1]) : 0;
-                                        })
-                                        .filter(num => !isNaN(num));
-
-                                    let nextNumber = 1;
-                                    while (existingNumbers.includes(nextNumber)) {
-                                        nextNumber++;
-                                    }
-
-                                    updateNodeData(selectedNode.id, { name: `${cleanBaseName}${nextNumber}` });
-                                }
-                            }}
+                        <ComponentSetMenu
+                            activeKey={activeSection}
+                            onChange={setActiveSection}
                         />
-                        {/* Show error if duplicate */}
-                        {nodes.some(n => n.id !== selectedNode.id && n.data.name === selectedNode.data.name) && selectedNode.data.name && (
-                            <div className="mt-1 text-xs text-red-500">
-                                This name already exists. Please choose a unique name.
-                            </div>
-                        )}
                     </div>
 
-                    {/* Component Type Selection */}
-                    <div className="mb-4 flex items-center justify-between">
-                        <label className={cn(LABEL_STYLES, "mb-0")}>
-                            Component Type
-                        </label>
-
-
-                        <div className="relative w-[68px]">
-                            <PortalToFollowElem placement="bottom-end" offsetValue={4}>
-                                <PortalToFollowElemTrigger className="w-full">
-                                    <Button
-                                        variant="secondary"
-                                        size="small"
-                                        className="w-full justify-between items-center font-normal bg-white border-components-button-secondary-border text-text-primary hover:bg-state-base-hover px-2 h-[24px] text-xs rounded-md"
-                                    >
-                                        <span className="truncate leading-none">
-                                            {selectedNode.data.componentType === 'webservice' ? 'Web' :
-                                                selectedNode.data.componentType === 'store' ? 'Store' :
-                                                    (selectedNode.data.componentType || 'Store')}
-                                        </span>
-                                        <ChevronDown className="h-3 w-3 text-text-tertiary opacity-70 shrink-0 ml-1" />
-                                    </Button>
-                                </PortalToFollowElemTrigger>
-                                <PortalToFollowElemContent className="w-[280px] p-1 bg-white border border-components-panel-border shadow-lg rounded-lg">
-                                    <div className="flex flex-col gap-0.5">
-                                        {[
-                                            {
-                                                value: 'webservice',
-                                                label: 'Web Service',
-                                                desc: 'Standard web service component for handling requests.'
-                                            },
-                                            {
-                                                value: 'store',
-                                                label: 'Store',
-                                                desc: 'Persistent storage component for data retention.'
-                                            }
-                                        ].map((type) => {
-                                            const isSelected = selectedNode.data.componentType === type.value;
-                                            return (
-                                                <div
-                                                    key={type.value}
-                                                    className={cn(
-                                                        "group flex items-start gap-2.5 p-2.5 rounded-md cursor-pointer transition-colors",
-                                                        isSelected ? "bg-state-accent-active" : "hover:bg-state-base-hover"
-                                                    )}
-                                                    onClick={() => {
-                                                        updateNodeData(selectedNode.id, { componentType: type.value as any });
-                                                    }}
-                                                >
-                                                    <div className={cn(
-                                                        "mt-0.5 flex h-4 w-4 items-center justify-center shrink-0",
-                                                        isSelected ? "text-state-accent-solid" : "invisible"
-                                                    )}>
-                                                        <Check size={16} strokeWidth={2.5} />
-                                                    </div>
-                                                    <div className="flex flex-col gap-0.5">
-                                                        <span className={cn(
-                                                            "text-[14px] font-medium leading-none",
-                                                            isSelected ? "text-state-accent-solid" : "text-text-primary"
-                                                        )}>
-                                                            {type.label}
-                                                        </span>
-                                                        <span className="text-[12px] leading-normal text-text-tertiary">
-                                                            {type.desc}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </PortalToFollowElemContent>
-                            </PortalToFollowElem>
-                        </div>
-                    </div>
-
-                    {/* Conditional Controls */}
-                    {(!selectedNode.data.componentType || selectedNode.data.componentType === 'webservice') && (
-                        <>
-                            {/* Image - Moved to second row */}
-                            <div className="mb-4">
-                                <label className={LABEL_STYLES}>
-                                    Image <span className="text-red-500 ml-0.5">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    className={cn(INPUT_CONTAINER_STYLES, "w-full outline-none focus:ring-1 focus:ring-state-accent-solid")}
-                                    placeholder="e.g. nginx:latest"
-                                    value={selectedNode.data.image || ''}
-                                    onChange={(e) => updateNodeData(selectedNode.id, { image: e.target.value })}
-                                />
-                            </div>
-
-                            <FieldCollapse title="Basic Settings" defaultOpen={true}>
-                                {/* Namespace Removed */}
-
-                                {/* Enabled Toggle */}
-                                <FlexRow className="justify-between mb-4">
-                                    <label className={cn(LABEL_STYLES, "mb-0")}>Enabled</label>
-                                    <Switch
-                                        checked={selectedNode.data.enabled !== false}
-                                        onChange={(checked) => updateNodeData(selectedNode.id, { enabled: checked })}
-                                        size="md"
-                                    />
-                                </FlexRow>
-
-                                {/* Replicas */}
-                                <FlexRow className="justify-between">
-                                    <label className={cn(LABEL_STYLES, "mb-0")}>Replicas</label>
-                                    <input
-                                        type="number"
-                                        className={cn(INPUT_CONTAINER_STYLES, "w-24 outline-none focus:ring-1 focus:ring-state-accent-solid text-right")}
-                                        placeholder="1"
-                                        min={1}
-                                        value={selectedNode.data.replicas || 1}
-                                        onChange={(e) => updateNodeData(selectedNode.id, { replicas: parseInt(e.target.value) || 1 })}
-                                    />
-                                </FlexRow>
-                            </FieldCollapse>
-
-                            <FieldCollapse title="Properties" defaultOpen={true}>
-                                {/* Tags (Dynamic Input List) */}
-                                <div>
-                                    <DynamicInputList
-                                        key={selectedNode.id} // Force re-render on node change
-                                        title="" // Title handled by FieldCollapse
-                                        placeholder="Enter port"
-                                        btnText="Add Properties"
-                                        inputType="number"
-                                        inputClassName="bg-white focus:bg-gray-50 text-[12px]"
-                                        deleteBtnClassName="bg-white h-6 w-6 p-1"
-                                        showEmptyState={false}
-                                        itemContainerClassName="bg-white"
-                                        initialItems={selectedNode.data.properties || []}
-                                        onItemsChange={(items) => updateNodeData(selectedNode.id, { properties: items })}
-                                    />
-                                </div>
-                            </FieldCollapse>
-
-                            <FieldCollapse title="ENV" defaultOpen={true}>
-                                {/* Config (Dynamic Key-Value List) */}
-                                <div>
-                                    <DynamicKeyValueList
-                                        key={selectedNode.id} // Force re-render on node change
-                                        title="" // Title handled by FieldCollapse
-                                        keyPlaceholder="Name"
-                                        valuePlaceholder="Value"
-                                        btnText="Add Config"
-                                        inputClassName="bg-white focus:bg-gray-50 text-[12px]"
-                                        deleteBtnClassName="bg-white h-6 w-6 p-1"
-                                        showEmptyState={false}
-                                        itemContainerClassName="bg-white"
-                                        initialItems={selectedNode.data.envConfig || []}
-                                        onItemsChange={(items) => updateNodeData(selectedNode.id, { envConfig: items })}
-                                    />
-                                </div>
-                            </FieldCollapse>
-                        </>
-                    )}
-
-                    {(selectedNode.data.componentType === 'config' || selectedNode.data.componentType === 'secret') && (
-                        <div className="mb-4">
-                            <label className={LABEL_STYLES}>
-                                {selectedNode.data.componentType === 'secret' ? 'Secret Variables' : '环境变量'}
-                            </label>
-                            <EnvironmentVariableManager
-                                variables={selectedNode.data.environmentVariables || []}
-                                onChange={(variables) => updateNodeData(selectedNode.id, { environmentVariables: variables })}
-                            />
+                    {/* Placeholder for other sections */}
+                    {activeSection !== 'system' && (
+                        <div className="mt-6 text-xs text-text-tertiary">
+                            此区域对应菜单 “{activeSection.toUpperCase()}”，后续可按需填充具体表单配置。
                         </div>
                     )}
-
-
                 </div>
             </div>
 
