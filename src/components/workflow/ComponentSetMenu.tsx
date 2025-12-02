@@ -323,6 +323,123 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                         </div>
                     </FlexRow>
 
+                    {/* Liveness Toggle */}
+                    <div className="mb-4">
+                        <FlexRow className="justify-between items-center">
+                            <label className="text-[13px] font-medium text-text-primary mb-0">
+                                Liveness
+                            </label>
+                            <Switch
+                                checked={Boolean(selectedNode.data.livenessEnabled)}
+                                onChange={(checked) => updateNodeData(selectedNode.id, { livenessEnabled: checked })}
+                                size="md"
+                            />
+                        </FlexRow>
+
+                        {/* Liveness Settings - shown when enabled */}
+                        {Boolean(selectedNode.data.livenessEnabled) && (
+                            <div className="mt-3 space-y-3">
+                                {/* Exec Command */}
+                                <div>
+                                    <label className="text-[13px] font-medium text-text-primary mb-2 block">
+                                        Exec Command
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className={cn(INPUT_CONTAINER_STYLES, "w-full h-8 outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                        placeholder='e.g. sh -c "mysqladmin ping -h127.0.0.1"'
+                                        value={String(selectedNode.data.livenessExecCommand || '')}
+                                        onChange={(e) => updateNodeData(selectedNode.id, { livenessExecCommand: e.target.value })}
+                                    />
+                                </div>
+
+                                {/* Initial Delay Seconds */}
+                                <FlexRow className="justify-between items-center">
+                                    <label className="text-[13px] font-medium text-text-primary mb-0">
+                                        initialDelaySeconds
+                                    </label>
+                                    <div className="flex items-center gap-3 flex-1 ml-4 h-8">
+                                        <div className="flex-1 relative h-8 flex items-center">
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="120"
+                                                value={Number(selectedNode.data.livenessInitialDelay) || 30}
+                                                onChange={(e) => updateNodeData(selectedNode.id, { livenessInitialDelay: parseInt(e.target.value) || 30 })}
+                                                className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                                style={{
+                                                    background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${(Number(selectedNode.data.livenessInitialDelay) || 30) / 120 * 100}%, #e5e7eb ${(Number(selectedNode.data.livenessInitialDelay) || 30) / 120 * 100}%, #e5e7eb 100%)`
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="w-12 h-8 flex items-center justify-center rounded-md bg-gray-50/80 border border-components-panel-border shrink-0">
+                                            <span className="text-[13px] font-medium text-gray-700">
+                                                {Number(selectedNode.data.livenessInitialDelay) || 30}
+                                            </span>
+                                        </div>
+                                        <span className="text-[13px] text-text-tertiary shrink-0">秒</span>
+                                    </div>
+                                </FlexRow>
+
+                                {/* Period Seconds */}
+                                <FlexRow className="justify-between items-center">
+                                    <label className="text-[13px] font-medium text-text-primary mb-0">
+                                        periodSeconds
+                                    </label>
+                                    <div className="flex items-center gap-3 flex-1 ml-4 h-8">
+                                        <div className="flex-1 relative h-8 flex items-center">
+                                            <input
+                                                type="range"
+                                                min="1"
+                                                max="60"
+                                                value={Number(selectedNode.data.livenessPeriod) || 10}
+                                                onChange={(e) => updateNodeData(selectedNode.id, { livenessPeriod: parseInt(e.target.value) || 10 })}
+                                                className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                                style={{
+                                                    background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${((Number(selectedNode.data.livenessPeriod) || 10) - 1) / 59 * 100}%, #e5e7eb ${((Number(selectedNode.data.livenessPeriod) || 10) - 1) / 59 * 100}%, #e5e7eb 100%)`
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="w-12 h-8 flex items-center justify-center rounded-md bg-gray-50/80 border border-components-panel-border shrink-0">
+                                            <span className="text-[13px] font-medium text-gray-700">
+                                                {Number(selectedNode.data.livenessPeriod) || 10}
+                                            </span>
+                                        </div>
+                                        <span className="text-[13px] text-text-tertiary shrink-0">秒</span>
+                                    </div>
+                                </FlexRow>
+
+                                {/* Timeout Seconds */}
+                                <FlexRow className="justify-between items-center">
+                                    <label className="text-[13px] font-medium text-text-primary mb-0">
+                                        timeoutSeconds
+                                    </label>
+                                    <div className="flex items-center gap-3 flex-1 ml-4 h-8">
+                                        <div className="flex-1 relative h-8 flex items-center">
+                                            <input
+                                                type="range"
+                                                min="1"
+                                                max="30"
+                                                value={Number(selectedNode.data.livenessTimeout) || 5}
+                                                onChange={(e) => updateNodeData(selectedNode.id, { livenessTimeout: parseInt(e.target.value) || 5 })}
+                                                className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                                style={{
+                                                    background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${((Number(selectedNode.data.livenessTimeout) || 5) - 1) / 29 * 100}%, #e5e7eb ${((Number(selectedNode.data.livenessTimeout) || 5) - 1) / 29 * 100}%, #e5e7eb 100%)`
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="w-12 h-8 flex items-center justify-center rounded-md bg-gray-50/80 border border-components-panel-border shrink-0">
+                                            <span className="text-[13px] font-medium text-gray-700">
+                                                {Number(selectedNode.data.livenessTimeout) || 5}
+                                            </span>
+                                        </div>
+                                        <span className="text-[13px] text-text-tertiary shrink-0">秒</span>
+                                    </div>
+                                </FlexRow>
+                            </div>
+                        )}
+                    </div>
+
                 </>
             )}
 
