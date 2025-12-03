@@ -59,7 +59,11 @@ const CustomNode = ({ data, selected }: NodeProps) => {
                         </span>
                     </div>
                     <div className={NODE_BADGE_STYLES}>
-                        Component
+                        {(data.componentType as string) === 'webservice' ? 'Web Service' :
+                         (data.componentType as string) === 'store' ? 'Store' :
+                         (data.componentType as string)?.includes('config') ? 'Config' :
+                         (data.componentType as string)?.includes('secret') ? 'Secret' :
+                         'Web Service'}
                     </div>
                 </div>
 

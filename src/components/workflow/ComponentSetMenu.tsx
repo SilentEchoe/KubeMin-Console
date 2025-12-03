@@ -93,7 +93,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                         Component Type
                     </label>
 
-                    <div className="relative w-[120px]">
+                    <div className="relative w-[130px]">
                         <PortalToFollowElem
                             placement="bottom-end"
                             offsetValue={4}
@@ -104,12 +104,12 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                             <PortalToFollowElemTrigger asChild>
                                 <button
                                     type="button"
-                                    className="w-full h-[24px] px-2 flex items-center justify-between gap-2 font-normal bg-white border border-components-button-secondary-border text-text-primary hover:bg-state-base-hover text-xs rounded-md transition-colors"
+                                    className="w-full h-[34px] px-2 flex items-center justify-between gap-2 font-normal bg-white border border-components-button-secondary-border text-text-primary hover:bg-state-base-hover text-xs rounded-md transition-colors"
                                 >
                                     <span className="truncate leading-none flex-1 text-left">
-                                        {selectedNode.data.componentType === 'webservice' ? 'Web' :
+                                        {selectedNode.data.componentType === 'webservice' ? 'Web Service' :
                                             selectedNode.data.componentType === 'store' ? 'Store' :
-                                                (selectedNode.data.componentType || 'Store')}
+                                                'Web Service'}
                                     </span>
                                     <ChevronDown className="h-3 w-3 text-text-tertiary opacity-70 shrink-0" />
                                 </button>
@@ -168,7 +168,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                 </div>
 
                 {/* Conditional Controls */}
-                {(!selectedNode.data.componentType || selectedNode.data.componentType === 'webservice') && (
+                {(!selectedNode.data.componentType || selectedNode.data.componentType === 'webservice' || selectedNode.data.componentType === 'store') && (
                     <>
                         {/* Image - Inline with label */}
                         <FlexRow className="justify-between mb-4">
@@ -576,7 +576,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                     variant="secondary"
                                     size="small"
                                     onClick={onTraitsEnvAddClick}
-                                    className="h-8 px-3 text-xs whitespace-nowrap"
+                                    className="h-8 w-[120px] text-xs whitespace-nowrap"
                                 >
                                     + Add Traits Env
                                 </Button>
@@ -617,7 +617,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                     variant="secondary"
                                     size="small"
                                     onClick={onTraitsStorageAddClick}
-                                    className="h-8 px-3 text-xs whitespace-nowrap"
+                                    className="h-8 w-[120px] text-xs whitespace-nowrap"
                                 >
                                     + Add Storage
                                 </Button>
@@ -659,7 +659,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                     variant="secondary"
                                     size="small"
                                     onClick={onTraitsSidecarAddClick}
-                                    className="h-8 px-3 text-xs whitespace-nowrap"
+                                    className="h-8 w-[120px] text-xs whitespace-nowrap"
                                 >
                                     + Add Sidecar
                                 </Button>
@@ -700,7 +700,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                     variant="secondary"
                                     size="small"
                                     onClick={onTraitsInitAddClick}
-                                    className="h-8 px-3 text-xs whitespace-nowrap"
+                                    className="h-8 w-[120px] text-xs whitespace-nowrap"
                                 >
                                     + Add Init
                                 </Button>

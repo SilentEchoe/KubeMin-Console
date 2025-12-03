@@ -284,7 +284,7 @@ const PropertyPanel: React.FC = () => {
                                                 setEditingName(selectedNode.data.name || '');
                                             }
                                         }}
-                                        className="text-sm font-bold text-text-primary outline-none border-b-2 border-state-accent-solid bg-transparent"
+                                        className="text-sm font-bold text-text-primary outline-none border-b-2 border-blue-300 bg-transparent"
                                         autoFocus
                                     />
                                 ) : (
