@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Box, Wrench, LayoutTemplate } from 'lucide-react';
+import { Box, Wrench, LayoutTemplate } from 'lucide-react';
 import { fetchTemplates } from '../api/apps';
 import type { App } from '../types/app';
 
-type TabKey = 'start' | 'blocks' | 'tools' | 'sources' | 'tmp';
+type TabKey = 'blocks' | 'tmp';
 
 interface BlockSelectorProps {
     onSelect: (type: string, data?: any) => void;
@@ -12,7 +12,6 @@ interface BlockSelectorProps {
 
 const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
     const [activeTab, setActiveTab] = useState<TabKey>('blocks');
-    const [search, setSearch] = useState('');
     const [templates, setTemplates] = useState<App[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -44,21 +43,13 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
     };
 
     const tabs: { key: TabKey; name: string }[] = [
-        { key: 'start', name: 'Start' },
-        { key: 'blocks', name: 'Blocks' },
-        { key: 'tools', name: 'Tools' },
-        { key: 'sources', name: 'Sources' },
+        { key: 'blocks', name: 'Component' },
         { key: 'tmp', name: 'Tmp' },
     ];
 
     const blocks = [
-        // { type: 'llm', title: 'LLM', category: 'Model' },
-        { type: 'component', title: 'Component', category: 'Model' },
-        // { type: 'knowledge', title: 'Knowledge Retrieval', category: 'Knowledge' },
-        // { type: 'if-else', title: 'If/Else', category: 'Logic' },
-        // { type: 'code', title: 'Code', category: 'Logic' },
-        // { type: 'http', title: 'HTTP Request', category: 'Transform' },
-        { type: 'config-secret', title: 'Config/Secret Node', category: 'Model' },
+        { type: 'component', title: 'Component', category: 'Node' },
+        { type: 'config-secret', title: 'Config/Secret', category: 'Node' },
     ];
 
     return (
@@ -82,26 +73,12 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
                 ))}
             </div>
 
-            {/* Search */}
-            <div className="p-2">
-                <div className="relative flex items-center">
-                    <Search className="absolute left-2 h-4 w-4 text-text-tertiary" />
-                    <input
-                        type="text"
-                        placeholder="Search blocks..."
-                        className="w-full rounded-lg bg-background-section-burn py-1.5 pl-8 pr-2 text-sm outline-none focus:ring-1 focus:ring-text-accent"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-            </div>
-
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-2 max-h-[300px]">
                 {activeTab === 'blocks' && (
                     <div className="space-y-2">
-                        <div className="text-xs font-medium text-text-tertiary px-2">Model</div>
-                        {blocks.filter(b => b.category === 'Model').map(block => (
+                        <div className="text-xs font-medium text-text-tertiary px-2">Node</div>
+                        {blocks.filter(b => b.category === 'Node').map(block => (
                             <div
                                 key={block.type}
                                 className="flex h-8 w-full cursor-pointer items-center rounded-lg px-2 hover:bg-state-base-hover"

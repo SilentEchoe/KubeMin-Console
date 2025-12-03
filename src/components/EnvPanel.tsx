@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
 import VariableTrigger from './VariableTrigger';
 import EnvItem from './EnvItem';
 import VariableForm from './VariableForm';
+import configIcon from '../assets/config.svg';
 import type { EnvironmentVariable } from '../types/flow';
 
 interface EnvPanelProps {
@@ -12,9 +13,16 @@ interface EnvPanelProps {
 }
 
 const EnvPanel: React.FC<EnvPanelProps> = ({ variables: propVariables, onUpdate }) => {
-    const { environmentVariables: storeVariables, setEnvironmentVariables, envSecrets, setEnvSecrets, setSelectedNode } = useFlowStore();
+    const { nodes, selectedNodeId, environmentVariables: storeVariables, setEnvironmentVariables, envSecrets, setEnvSecrets, setSelectedNode, updateNodeData } = useFlowStore();
     const [editingVar, setEditingVar] = useState<EnvironmentVariable | null>(null);
     const [isAdding, setIsAdding] = useState(false);
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [editingName, setEditingName] = useState('');
+
+    // Get selected node
+    const selectedNode = useMemo(() => {
+        return nodes.find((n) => n.id === selectedNodeId);
+    }, [nodes, selectedNodeId]);
 
     // Use props if provided, otherwise fall back to store
     const variables = propVariables || storeVariables;
@@ -66,8 +74,48 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ variables: propVariables, onUpdate 
             <div className="flex h-full flex-col">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-components-panel-border px-5 py-4">
-                    <div>
-                        <h2 className="text-[15px] font-semibold text-text-primary">Config / Secret Variables</h2>
+                    <div className="flex items-center gap-2">
+                        <img
+                            src={configIcon}
+                            alt="icon"
+                            className="w-5 h-5"
+                        />
+                        {isEditingName ? (
+                            <input
+                                type="text"
+                                value={editingName}
+                                onChange={(e) => setEditingName(e.target.value)}
+                                onBlur={() => {
+                                    if (editingName.trim() && selectedNode) {
+                                        updateNodeData(selectedNode.id, { name: editingName.trim() });
+                                    }
+                                    setIsEditingName(false);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        if (editingName.trim() && selectedNode) {
+                                            updateNodeData(selectedNode.id, { name: editingName.trim() });
+                                        }
+                                        setIsEditingName(false);
+                                    } else if (e.key === 'Escape') {
+                                        setIsEditingName(false);
+                                        setEditingName(selectedNode?.data.name || '');
+                                    }
+                                }}
+                                className="text-sm font-bold text-text-primary outline-none border-b-2 border-blue-300 bg-transparent"
+                                autoFocus
+                            />
+                        ) : (
+                            <span
+                                className="text-sm font-bold text-text-primary cursor-pointer"
+                                onDoubleClick={() => {
+                                    setEditingName(selectedNode?.data.name || '');
+                                    setIsEditingName(true);
+                                }}
+                            >
+                                {selectedNode?.data.name || 'Unnamed'}
+                            </span>
+                        )}
                     </div>
                     <button
                         onClick={handleClose}
