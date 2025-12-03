@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
 import { cn } from '../utils/cn';
-import EnvPanel from './EnvPanel';
+import ConfigSecretPanel from './ConfigSecretPanel';
 import ComponentSetMenu from './workflow/ComponentSetMenu';
 import WorkflowEnvPanel from './workflow/EnvPanel';
 import TraitsEnvPanel from './workflow/TraitsEnvPanel';
@@ -40,11 +40,9 @@ const PropertyPanel: React.FC = () => {
         return null;
     }
 
+    // Use ConfigSecretPanel for config-secret type nodes
     if ((selectedNode.data.componentType as any) === 'config-secret') {
-        return <EnvPanel
-            variables={selectedNode.data.environmentVariables || []}
-            onUpdate={(vars) => updateNodeData(selectedNode.id, { environmentVariables: vars })}
-        />;
+        return <ConfigSecretPanel />;
     }
 
     const handleEnvAdd = () => {
