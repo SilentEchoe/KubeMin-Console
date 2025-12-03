@@ -84,6 +84,34 @@ function convertComponentToNode(component: Component, position: { x: number; y: 
   // Convert traits (mainly for store/webservice types)
   if (component.traits && Object.keys(component.traits).length > 0) {
     nodeData.traits = convertTraits(component.traits);
+    
+    // Extract probes to individual fields for UI display
+    if (component.traits.probes) {
+      const livenessProbe = component.traits.probes.find(p => p.type === 'liveness');
+      const readinessProbe = component.traits.probes.find(p => p.type === 'readiness');
+      
+      if (livenessProbe) {
+        nodeData.livenessEnabled = true;
+        nodeData.livenessInitialDelay = livenessProbe.initialDelaySeconds;
+        nodeData.livenessPeriod = livenessProbe.periodSeconds;
+        nodeData.livenessTimeout = livenessProbe.timeoutSeconds;
+        if (livenessProbe.exec?.command) {
+          // Convert command array to string for display
+          nodeData.livenessExecCommand = livenessProbe.exec.command.join(' ');
+        }
+      }
+      
+      if (readinessProbe) {
+        nodeData.readinessEnabled = true;
+        nodeData.readinessInitialDelay = readinessProbe.initialDelaySeconds;
+        nodeData.readinessPeriod = readinessProbe.periodSeconds;
+        nodeData.readinessTimeout = readinessProbe.timeoutSeconds;
+        if (readinessProbe.exec?.command) {
+          // Convert command array to string for display
+          nodeData.readinessExecCommand = readinessProbe.exec.command.join(' ');
+        }
+      }
+    }
   }
 
   return {
