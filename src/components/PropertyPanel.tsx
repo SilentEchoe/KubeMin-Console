@@ -255,61 +255,49 @@ const PropertyPanel: React.FC = () => {
                 >
                     {/* Node Name and Icon - Above tabs with 10px margin */}
                     <div className="px-5 pt-4 pb-0" style={{ marginBottom: '10px' }}>
-                        <div className="flex items-center gap-2">
-                            <img
-                                src={(selectedNode.data.componentType as string)?.includes('config') || (selectedNode.data.componentType as string)?.includes('secret') ? configIcon : componentIcon}
-                                alt="icon"
-                                className="w-5 h-5"
-                            />
-                            {isEditingName ? (
-                                <input
-                                    type="text"
-                                    value={editingName}
-                                    onChange={(e) => setEditingName(e.target.value)}
-                                    onBlur={() => {
-                                        if (editingName.trim()) {
-                                            updateNodeData(selectedNode.id, { name: editingName.trim() });
-                                        }
-                                        setIsEditingName(false);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                                <img
+                                    src={(selectedNode.data.componentType as string)?.includes('config') || (selectedNode.data.componentType as string)?.includes('secret') ? configIcon : componentIcon}
+                                    alt="icon"
+                                    className="w-5 h-5"
+                                />
+                                {isEditingName ? (
+                                    <input
+                                        type="text"
+                                        value={editingName}
+                                        onChange={(e) => setEditingName(e.target.value)}
+                                        onBlur={() => {
                                             if (editingName.trim()) {
                                                 updateNodeData(selectedNode.id, { name: editingName.trim() });
                                             }
                                             setIsEditingName(false);
-                                        } else if (e.key === 'Escape') {
-                                            setIsEditingName(false);
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                if (editingName.trim()) {
+                                                    updateNodeData(selectedNode.id, { name: editingName.trim() });
+                                                }
+                                                setIsEditingName(false);
+                                            } else if (e.key === 'Escape') {
+                                                setIsEditingName(false);
+                                                setEditingName(selectedNode.data.name || '');
+                                            }
+                                        }}
+                                        className="text-sm font-bold text-text-primary outline-none border-b-2 border-state-accent-solid bg-transparent"
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <span
+                                        className="text-sm font-bold text-text-primary cursor-pointer"
+                                        onDoubleClick={() => {
                                             setEditingName(selectedNode.data.name || '');
-                                        }
-                                    }}
-                                    className="text-sm font-bold text-text-primary outline-none border-b-2 border-state-accent-solid bg-transparent"
-                                    autoFocus
-                                />
-                            ) : (
-                                <span
-                                    className="text-sm font-bold text-text-primary cursor-pointer"
-                                    onDoubleClick={() => {
-                                        setEditingName(selectedNode.data.name || '');
-                                        setIsEditingName(true);
-                                    }}
-                                >
-                                    {selectedNode.data.name || 'Unnamed'}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Header with Tabs */}
-                    <div className="border-b border-components-panel-border">
-                        <div className="flex items-center justify-between px-5 pt-4">
-                            <div className="flex items-center gap-6">
-                                <button className="text-[13px] font-medium text-text-primary pb-2.5 border-b-2 border-text-primary relative">
-                                    Settings
-                                </button>
-                                <button className="text-[13px] font-medium text-text-tertiary pb-2.5 border-b-2 border-transparent hover:text-text-secondary transition-colors">
-                                    Last Run
-                                </button>
+                                            setIsEditingName(true);
+                                        }}
+                                    >
+                                        {selectedNode.data.name || 'Unnamed'}
+                                    </span>
+                                )}
                             </div>
                             <Button
                                 variant="ghost"
@@ -319,6 +307,18 @@ const PropertyPanel: React.FC = () => {
                             >
                                 <X size={16} />
                             </Button>
+                        </div>
+                    </div>
+
+                    {/* Header with Tabs */}
+                    <div className="border-b border-components-panel-border">
+                        <div className="flex items-center gap-6 px-5 pt-4">
+                            <button className="text-[13px] font-medium text-text-primary pb-2.5 border-b-2 border-text-primary relative">
+                                Settings
+                            </button>
+                            <button className="text-[13px] font-medium text-text-tertiary pb-2.5 border-b-2 border-transparent hover:text-text-secondary transition-colors">
+                                Last Run
+                            </button>
                         </div>
                     </div>
 

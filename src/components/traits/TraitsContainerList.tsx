@@ -92,7 +92,7 @@ const TraitsContainerList: React.FC<TraitsContainerListProps> = ({ title, contai
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none"
+                            className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                         />
                     </div>
                     <div>
@@ -101,7 +101,7 @@ const TraitsContainerList: React.FC<TraitsContainerListProps> = ({ title, contai
                             type="text"
                             value={image}
                             onChange={(e) => setImage(e.target.value)}
-                            className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none"
+                            className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                         />
                     </div>
                     <div>
@@ -111,7 +111,7 @@ const TraitsContainerList: React.FC<TraitsContainerListProps> = ({ title, contai
                             onChange={(e) => setCommand(e.target.value)}
                             placeholder="One argument per line"
                             rows={2}
-                            className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none resize-vertical"
+                            className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none resize-vertical"
                         />
                     </div>
                     <div className="flex justify-end gap-2">
@@ -157,7 +157,7 @@ const TraitsContainerList: React.FC<TraitsContainerListProps> = ({ title, contai
                                             }
                                         }}
                                         placeholder="Image"
-                                        className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none"
+                                        className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                                     />
                                     <textarea
                                         value={(variant === 'init' ? container.properties?.command : container.command)?.join('\n') || ''}
@@ -171,7 +171,7 @@ const TraitsContainerList: React.FC<TraitsContainerListProps> = ({ title, contai
                                         }}
                                         placeholder="Command (one per line)"
                                         rows={2}
-                                        className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none resize-vertical"
+                                        className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none resize-vertical"
                                     />
                                 </div>
 

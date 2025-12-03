@@ -100,7 +100,7 @@ const TraitsStorageManager: React.FC<TraitsStorageManagerProps> = ({ storage, on
                                 <select
                                     value={type}
                                     onChange={(e) => setType(e.target.value as TraitStorage['type'])}
-                                    className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none appearance-none"
+                                    className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none appearance-none"
                                 >
                                     <option value="persistent">Persistent</option>
                                     <option value="ephemeral">Ephemeral</option>
@@ -117,7 +117,7 @@ const TraitsStorageManager: React.FC<TraitsStorageManagerProps> = ({ storage, on
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Volume Name"
-                                className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none"
+                                className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                             />
                         </div>
 
@@ -128,7 +128,7 @@ const TraitsStorageManager: React.FC<TraitsStorageManagerProps> = ({ storage, on
                                 value={mountPath}
                                 onChange={(e) => setMountPath(e.target.value)}
                                 placeholder="/var/lib/data"
-                                className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none"
+                                className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                             />
                         </div>
 
@@ -141,7 +141,7 @@ const TraitsStorageManager: React.FC<TraitsStorageManagerProps> = ({ storage, on
                                         value={subPath}
                                         onChange={(e) => setSubPath(e.target.value)}
                                         placeholder="Optional subpath"
-                                        className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none"
+                                        className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                                     />
                                 </div>
                                 <div>
@@ -151,7 +151,7 @@ const TraitsStorageManager: React.FC<TraitsStorageManagerProps> = ({ storage, on
                                         value={size}
                                         onChange={(e) => setSize(e.target.value)}
                                         placeholder="e.g. 5Gi"
-                                        className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none"
+                                        className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                                     />
                                 </div>
                             </>
@@ -164,7 +164,7 @@ const TraitsStorageManager: React.FC<TraitsStorageManagerProps> = ({ storage, on
                                     <select
                                         value={sourceName}
                                         onChange={(e) => setSourceName(e.target.value)}
-                                        className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none appearance-none"
+                                        className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none appearance-none"
                                     >
                                         <option value="">Select Config Node...</option>
                                         {configNodes.map(node => (

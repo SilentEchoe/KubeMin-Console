@@ -9,8 +9,22 @@ interface TraitsSidecarPanelProps {
     onAdd: (container: TraitContainer) => void;
 }
 
-const INPUT_STYLES = 'w-full px-3 py-2 text-sm border border-components-panel-border rounded-lg bg-white focus:ring-1 focus:ring-state-accent-solid outline-none transition-colors';
-const SMALL_INPUT_STYLES = 'px-2 py-1.5 text-xs border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none';
+const INPUT_STYLES = 'w-full px-3 py-2 text-sm border border-components-panel-border rounded-lg bg-white input-gradient-focus focus:ring-0 outline-none transition-colors';
+const SMALL_INPUT_STYLES = 'px-2 py-1.5 text-xs border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none';
+
+const gradientBorderStyle = `
+    .input-gradient-focus:focus {
+        border-image: linear-gradient(to right, #67e8f9, #3b82f6) 1;
+        border-width: 1px;
+        outline: none;
+    }
+    .input-gradient-focus:focus-visible {
+        border-image: linear-gradient(to right, #67e8f9, #3b82f6) 1;
+        border-width: 1px;
+        outline: none;
+        box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+    }
+`;
 
 const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd }) => {
     const [name, setName] = useState('');
@@ -109,7 +123,9 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd 
     const isValid = name.trim() !== '';
 
     return (
-        <div className="flex flex-col h-full">
+        <>
+            <style>{gradientBorderStyle}</style>
+            <div className="flex flex-col h-full">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-components-panel-border">
                 <span className="text-[15px] font-semibold text-text-primary">Add Sidecar Container</span>
@@ -319,6 +335,7 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd 
                 </Button>
             </div>
         </div>
+        </>
     );
 };
 

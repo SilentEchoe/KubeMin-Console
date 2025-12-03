@@ -103,7 +103,7 @@ const TraitsEnvsManager: React.FC<TraitsEnvsManagerProps> = ({ envs, onChange })
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="e.g. MYSQL_ROOT_PASSWORD"
-                                className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none"
+                                className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                             />
                         </div>
 
@@ -113,7 +113,7 @@ const TraitsEnvsManager: React.FC<TraitsEnvsManagerProps> = ({ envs, onChange })
                                 <select
                                     value={selectedNodeId}
                                     onChange={(e) => setSelectedNodeId(e.target.value)}
-                                    className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none appearance-none"
+                                    className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none appearance-none"
                                 >
                                     <option value="">Select a node...</option>
                                     {configNodes.map(node => (
@@ -133,7 +133,7 @@ const TraitsEnvsManager: React.FC<TraitsEnvsManagerProps> = ({ envs, onChange })
                                 value={key}
                                 onChange={(e) => setKey(e.target.value)}
                                 placeholder="Key in config/secret"
-                                className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white focus:ring-1 focus:ring-state-accent-solid outline-none"
+                                className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                             />
                         </div>
 

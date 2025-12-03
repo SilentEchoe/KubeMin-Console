@@ -102,7 +102,7 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                         value={newKey}
                         onChange={(e) => setNewKey(e.target.value)}
                         onKeyPress={(e) => handleKeyPress(e, 'add')}
-                        className="w-full px-3 py-2 text-[15px] border border-components-panel-border rounded-md bg-white focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none"
+                        className="w-full px-3 py-2 text-[15px] border border-components-panel-border rounded-md bg-white input-gradient-focus focus:ring-0 outline-none"
                     />
                     <div className="flex gap-2">
                         <textarea
@@ -110,7 +110,7 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                             value={newValue}
                             onChange={(e) => setNewValue(e.target.value)}
                             rows={3}
-                            className="flex-1 px-3 py-2 text-[15px] border border-components-panel-border rounded-md bg-white focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none resize-vertical min-h-[60px] max-h-[200px]"
+                            className="flex-1 px-3 py-2 text-[15px] border border-components-panel-border rounded-md bg-white input-gradient-focus focus:ring-0 outline-none resize-vertical min-h-[60px] max-h-[200px]"
                         />
                         <label className="flex items-center gap-1 px-2 py-2 text-[15px]">
                             <input
@@ -148,7 +148,7 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                                             type="text"
                                             value={editKey}
                                             onChange={(e) => setEditKey(e.target.value)}
-                                            className="w-full px-2 py-1 text-[15px] border border-components-panel-border rounded focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none"
+                                            className="w-full px-2 py-1 text-[15px] border border-components-panel-border rounded input-gradient-focus focus:ring-0 outline-none"
                                         />
                                         <div className="flex gap-2">
                                             <textarea
@@ -156,7 +156,7 @@ const EnvironmentVariableManager: React.FC<EnvironmentVariableManagerProps> = ({
                                                 value={editValue}
                                                 onChange={(e) => setEditValue(e.target.value)}
                                                 rows={3}
-                                                className="flex-1 px-2 py-1 text-[15px] border border-components-panel-border rounded focus:border-state-accent-solid focus:ring-1 focus:ring-state-accent-solid outline-none resize-vertical min-h-[60px] max-h-[150px]"
+                                                className="flex-1 px-2 py-1 text-[15px] border border-components-panel-border rounded input-gradient-focus focus:ring-0 outline-none resize-vertical min-h-[60px] max-h-[150px]"
                                             />
                                             <label className="flex items-center gap-1 text-[15px]">
                                                 <input

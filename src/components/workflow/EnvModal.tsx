@@ -114,7 +114,7 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="变量名"
-                            className="w-full px-3 py-2 rounded-lg border border-components-panel-border bg-white text-[13px] text-text-primary outline-none focus:ring-1 focus:ring-state-accent-solid focus:border-state-accent-solid"
+                            className="w-full px-3 py-2 rounded-lg border border-components-panel-border bg-white text-[13px] text-text-primary outline-none input-gradient-focus focus:ring-0"
                             disabled={!!editingVariable}
                         />
                     </div>
@@ -129,7 +129,7 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
                             onChange={(e) => setValue(e.target.value)}
                             placeholder="变量值"
                             rows={3}
-                            className="w-full px-3 py-2 rounded-lg border border-components-panel-border bg-white text-[13px] text-text-primary outline-none focus:ring-1 focus:ring-state-accent-solid focus:border-state-accent-solid resize-none"
+                            className="w-full px-3 py-2 rounded-lg border border-components-panel-border bg-white text-[13px] text-text-primary outline-none input-gradient-focus focus:ring-0 resize-none"
                         />
                     </div>
 
@@ -143,7 +143,7 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="变量的描述"
                             rows={3}
-                            className="w-full px-3 py-2 rounded-lg border border-components-panel-border bg-white text-[13px] text-text-primary outline-none focus:ring-1 focus:ring-state-accent-solid focus:border-state-accent-solid resize-none"
+                            className="w-full px-3 py-2 rounded-lg border border-components-panel-border bg-white text-[13px] text-text-primary outline-none input-gradient-focus focus:ring-0 resize-none"
                         />
                     </div>
                 </div>

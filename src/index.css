@@ -117,3 +117,19 @@ button {
 .custom-node.selected {
   border-color: #2563eb !important;
 }
+
+/* Input Gradient Focus Border with rounded corners */
+.input-gradient-focus:focus {
+  outline: none;
+  border: 1px solid transparent !important;
+  background: 
+    linear-gradient(white, white) padding-box,
+    linear-gradient(90deg, #67e8f9 0%, #3b82f6 100%) border-box;
+}
+
+/* For inputs with gray background */
+.input-gradient-focus.bg-components-badge-bg-dimm:focus {
+  background: 
+    linear-gradient(#f9fafb, #f9fafb) padding-box,
+    linear-gradient(90deg, #67e8f9 0%, #3b82f6 100%) border-box;
+}
