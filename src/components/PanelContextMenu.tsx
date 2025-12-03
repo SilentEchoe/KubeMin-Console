@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useFlowStore } from '../stores/flowStore';
-import { Plus, Play, Clipboard, Download, Upload, ChevronRight, Settings } from 'lucide-react';
+import { Plus, Play, Clipboard, Download, Upload, ChevronRight } from 'lucide-react';
 import BlockSelector from './BlockSelector';
 import { componentsToNodes } from '../utils/componentToNode';
 import type { Component } from '../types/app';
@@ -244,42 +244,7 @@ const PanelContextMenu: React.FC = () => {
             onContextMenu={(e) => e.preventDefault()}
         >
             <div className="p-1">
-                {/* Create Config/Secret Node */}
-                <div
-                    className="flex h-8 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-text-secondary hover:bg-state-base-hover"
-                    onClick={() => {
-                        const id = Math.random().toString(36).substr(2, 9);
-                        const newNode = {
-                            id,
-                            type: 'custom',
-                            position: { x: panelMenu.left + 50, y: panelMenu.top + 50 },
-                            data: {
-                                label: 'Config/Secret',
-                                description: 'Manage global environment variables',
-                                icon: 'settings',
-                                componentType: 'config-secret' as const,
-                            },
-                        };
-
-                        if (panelMenu.edgeId) {
-                            insertNodeOnEdge(panelMenu.edgeId, newNode);
-                        } else {
-                            addNode(newNode);
-                        }
-                        setPanelMenu(null);
-                    }}
-                >
-                    <div className="flex items-center gap-2">
-                        <Settings className="h-4 w-4" />
-                        <span>Config/Secret</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="my-1 h-[0.5px] bg-components-panel-border" />
-
-            <div className="p-1">
-                {/* Add Block */}
+                {/* Add Node */}
                 <div
                     className="relative flex h-8 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-text-secondary hover:bg-state-base-hover"
                     onMouseEnter={() => setShowAddBlock(true)}
@@ -287,7 +252,7 @@ const PanelContextMenu: React.FC = () => {
                 >
                     <div className="flex items-center gap-2">
                         <Plus className="h-4 w-4" />
-                        <span>Add Block</span>
+                        <span>Add Node</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-text-tertiary" />
 
