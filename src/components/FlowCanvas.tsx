@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { Play, ChevronDown } from 'lucide-react';
+import { Play, ChevronDown, ListChecks } from 'lucide-react';
 import {
     ReactFlow,
     Background,
@@ -24,6 +24,8 @@ import type { FlowNode } from '../types/flow';
 import PanelContextMenu from './PanelContextMenu';
 import CustomEdge from './workflow/CustomEdge';
 import CustomConnectionLine from './workflow/CustomConnectionLine';
+import WorkflowChecklist from './workflow/WorkflowChecklist';
+import type { NodeWithIssues } from './workflow/WorkflowChecklist';
 
 import { useShortcuts } from '../hooks/useShortcuts';
 
@@ -78,8 +80,51 @@ const FlowCanvas: React.FC = () => {
     } = useFlowStore();
 
     const [viewport, setViewportState] = useState<Viewport>({ x: 0, y: 0, zoom: 1.0 });
+    const [showChecklist, setShowChecklist] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const reactFlowInstanceRef = useRef<any>(null);
+
+    // Generate workflow issues from nodes
+    const getWorkflowIssues = useCallback((): NodeWithIssues[] => {
+        const issues: NodeWithIssues[] = [];
+        
+        nodes.forEach((node) => {
+            const nodeIssues: { message: string }[] = [];
+            
+            // Check if node has connections
+            const hasIncoming = edges.some(e => e.target === node.id);
+            const hasOutgoing = edges.some(e => e.source === node.id);
+            
+            if (!hasIncoming && !hasOutgoing) {
+                nodeIssues.push({ message: '此节点尚未连接到其他节点' });
+            }
+            
+            // Check required fields based on node type
+            if (node.data.componentType === 'webservice' || node.data.componentType === 'store') {
+                if (!node.data.image) {
+                    nodeIssues.push({ message: '镜像 不能为空' });
+                }
+            }
+            
+            // Check if name is empty
+            if (!node.data.name) {
+                nodeIssues.push({ message: '名称 不能为空' });
+            }
+            
+            if (nodeIssues.length > 0) {
+                issues.push({
+                    id: node.id,
+                    name: node.data.name || node.data.label || '未命名节点',
+                    type: node.data.componentType === 'config-secret' ? 'list' : 'reply',
+                    issues: nodeIssues,
+                });
+            }
+        });
+        
+        return issues;
+    }, [nodes, edges]);
+
+    const workflowIssues = getWorkflowIssues();
 
     // Track viewport changes
     const onMove = useCallback((_: any, viewport: Viewport) => {
@@ -200,6 +245,22 @@ const FlowCanvas: React.FC = () => {
                             </button>
                         </div>
 
+                        {/* Workflow Button */}
+                        <div className="relative flex h-8 items-center">
+                            <button
+                                onClick={() => setShowChecklist(!showChecklist)}
+                                className="flex h-8 items-center rounded-lg border-[0.5px] border-components-button-secondary-border bg-components-button-secondary-bg px-3 text-[13px] font-medium text-text-secondary hover:bg-state-base-hover cursor-pointer"
+                            >
+                                <ListChecks className="mr-1.5 h-4 w-4" />
+                                Workflow
+                                {workflowIssues.length > 0 && (
+                                    <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-medium text-white">
+                                        {workflowIssues.reduce((sum, n) => sum + n.issues.length, 0)}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+
                         {/* Publish Button */}
                         <div className="flex h-8 items-center">
                             <button
@@ -212,6 +273,13 @@ const FlowCanvas: React.FC = () => {
                         </div>
                     </div>
                 </Panel>
+                
+                {/* Workflow Checklist Panel */}
+                <WorkflowChecklist
+                    isOpen={showChecklist}
+                    onClose={() => setShowChecklist(false)}
+                    nodes={workflowIssues}
+                />
                 <ZoomIndicator />
             </ReactFlow>
         </div>
