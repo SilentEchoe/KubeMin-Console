@@ -14,17 +14,29 @@ import { ControlMode } from '../types/flow';
 
 // Helper function to generate unique node names
 const generateUniqueName = (baseName: string, existingNames: string[]): string => {
-    // Remove any existing numbers from the base name
-    const cleanBaseName = baseName.replace(/\d+$/, '');
+    // Remove any existing numbers and trailing spaces from the base name
+    const cleanBaseName = baseName.replace(/\s*\d+$/, '').trim();
 
-    // Find all names with the same base
+    // Check if the base name already exists
+    const baseExists = existingNames.some(name => name === cleanBaseName);
+    
+    // Find all names with the same base (including the original without number)
     const existingNumbers = existingNames
-        .filter(name => name.startsWith(cleanBaseName))
-        .map(name => {
-            const match = name.match(/(\d+)$/);
-            return match ? parseInt(match[1]) : 0;
+        .filter(name => {
+            // Match exact base name or base name followed by space and number
+            return name === cleanBaseName || name.startsWith(cleanBaseName + ' ');
         })
-        .filter(num => !isNaN(num));
+        .map(name => {
+            if (name === cleanBaseName) return 0; // Original name without number counts as 0
+            const match = name.match(/\s(\d+)$/);
+            return match ? parseInt(match[1]) : -1;
+        })
+        .filter(num => num >= 0);
+
+    // If base name doesn't exist and no numbered variants, use base name
+    if (!baseExists && existingNumbers.length === 0) {
+        return cleanBaseName;
+    }
 
     // Find the next available number
     let nextNumber = 1;
@@ -32,7 +44,7 @@ const generateUniqueName = (baseName: string, existingNames: string[]): string =
         nextNumber++;
     }
 
-    return `${cleanBaseName}${nextNumber}`;
+    return `${cleanBaseName} ${nextNumber}`;
 };
 
 export const useFlowStore = create<FlowState>((set, get) => ({
@@ -170,6 +182,19 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         if (!clipboard) return;
 
         const id = Math.random().toString(36).substr(2, 9);
+        
+        // Get existing names of nodes with the same componentType
+        const sameTypeNodes = nodes.filter(
+            n => n.data.componentType === clipboard.data.componentType
+        );
+        const existingNames = sameTypeNodes
+            .map(n => n.data.name)
+            .filter(Boolean) as string[];
+        
+        // Generate unique name based on the copied node's name
+        const baseName = clipboard.data.name || clipboard.data.label || 'Component';
+        const uniqueName = generateUniqueName(baseName, existingNames);
+        
         const newNode: FlowNode = {
             ...clipboard,
             id,
@@ -178,7 +203,10 @@ export const useFlowStore = create<FlowState>((set, get) => ({
                 y: clipboard.position.y + 50,
             },
             selected: true,
-            data: { ...clipboard.data }, // Deep copy data if needed
+            data: { 
+                ...clipboard.data,
+                name: uniqueName,  // Use the generated unique name
+            },
         };
 
         set({
