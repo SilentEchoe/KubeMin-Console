@@ -1,4 +1,4 @@
-import type { App, AppListResponse, AppFilters } from '../types/app';
+import type { App, AppListResponse, AppFilters, Component } from '../types/app';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 
@@ -66,7 +66,7 @@ export const fetchTemplates = async (): Promise<App[]> => {
     }
 };
 
-export const fetchAppComponents = async (appId: string): Promise<any[]> => {
+export const fetchAppComponents = async (appId: string): Promise<Component[]> => {
     try {
         const response = await fetch(`${API_BASE_URL}/applications/${appId}/components`);
         if (!response.ok) {

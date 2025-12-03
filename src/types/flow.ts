@@ -72,12 +72,27 @@ export interface Traits {
     init?: TraitContainer[];
 }
 
+// Config data item (key-value pair for config files like master.cnf, slave.cnf)
+export interface ConfigDataItem {
+    id: string;
+    key: string;      // filename, e.g., "master.cnf"
+    value: string;    // file content
+}
+
+// Secret data item (key-value pair for secrets)
+export interface SecretDataItem {
+    id: string;
+    key: string;      // secret key, e.g., "MYSQL_ROOT_PASSWORD"
+    value: string;    // secret value (base64 encoded)
+}
+
 export interface FlowNodeData extends Record<string, unknown> {
     name?: string;
     label: string;
     description?: string;
     icon?: string;
     componentType?: 'webservice' | 'store' | 'config' | 'secret' | 'config-secret';
+    originalType?: 'config' | 'secret' | 'store' | 'webservice';  // Original API type
     image?: string;
     namespace?: string;
     replicas?: number;
@@ -85,6 +100,8 @@ export interface FlowNodeData extends Record<string, unknown> {
     environmentVariables?: EnvironmentVariable[];
     properties?: any[];
     envConfig?: any[];
+    configData?: ConfigDataItem[];   // For config type: properties.conf
+    secretData?: SecretDataItem[];   // For secret type: properties.secret
     enabled?: boolean;
     ports?: string[];
     traits?: Traits;
@@ -107,6 +124,8 @@ export type FlowState = {
     controlMode: ControlMode;
     panelMenu: { top: number; left: number; edgeId?: string } | null;
     clipboard: FlowNode | null;
+    setNodes: (nodes: FlowNode[]) => void;
+    clearNodes: () => void;
     onNodesChange: (changes: any) => void;
     onEdgesChange: (changes: any) => void;
     onConnect: (connection: any) => void;

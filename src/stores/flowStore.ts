@@ -38,6 +38,12 @@ const generateUniqueName = (baseName: string, existingNames: string[]): string =
 export const useFlowStore = create<FlowState>((set, get) => ({
     nodes: [],
     edges: [],
+    setNodes: (nodes: FlowNode[]) => {
+        set({ nodes });
+    },
+    clearNodes: () => {
+        set({ nodes: [], edges: [], selectedNodeId: null });
+    },
     selectedNodeId: null,
     controlMode: ControlMode.Pointer,
     panelMenu: null,

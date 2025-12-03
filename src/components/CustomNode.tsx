@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
-import { Play, Cpu, Box, FileText, Database, Globe, MessageSquare, Settings } from 'lucide-react';
+import { Play, Cpu, Box, FileText, Database, Globe, MessageSquare, Settings, Key, File } from 'lucide-react';
 
 import { cn } from '../utils/cn';
 import componentIcon from '../assets/component.svg';
 import configIcon from '../assets/config.svg';
+import type { ConfigDataItem, SecretDataItem } from '../types/flow';
 
 const icons: Record<string, React.ElementType> = {
     play: Play,
@@ -25,9 +26,45 @@ const NODE_HEADER_STYLES = 'flex h-8 items-center justify-between rounded-lg bg-
 const NODE_BODY_STYLES = 'px-3 pb-2 pt-3';
 const NODE_ICON_CONTAINER_STYLES = 'flex items-center gap-2';
 const NODE_BADGE_STYLES = 'flex h-[18px] items-center rounded-[5px] border border-divider-deep bg-components-badge-bg-dimm px-1 text-xs font-semibold uppercase text-text-tertiary';
+const NODE_DATA_LIST_STYLES = 'mt-2 space-y-1';
+const NODE_DATA_ITEM_STYLES = 'flex items-center gap-1.5 text-xs text-text-secondary truncate';
 
 const CustomNode = ({ data, selected }: NodeProps) => {
     const Icon = icons[data.icon as string] || Box;
+    const isConfigSecret = (data.componentType as string) === 'config-secret';
+    const originalType = data.originalType as string;
+    const configData = data.configData as ConfigDataItem[] | undefined;
+    const secretData = data.secretData as SecretDataItem[] | undefined;
+
+    // Render config files list
+    const renderConfigData = () => {
+        if (!configData || configData.length === 0) return null;
+        return (
+            <div className={NODE_DATA_LIST_STYLES}>
+                {configData.map((item) => (
+                    <div key={item.id} className={NODE_DATA_ITEM_STYLES}>
+                        <File size={12} className="text-text-tertiary flex-shrink-0" />
+                        <span className="truncate">{item.key}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    // Render secret keys list
+    const renderSecretData = () => {
+        if (!secretData || secretData.length === 0) return null;
+        return (
+            <div className={NODE_DATA_LIST_STYLES}>
+                {secretData.map((item) => (
+                    <div key={item.id} className={NODE_DATA_ITEM_STYLES}>
+                        <Key size={12} className="text-text-tertiary flex-shrink-0" />
+                        <span className="truncate">{item.key}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
 
     return (
         <div
@@ -42,7 +79,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
                 {data.name && (
                     <div className="text-sm font-bold text-text-primary mb-1 truncate flex items-center gap-1">
                         <img
-                            src={(data.componentType as string)?.includes('config') || (data.componentType as string)?.includes('secret') ? configIcon : componentIcon}
+                            src={isConfigSecret ? configIcon : componentIcon}
                             alt="icon"
                             className="w-5 h-5"
                         />
@@ -53,7 +90,6 @@ const CustomNode = ({ data, selected }: NodeProps) => {
                 {/* Header */}
                 <div className={NODE_HEADER_STYLES}>
                     <div className={NODE_ICON_CONTAINER_STYLES}>
-                        {/* <Icon size={14} className="text-text-primary" /> */}
                         <span className="text-xs font-semibold text-text-primary truncate max-w-[120px]">
                             {data.label as string}
                         </span>
@@ -61,13 +97,18 @@ const CustomNode = ({ data, selected }: NodeProps) => {
                     <div className={NODE_BADGE_STYLES}>
                         {(data.componentType as string) === 'webservice' ? 'Web Service' :
                          (data.componentType as string) === 'store' ? 'Store' :
-                         (data.componentType as string)?.includes('config') ? 'Config' :
-                         (data.componentType as string)?.includes('secret') ? 'Secret' :
+                         (data.componentType as string) === 'config-secret' ? (
+                            originalType === 'config' ? 'Config' : 'Secret'
+                         ) :
+                         (data.componentType as string) === 'config' ? 'Config' :
+                         (data.componentType as string) === 'secret' ? 'Secret' :
                          'Web Service'}
                     </div>
                 </div>
 
-
+                {/* Config/Secret Data List */}
+                {isConfigSecret && originalType === 'config' && renderConfigData()}
+                {isConfigSecret && originalType === 'secret' && renderSecretData()}
             </div>
 
             {/* Handles */}

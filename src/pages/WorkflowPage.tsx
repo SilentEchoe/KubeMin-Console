@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, Package, Database, Server, Cloud, Box, Layers, Cpu, Globe, Layout, Terminal } from 'lucide-react';
 import useSWR from 'swr';
 import FlowCanvas from '../components/FlowCanvas';
 import Sidebar from '../components/Sidebar';
 import PropertyPanel from '../components/PropertyPanel';
-import { fetchApp } from '../api/apps';
+import { fetchApp, fetchAppComponents } from '../api/apps';
+import { useFlowStore } from '../stores/flowStore';
+import { componentsToNodes } from '../utils/componentToNode';
 import GameIcon from '../assets/game.svg';
 
 // Default icon background colors
@@ -28,11 +30,32 @@ const WorkflowPage: React.FC = () => {
     const { appId } = useParams<{ appId: string }>();
     const navigate = useNavigate();
     const [showArrow, setShowArrow] = useState(false);
+    const { setNodes, clearNodes } = useFlowStore();
 
+    // Fetch app details
     const { data: app, isLoading } = useSWR(
         appId ? ['app', appId] : null,
         ([_, id]) => fetchApp(id)
     );
+
+    // Fetch app components
+    const { data: components, isLoading: isLoadingComponents } = useSWR(
+        appId ? ['components', appId] : null,
+        ([_, id]) => fetchAppComponents(id)
+    );
+
+    // Initialize nodes when components are loaded
+    useEffect(() => {
+        if (components && components.length > 0) {
+            const nodes = componentsToNodes(components);
+            setNodes(nodes);
+        }
+        
+        // Cleanup: clear nodes when leaving the page
+        return () => {
+            clearNodes();
+        };
+    }, [components, setNodes, clearNodes]);
 
     // Generate a consistent background color based on app id
     const iconBackground = app?.id ? ICON_BACKGROUNDS[
