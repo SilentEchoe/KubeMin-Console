@@ -4,8 +4,7 @@ import { useFlowStore } from '../stores/flowStore';
 import { cn } from '../utils/cn';
 import EnvPanel from './EnvPanel';
 import ComponentSetMenu from './workflow/ComponentSetMenu';
-import EnvManager from './workflow/EnvManager';
-import EnvModal from './workflow/EnvModal';
+import WorkflowEnvPanel from './workflow/EnvPanel';
 import TraitsEnvPanel from './workflow/TraitsEnvPanel';
 import TraitsStoragePanel from './workflow/TraitsStoragePanel';
 import TraitsSidecarPanel from './workflow/TraitsSidecarPanel';
@@ -30,9 +29,7 @@ const PropertyPanel: React.FC = () => {
     const [activeSection, setActiveSection] = React.useState<ComponentSetSectionKey>('system');
     const [isEditingName, setIsEditingName] = useState(false);
     const [editingName, setEditingName] = useState('');
-    const [showEnvModal, setShowEnvModal] = useState(false);
-    const [editingEnvVar, setEditingEnvVar] = useState<EnvironmentVariable | null>(null);
-    const [showEnvList, setShowEnvList] = useState(false); // EnvManager 默认关闭
+    const [showEnvPanel, setShowEnvPanel] = useState(false); // Env Panel 侧边栏
     const [activeTraitsPanel, setActiveTraitsPanel] = useState<TraitsPanelType>(null); // Current active traits panel
 
     const selectedNode = useMemo(() => {
@@ -51,11 +48,10 @@ const PropertyPanel: React.FC = () => {
     }
 
     const handleEnvAdd = () => {
-        setEditingEnvVar(null);
-        setShowEnvModal(true);
+        setShowEnvPanel(true);
     };
 
-    const handleEnvSave = (variable: EnvironmentVariable) => {
+    const handleEnvAddFromPanel = (variable: EnvironmentVariable) => {
         if (!selectedNodeId) return;
 
         // Get the latest node data from store
@@ -64,7 +60,12 @@ const PropertyPanel: React.FC = () => {
         if (!latestNode) return;
 
         const currentVars = latestNode.data.environmentVariables || [];
-        let newVars: EnvironmentVariable[];
+
+        // Check for duplicate key
+        if (currentVars.some(v => v.key === variable.key)) {
+            alert('变量名已存在');
+            return;
+        }
 
         // Store secret value separately before masking
         const secretValue = variable.isSecret ? variable.value : undefined;
@@ -74,25 +75,7 @@ const PropertyPanel: React.FC = () => {
             ? { ...variable, value: '[__HIDDEN__]' }
             : variable;
 
-        if (editingEnvVar) {
-            // Update existing variable
-            // If key changed, remove old secret
-            if (editingEnvVar.key !== variable.key && editingEnvVar.isSecret) {
-                const newSecrets = { ...envSecrets };
-                delete newSecrets[editingEnvVar.key];
-                setEnvSecrets(newSecrets);
-            }
-            newVars = currentVars.map(v =>
-                v.key === editingEnvVar.key ? variableToSave : v
-            );
-        } else {
-            // Add new variable
-            if (currentVars.some(v => v.key === variable.key)) {
-                alert('变量名已存在');
-                return;
-            }
-            newVars = [...currentVars, variableToSave];
-        }
+        const newVars = [...currentVars, variableToSave];
 
         // Store secret value separately
         if (variable.isSecret && secretValue) {
@@ -100,41 +83,10 @@ const PropertyPanel: React.FC = () => {
                 ...envSecrets,
                 [variable.key]: secretValue
             });
-        } else if (editingEnvVar && editingEnvVar.isSecret && !variable.isSecret) {
-            // Remove secret if type changed from Secret
-            const newSecrets = { ...envSecrets };
-            delete newSecrets[variable.key];
-            setEnvSecrets(newSecrets);
         }
 
-        console.log('Saving environment variables to node:', selectedNodeId, newVars);
         updateNodeData(selectedNodeId, { environmentVariables: newVars });
-
-        // Force a re-render by updating the state
-        setTimeout(() => {
-            const updatedNodes = useFlowStore.getState().nodes;
-            const updatedNode = updatedNodes.find(n => n.id === selectedNodeId);
-            console.log('After save, node environmentVariables:', updatedNode?.data?.environmentVariables);
-        }, 100);
-
-        setShowEnvModal(false);
-        setEditingEnvVar(null);
-    };
-
-    const handleEnvEdit = (variable: EnvironmentVariable) => {
-        // Get actual value from secrets if it's a secret
-        const editVar: EnvironmentVariable = {
-            ...variable,
-            value: variable.isSecret && envSecrets[variable.key]
-                ? envSecrets[variable.key]
-                : variable.value
-        };
-        setEditingEnvVar(editVar);
-        setShowEnvModal(true);
-    };
-
-    const handleEnvChange = (variables: EnvironmentVariable[]) => {
-        updateNodeData(selectedNode.id, { environmentVariables: variables });
+        setShowEnvPanel(false);
     };
 
     const handleTraitsEnvAdd = (newEnv: TraitEnv) => {
@@ -175,17 +127,6 @@ const PropertyPanel: React.FC = () => {
 
     return (
         <>
-            {/* Env Modal */}
-            <EnvModal
-                isOpen={showEnvModal}
-                onClose={() => {
-                    setShowEnvModal(false);
-                    setEditingEnvVar(null);
-                }}
-                onSave={handleEnvSave}
-                editingVariable={editingEnvVar}
-            />
-
             {/* Floating Configuration Panel */}
             {showConfigPanel && (
                 <div
@@ -284,31 +225,21 @@ const PropertyPanel: React.FC = () => {
                     </div>
                 )}
 
-                {/* Env Sidebar - Left (conditionally rendered) */}
-                {showEnvList && !activeTraitsPanel && (
+                {/* Env Panel - Left (conditionally rendered) */}
+                {showEnvPanel && !activeTraitsPanel && (
                     <div
                         className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl transition-all duration-200"
                         style={{
-                            minWidth: '400px',
-                            maxWidth: '400px',
-                            width: '400px',
+                            minWidth: '360px',
+                            maxWidth: '360px',
+                            width: '360px',
                             height: '100%',
                         }}
                     >
-                        <div className="flex-1 overflow-y-auto p-4" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                            {selectedNode ? (
-                                <EnvManager
-                                    key={`${selectedNode.id}-${JSON.stringify(selectedNode.data.environmentVariables || [])}`} // Force re-render when variables change
-                                    variables={(selectedNode.data.environmentVariables as EnvironmentVariable[]) || []}
-                                    onChange={handleEnvChange}
-                                    onAddClick={handleEnvAdd}
-                                    onEditClick={handleEnvEdit}
-                                    onClose={() => setShowEnvList(false)}
-                                />
-                            ) : (
-                                <div className="text-center py-8 text-text-tertiary text-sm">请选择一个节点</div>
-                            )}
-                        </div>
+                        <WorkflowEnvPanel
+                            onClose={() => setShowEnvPanel(false)}
+                            onAdd={handleEnvAddFromPanel}
+                        />
                     </div>
                 )}
 
@@ -399,7 +330,6 @@ const PropertyPanel: React.FC = () => {
                                 activeKey={activeSection}
                                 onChange={setActiveSection}
                                 onEnvAddClick={handleEnvAdd}
-                                onEnvListClick={() => setShowEnvList(true)}
                                 onTraitsEnvAddClick={() => setActiveTraitsPanel('env')}
                                 onTraitsStorageAddClick={() => setActiveTraitsPanel('storage')}
                                 onTraitsSidecarAddClick={() => setActiveTraitsPanel('sidecar')}

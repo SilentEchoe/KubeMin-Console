@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import type { ComponentSetSectionKey } from '../PropertyPanel';
-import type { Traits } from '../../types/flow';
+import type { Traits, EnvironmentVariable } from '../../types/flow';
 import { ChevronDown, Check, X } from 'lucide-react';
 import { useFlowStore } from '../../stores/flowStore';
 import EnvironmentVariableManager from '../EnvironmentVariableManager';
@@ -21,20 +21,18 @@ interface ComponentSetMenuProps {
     activeKey: ComponentSetSectionKey;
     onChange: (key: ComponentSetSectionKey) => void;
     onEnvAddClick?: () => void;
-    onEnvListClick?: () => void;
     onTraitsEnvAddClick?: () => void;
     onTraitsStorageAddClick?: () => void;
     onTraitsSidecarAddClick?: () => void;
     onTraitsInitAddClick?: () => void;
 }
 
-const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeKey, onChange: _onChange, onEnvAddClick, onEnvListClick, onTraitsEnvAddClick, onTraitsStorageAddClick, onTraitsSidecarAddClick, onTraitsInitAddClick }) => {
+const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeKey, onChange: _onChange, onEnvAddClick, onTraitsEnvAddClick, onTraitsStorageAddClick, onTraitsSidecarAddClick, onTraitsInitAddClick }) => {
     const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
     const [portInput, setPortInput] = useState('');
     const [ports, setPorts] = useState<string[]>([]);
     const [isComponentTypeOpen, setIsComponentTypeOpen] = useState(false);
-    const [activeEnvButton, setActiveEnvButton] = useState<'add' | 'list'>('add');
 
 
     useEffect(() => {
@@ -169,23 +167,13 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                         />
                     </FlexRow>
 
-                    {/* Enabled Toggle - Moved outside FieldCollapse */}
-                    <FlexRow className="justify-between mb-4">
-                        <label className="text-[13px] font-medium text-text-primary mb-0">TmpEnabled</label>
-                        <Switch
-                            checked={selectedNode.data.enabled !== false}
-                            onChange={(checked) => updateNodeData(selectedNode.id, { enabled: checked })}
-                            size="md"
-                        />
-                    </FlexRow>
-
                     {/* Port Tags */}
                     <div className="mb-4">
                         <FlexRow className="justify-between items-center mb-2">
                             <label className="text-[13px] font-medium text-text-primary mb-0">
                                 Ports
                             </label>
-                            <div className="flex items-center gap-2 flex-1 ml-4">
+                            <div className="flex items-center gap-2 ml-auto">
                                 <input
                                     type="text"
                                     className={cn(INPUT_CONTAINER_STYLES, "w-[50px] h-8 outline-none focus:ring-1 focus:ring-state-accent-solid")}
@@ -280,54 +268,52 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                         </div>
                     </FlexRow>
 
-                    {/* Env Label and Toggle Buttons */}
-                    <FlexRow className="justify-between items-center mb-4">
-                        <label className="text-[13px] font-medium text-text-primary mb-0">
-                            Env
-                        </label>
-                        <div className="flex" style={{ gap: '2px' }}>
-                            {onEnvAddClick && (
-                                <button
-                                    onClick={() => {
-                                        setActiveEnvButton('add');
-                                        onEnvAddClick();
-                                    }}
-                                    className={cn(
-                                        "flex items-center justify-center border-2 bg-white transition-colors",
-                                        activeEnvButton === 'add'
-                                            ? "border-[#1d4ed8] text-[#1d4ed8]"
-                                            : "border-gray-300 text-gray-600"
-                                    )}
-                                    style={{
-                                        width: '50px',
-                                        height: '28px',
-                                    }}
-                                >
-                                    <span className="text-[12px] font-medium">Add</span>
-                                </button>
-                            )}
-                            {onEnvListClick && (
-                                <button
-                                    onClick={() => {
-                                        setActiveEnvButton('list');
-                                        onEnvListClick();
-                                    }}
-                                    className={cn(
-                                        "flex items-center justify-center border-2 bg-white transition-colors",
-                                        activeEnvButton === 'list'
-                                            ? "border-[#1d4ed8] text-[#1d4ed8]"
-                                            : "border-gray-300 text-gray-600"
-                                    )}
-                                    style={{
-                                        width: '50px',
-                                        height: '28px',
-                                    }}
-                                >
-                                    <span className="text-[12px] font-medium">List</span>
-                                </button>
-                            )}
-                        </div>
-                    </FlexRow>
+                    {/* Env Section */}
+                    <div className="mb-4">
+                        <FlexRow className="justify-between items-center mb-2">
+                            <label className="text-[13px] font-medium text-text-primary mb-0">
+                                Env
+                            </label>
+                            <Button
+                                variant="secondary"
+                                size="small"
+                                onClick={onEnvAddClick}
+                                className="h-8 px-3 text-xs whitespace-nowrap"
+                            >
+                                + Add Env
+                            </Button>
+                        </FlexRow>
+                        {((selectedNode.data.environmentVariables as EnvironmentVariable[]) || []).length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {((selectedNode.data.environmentVariables as EnvironmentVariable[]) || []).map((env, index) => {
+                                    const envType = env.type || 'String';
+                                    const bgColor = envType === 'Secret' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                   envType === 'Number' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                   'bg-blue-50 text-blue-700 border-blue-200';
+                                    return (
+                                        <span
+                                            key={index}
+                                            className={cn("inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md border", bgColor)}
+                                        >
+                                            {env.key}
+                                            <span className="text-[10px] opacity-70">({envType})</span>
+                                            <button
+                                                onClick={() => {
+                                                    const currentVars = (selectedNode.data.environmentVariables as EnvironmentVariable[]) || [];
+                                                    updateNodeData(selectedNode.id, {
+                                                        environmentVariables: currentVars.filter((_, i) => i !== index)
+                                                    });
+                                                }}
+                                                className="hover:opacity-70 transition-opacity"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
 
                     {/* Liveness Toggle */}
                     <div className="mb-4">
@@ -727,6 +713,16 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                             </div>
                         )}
                     </div>
+
+                    {/* Enabled Toggle */}
+                    <FlexRow className="justify-between mb-4">
+                        <label className="text-[13px] font-medium text-text-primary mb-0">TmpEnabled</label>
+                        <Switch
+                            checked={selectedNode.data.enabled !== false}
+                            onChange={(checked) => updateNodeData(selectedNode.id, { enabled: checked })}
+                            size="md"
+                        />
+                    </FlexRow>
 
                 </>
             )}

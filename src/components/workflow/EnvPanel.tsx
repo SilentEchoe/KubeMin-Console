@@ -1,0 +1,214 @@
+import React, { useState } from 'react';
+import { X, ChevronDown, Check } from 'lucide-react';
+import { cn } from '../../utils/cn';
+import { Button } from '../ui/Button';
+import {
+    PortalToFollowElem,
+    PortalToFollowElemContent,
+    PortalToFollowElemTrigger,
+} from '../ui/PortalToFollowElem';
+import type { EnvironmentVariable } from '../../types/flow';
+
+interface EnvPanelProps {
+    onClose: () => void;
+    onAdd: (env: EnvironmentVariable) => void;
+}
+
+const INPUT_STYLES = 'w-full px-3 py-2 text-sm border border-components-panel-border rounded-lg bg-white focus:ring-1 focus:ring-state-accent-solid outline-none transition-colors';
+
+const ENV_TYPES = [
+    { value: 'String', label: 'String', desc: 'Text value' },
+    { value: 'Number', label: 'Number', desc: 'Numeric value' },
+    { value: 'Secret', label: 'Secret', desc: 'Sensitive value (hidden)' },
+] as const;
+
+const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd }) => {
+    const [envType, setEnvType] = useState<'String' | 'Number' | 'Secret'>('String');
+    const [key, setKey] = useState('');
+    const [value, setValue] = useState('');
+    const [description, setDescription] = useState('');
+    const [isTypeOpen, setIsTypeOpen] = useState(false);
+
+    const handleAdd = () => {
+        if (!key.trim() || !value.trim()) return;
+
+        const newEnv: EnvironmentVariable = {
+            key: key.trim(),
+            value: value.trim(),
+            type: envType,
+            isSecret: envType === 'Secret',
+            ...(description.trim() && { description: description.trim() })
+        };
+
+        onAdd(newEnv);
+        
+        // Reset form
+        setKey('');
+        setValue('');
+        setDescription('');
+        setEnvType('String');
+    };
+
+    const isValid = key.trim() && value.trim();
+
+    return (
+        <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-components-panel-border">
+                <span className="text-[15px] font-semibold text-text-primary">Add Environment Variable</span>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onClose}
+                    className="h-6 w-6"
+                >
+                    <X size={16} />
+                </Button>
+            </div>
+
+            {/* Form Content */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                {/* Type */}
+                <div>
+                    <label className="text-[13px] font-medium text-text-primary mb-2 block">
+                        Type <span className="text-red-500">*</span>
+                    </label>
+                    <PortalToFollowElem
+                        placement="bottom-start"
+                        offsetValue={4}
+                        trigger="click"
+                        open={isTypeOpen}
+                        onOpenChange={setIsTypeOpen}
+                    >
+                        <PortalToFollowElemTrigger asChild>
+                            <button
+                                type="button"
+                                className={cn(INPUT_STYLES, "flex items-center justify-between cursor-pointer hover:bg-state-base-hover")}
+                            >
+                                <span>{envType}</span>
+                                <ChevronDown className="h-4 w-4 text-text-tertiary shrink-0" />
+                            </button>
+                        </PortalToFollowElemTrigger>
+                        <PortalToFollowElemContent className="w-[320px] p-1 bg-white border border-components-panel-border shadow-lg rounded-lg z-[100]">
+                            <div className="flex flex-col gap-0.5">
+                                {ENV_TYPES.map((type) => {
+                                    const isSelected = envType === type.value;
+                                    return (
+                                        <div
+                                            key={type.value}
+                                            className={cn(
+                                                "flex items-center gap-2.5 p-2.5 rounded-md cursor-pointer transition-colors",
+                                                isSelected ? "bg-state-accent-active" : "hover:bg-state-base-hover"
+                                            )}
+                                            onClick={() => {
+                                                setEnvType(type.value);
+                                                setIsTypeOpen(false);
+                                            }}
+                                        >
+                                            <div className={cn(
+                                                "flex h-4 w-4 items-center justify-center shrink-0",
+                                                isSelected ? "text-state-accent-solid" : "invisible"
+                                            )}>
+                                                <Check size={14} strokeWidth={2.5} />
+                                            </div>
+                                            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                                                <span className={cn(
+                                                    "text-[13px] font-medium leading-none",
+                                                    isSelected ? "text-state-accent-solid" : "text-text-primary"
+                                                )}>
+                                                    {type.label}
+                                                </span>
+                                                <span className="text-[11px] leading-normal text-text-tertiary">
+                                                    {type.desc}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </PortalToFollowElemContent>
+                    </PortalToFollowElem>
+                </div>
+
+                {/* Key */}
+                <div>
+                    <label className="text-[13px] font-medium text-text-primary mb-2 block">
+                        Variable Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        className={INPUT_STYLES}
+                        placeholder="e.g. MYSQL_ROOT_PASSWORD"
+                        value={key}
+                        onChange={(e) => setKey(e.target.value)}
+                    />
+                    <p className="mt-1 text-xs text-text-tertiary">
+                        The environment variable name
+                    </p>
+                </div>
+
+                {/* Value */}
+                <div>
+                    <label className="text-[13px] font-medium text-text-primary mb-2 block">
+                        Value <span className="text-red-500">*</span>
+                    </label>
+                    {envType === 'Secret' ? (
+                        <input
+                            type="password"
+                            className={INPUT_STYLES}
+                            placeholder="Enter secret value"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                        />
+                    ) : (
+                        <input
+                            type="text"
+                            className={INPUT_STYLES}
+                            placeholder="Enter value"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                        />
+                    )}
+                    <p className="mt-1 text-xs text-text-tertiary">
+                        {envType === 'Secret' ? 'Secret values are hidden' : 'The environment variable value'}
+                    </p>
+                </div>
+
+                {/* Description */}
+                <div>
+                    <label className="text-[13px] font-medium text-text-primary mb-2 block">
+                        Description <span className="text-text-tertiary">(optional)</span>
+                    </label>
+                    <textarea
+                        className={cn(INPUT_STYLES, "min-h-[60px] resize-y")}
+                        placeholder="Optional description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-components-panel-border">
+                <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={onClose}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    variant="primary"
+                    size="small"
+                    onClick={handleAdd}
+                    disabled={!isValid}
+                >
+                    Add
+                </Button>
+            </div>
+        </div>
+    );
+};
+
+export default EnvPanel;
+
