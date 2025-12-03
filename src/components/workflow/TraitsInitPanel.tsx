@@ -410,3 +410,4 @@ const TraitsInitPanel: React.FC<TraitsInitPanelProps> = ({ onClose, onAdd }) => 
 
 export default TraitsInitPanel;
 
+

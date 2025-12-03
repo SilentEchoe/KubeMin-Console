@@ -18,10 +18,11 @@ const TraitsEnvsManager: React.FC<TraitsEnvsManagerProps> = ({ envs, onChange })
     const [selectedNodeId, setSelectedNodeId] = useState('');
     const [key, setKey] = useState('');
 
-    // Filter config and secret nodes
-    const configNodes = nodes.filter(n =>
-        n.data.componentType === 'config' || n.data.componentType === 'secret'
-    );
+    // Filter config and secret nodes (including config-secret type)
+    const configNodes = nodes.filter(n => {
+        const type = n.data.componentType;
+        return type === 'config' || type === 'secret' || type === 'config-secret';
+    });
 
     const resetForm = () => {
         setName('');

@@ -324,3 +324,4 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd 
 
 export default TraitsSidecarPanel;
 
+

@@ -188,7 +188,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                             <div className="flex items-center gap-2 flex-1 ml-4">
                                 <input
                                     type="text"
-                                    className={cn(INPUT_CONTAINER_STYLES, "flex-1 h-8 outline-none focus:ring-1 focus:ring-state-accent-solid")}
+                                    className={cn(INPUT_CONTAINER_STYLES, "w-[50px] h-8 outline-none focus:ring-1 focus:ring-state-accent-solid")}
                                     placeholder="Enter port number"
                                     value={portInput}
                                     onChange={(e) => setPortInput(e.target.value)}
@@ -237,7 +237,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                     max="10"
                                     value={selectedNode.data.replicas || 1}
                                     onChange={(e) => updateNodeData(selectedNode.id, { replicas: parseInt(e.target.value) || 1 })}
-                                    className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                    className="w-full h-1 rounded-lg appearance-none cursor-pointer slider"
                                     style={{
                                         background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${((selectedNode.data.replicas || 1) - 1) / 9 * 100}%, #e5e7eb ${((selectedNode.data.replicas || 1) - 1) / 9 * 100}%, #e5e7eb 100%)`
                                     }}
@@ -252,7 +252,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                         cursor: pointer;
                                         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
                                         border: none;
-                                        margin-top: -9.5px;
+                                        margin-top: -9px;
                                     }
                                     .slider::-moz-range-thumb {
                                         width: 20px;
@@ -372,7 +372,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                                 max="120"
                                                 value={Number(selectedNode.data.livenessInitialDelay) || 30}
                                                 onChange={(e) => updateNodeData(selectedNode.id, { livenessInitialDelay: parseInt(e.target.value) || 30 })}
-                                                className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                                className="w-full h-1 rounded-lg appearance-none cursor-pointer slider"
                                                 style={{
                                                     background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${(Number(selectedNode.data.livenessInitialDelay) || 30) / 120 * 100}%, #e5e7eb ${(Number(selectedNode.data.livenessInitialDelay) || 30) / 120 * 100}%, #e5e7eb 100%)`
                                                 }}
@@ -400,7 +400,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                                 max="60"
                                                 value={Number(selectedNode.data.livenessPeriod) || 10}
                                                 onChange={(e) => updateNodeData(selectedNode.id, { livenessPeriod: parseInt(e.target.value) || 10 })}
-                                                className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                                className="w-full h-1 rounded-lg appearance-none cursor-pointer slider"
                                                 style={{
                                                     background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${((Number(selectedNode.data.livenessPeriod) || 10) - 1) / 59 * 100}%, #e5e7eb ${((Number(selectedNode.data.livenessPeriod) || 10) - 1) / 59 * 100}%, #e5e7eb 100%)`
                                                 }}
@@ -428,7 +428,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                                 max="30"
                                                 value={Number(selectedNode.data.livenessTimeout) || 5}
                                                 onChange={(e) => updateNodeData(selectedNode.id, { livenessTimeout: parseInt(e.target.value) || 5 })}
-                                                className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                                className="w-full h-1 rounded-lg appearance-none cursor-pointer slider"
                                                 style={{
                                                     background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${((Number(selectedNode.data.livenessTimeout) || 5) - 1) / 29 * 100}%, #e5e7eb ${((Number(selectedNode.data.livenessTimeout) || 5) - 1) / 29 * 100}%, #e5e7eb 100%)`
                                                 }}
@@ -489,7 +489,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                                 max="120"
                                                 value={Number(selectedNode.data.readinessInitialDelay) || 5}
                                                 onChange={(e) => updateNodeData(selectedNode.id, { readinessInitialDelay: parseInt(e.target.value) || 5 })}
-                                                className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                                className="w-full h-1 rounded-lg appearance-none cursor-pointer slider"
                                                 style={{
                                                     background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${(Number(selectedNode.data.readinessInitialDelay) || 5) / 120 * 100}%, #e5e7eb ${(Number(selectedNode.data.readinessInitialDelay) || 5) / 120 * 100}%, #e5e7eb 100%)`
                                                 }}
@@ -517,7 +517,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                                 max="60"
                                                 value={Number(selectedNode.data.readinessPeriod) || 2}
                                                 onChange={(e) => updateNodeData(selectedNode.id, { readinessPeriod: parseInt(e.target.value) || 2 })}
-                                                className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                                className="w-full h-1 rounded-lg appearance-none cursor-pointer slider"
                                                 style={{
                                                     background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${((Number(selectedNode.data.readinessPeriod) || 2) - 1) / 59 * 100}%, #e5e7eb ${((Number(selectedNode.data.readinessPeriod) || 2) - 1) / 59 * 100}%, #e5e7eb 100%)`
                                                 }}
@@ -545,7 +545,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                                 max="30"
                                                 value={Number(selectedNode.data.readinessTimeout) || 1}
                                                 onChange={(e) => updateNodeData(selectedNode.id, { readinessTimeout: parseInt(e.target.value) || 1 })}
-                                                className="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                                className="w-full h-1 rounded-lg appearance-none cursor-pointer slider"
                                                 style={{
                                                     background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${((Number(selectedNode.data.readinessTimeout) || 1) - 1) / 29 * 100}%, #e5e7eb ${((Number(selectedNode.data.readinessTimeout) || 1) - 1) / 29 * 100}%, #e5e7eb 100%)`
                                                 }}

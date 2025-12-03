@@ -34,8 +34,11 @@ const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd 
     const [isTypeOpen, setIsTypeOpen] = useState(false);
     const [isSourceOpen, setIsSourceOpen] = useState(false);
 
-    // Filter config nodes for config type storage
-    const configNodes = nodes.filter(n => n.data.componentType === 'config');
+    // Filter config nodes for config type storage (including config-secret type)
+    const configNodes = nodes.filter(n => {
+        const type = n.data.componentType;
+        return type === 'config' || type === 'config-secret';
+    });
 
     const handleAdd = () => {
         if (!name || !mountPath) return;
@@ -309,4 +312,5 @@ const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd 
 };
 
 export default TraitsStoragePanel;
+
 

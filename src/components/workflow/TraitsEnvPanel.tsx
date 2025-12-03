@@ -24,10 +24,11 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd }) => {
     const [envKey, setEnvKey] = useState('');
     const [isSourceOpen, setIsSourceOpen] = useState(false);
 
-    // Filter config and secret nodes
-    const configNodes = nodes.filter(n =>
-        n.data.componentType === 'config' || n.data.componentType === 'secret'
-    );
+    // Filter config and secret nodes (including config-secret type)
+    const configNodes = nodes.filter(n => {
+        const type = n.data.componentType;
+        return type === 'config' || type === 'secret' || type === 'config-secret';
+    });
 
     const selectedSourceNode = nodes.find(n => n.id === selectedNodeId);
 
@@ -38,7 +39,7 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd }) => {
             name: envName,
             valueFrom: {
                 secret: {
-                    name: selectedSourceNode?.data.label || selectedNodeId,
+                    name: selectedSourceNode?.data.name || selectedSourceNode?.data.label || selectedNodeId,
                     key: envKey
                 }
             }
@@ -106,7 +107,7 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd }) => {
                                 className={cn(INPUT_STYLES, "flex items-center justify-between cursor-pointer hover:bg-state-base-hover")}
                             >
                                 <span className={cn("truncate", !selectedNodeId && "text-text-tertiary")}>
-                                    {selectedSourceNode ? `${selectedSourceNode.data.label} (${selectedSourceNode.data.componentType})` : 'Select a Config/Secret node...'}
+                                    {selectedSourceNode ? `${selectedSourceNode.data.name || selectedSourceNode.data.label || selectedNodeId} (${selectedSourceNode.data.componentType})` : 'Select a Config/Secret node...'}
                                 </span>
                                 <ChevronDown className="h-4 w-4 text-text-tertiary shrink-0" />
                             </button>
@@ -139,7 +140,7 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd }) => {
                                                         "text-[13px] font-medium leading-none",
                                                         isSelected ? "text-state-accent-solid" : "text-text-primary"
                                                     )}>
-                                                        {node.data.label}
+                                                        {node.data.name || node.data.label || node.id}
                                                     </span>
                                                     <span className="text-[11px] leading-normal text-text-tertiary">
                                                         Type: {node.data.componentType}
