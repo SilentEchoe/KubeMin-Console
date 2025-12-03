@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useFlowStore } from '../../stores/flowStore';
@@ -13,6 +13,8 @@ import type { Traits, TraitEnv } from '../../types/flow';
 interface TraitsEnvPanelProps {
     onClose: () => void;
     onAdd: (env: TraitEnv) => void;
+    initialData?: TraitEnv;
+    onUpdate?: (env: TraitEnv) => void;
 }
 
 const INPUT_STYLES = 'w-full px-3 py-2 text-sm border border-components-panel-border rounded-lg bg-white input-gradient-focus focus:ring-0 outline-none transition-colors';
@@ -31,12 +33,14 @@ const gradientBorderStyle = `
     }
 `;
 
-const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd }) => {
+const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd, initialData, onUpdate }) => {
     const { nodes } = useFlowStore();
     const [envName, setEnvName] = useState('');
     const [selectedNodeId, setSelectedNodeId] = useState('');
     const [envKey, setEnvKey] = useState('');
     const [isSourceOpen, setIsSourceOpen] = useState(false);
+
+    const isEditMode = !!initialData;
 
     // Filter config and secret nodes (including config-secret type)
     const configNodes = nodes.filter(n => {
@@ -46,10 +50,30 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd }) => {
 
     const selectedSourceNode = nodes.find(n => n.id === selectedNodeId);
 
-    const handleAdd = () => {
+    // Populate form when initialData changes (edit mode)
+    useEffect(() => {
+        if (initialData) {
+            setEnvName(initialData.name || '');
+            setEnvKey(initialData.valueFrom?.secret?.key || '');
+            // Find the node by secret name
+            const secretName = initialData.valueFrom?.secret?.name;
+            if (secretName) {
+                const matchingNode = nodes.find(n => n.data.name === secretName || n.data.label === secretName);
+                if (matchingNode) {
+                    setSelectedNodeId(matchingNode.id);
+                }
+            }
+        } else {
+            setEnvName('');
+            setSelectedNodeId('');
+            setEnvKey('');
+        }
+    }, [initialData, nodes]);
+
+    const handleSubmit = () => {
         if (!envName || !selectedNodeId || !envKey) return;
 
-        const newEnv: TraitEnv = {
+        const envData: TraitEnv = {
             name: envName,
             valueFrom: {
                 secret: {
@@ -59,7 +83,11 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd }) => {
             }
         };
 
-        onAdd(newEnv);
+        if (isEditMode && onUpdate) {
+            onUpdate(envData);
+        } else {
+            onAdd(envData);
+        }
 
         // Reset form
         setEnvName('');
@@ -75,7 +103,9 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd }) => {
             <div className="flex flex-col h-full">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-components-panel-border">
-                <span className="text-[15px] font-semibold text-text-primary">Add Traits Env</span>
+                <span className="text-[15px] font-semibold text-text-primary">
+                    {isEditMode ? 'Edit Traits Env' : 'Add Traits Env'}
+                </span>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -210,10 +240,10 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd }) => {
                 <Button
                     variant="primary"
                     size="small"
-                    onClick={handleAdd}
+                    onClick={handleSubmit}
                     disabled={!isValid}
                 >
-                    Add
+                    {isEditMode ? 'Save' : 'Add'}
                 </Button>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
@@ -7,6 +7,8 @@ import type { TraitContainer, TraitEnv, TraitStorage } from '../../types/flow';
 interface TraitsSidecarPanelProps {
     onClose: () => void;
     onAdd: (container: TraitContainer) => void;
+    initialData?: TraitContainer;
+    onUpdate?: (container: TraitContainer) => void;
 }
 
 const INPUT_STYLES = 'w-full px-3 py-2 text-sm border border-components-panel-border rounded-lg bg-white input-gradient-focus focus:ring-0 outline-none transition-colors';
@@ -26,7 +28,7 @@ const gradientBorderStyle = `
     }
 `;
 
-const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd }) => {
+const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd, initialData, onUpdate }) => {
     const [name, setName] = useState('');
     const [image, setImage] = useState('');
     const [command, setCommand] = useState('');
@@ -45,6 +47,30 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd 
     const [storageType, setStorageType] = useState<'persistent' | 'ephemeral'>('ephemeral');
     const [storageMountPath, setStorageMountPath] = useState('');
     const [storageSubPath, setStorageSubPath] = useState('');
+
+    const isEditMode = !!initialData;
+
+    // Populate form when initialData changes (edit mode)
+    useEffect(() => {
+        if (initialData) {
+            setName(initialData.name || '');
+            setImage(initialData.image || '');
+            // Convert command array to JSON string for display
+            if (initialData.command && Array.isArray(initialData.command)) {
+                setCommand(JSON.stringify(initialData.command));
+            } else {
+                setCommand('');
+            }
+            setEnvs(initialData.traits?.envs || []);
+            setStorage(initialData.traits?.storage || []);
+        } else {
+            setName('');
+            setImage('');
+            setCommand('');
+            setEnvs([]);
+            setStorage([]);
+        }
+    }, [initialData]);
 
     const handleAddEnv = () => {
         if (!envName || !envSecretName || !envSecretKey) return;
@@ -80,7 +106,7 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd 
         setStorage(storage.filter((_, i) => i !== index));
     };
 
-    const handleAdd = () => {
+    const handleSubmit = () => {
         if (!name) return;
 
         // Parse command into array
@@ -98,7 +124,7 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd 
             }
         }
 
-        const newContainer: TraitContainer = {
+        const containerData: TraitContainer = {
             name,
             ...(image && { image }),
             ...(commandArray && { command: commandArray }),
@@ -110,7 +136,11 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd 
             }
         };
 
-        onAdd(newContainer);
+        if (isEditMode && onUpdate) {
+            onUpdate(containerData);
+        } else {
+            onAdd(containerData);
+        }
         
         // Reset form
         setName('');
@@ -128,7 +158,9 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd 
             <div className="flex flex-col h-full">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-components-panel-border">
-                <span className="text-[15px] font-semibold text-text-primary">Add Sidecar Container</span>
+                <span className="text-[15px] font-semibold text-text-primary">
+                    {isEditMode ? 'Edit Sidecar Container' : 'Add Sidecar Container'}
+                </span>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -328,10 +360,10 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd 
                 <Button
                     variant="primary"
                     size="small"
-                    onClick={handleAdd}
+                    onClick={handleSubmit}
                     disabled={!isValid}
                 >
-                    Add
+                    {isEditMode ? 'Save' : 'Add'}
                 </Button>
             </div>
         </div>

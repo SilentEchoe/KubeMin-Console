@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
@@ -12,6 +12,8 @@ import type { EnvironmentVariable } from '../../types/flow';
 interface EnvPanelProps {
     onClose: () => void;
     onAdd: (env: EnvironmentVariable) => void;
+    initialData?: EnvironmentVariable;
+    onUpdate?: (env: EnvironmentVariable) => void;
 }
 
 const INPUT_STYLES = 'w-full px-3 py-2 text-sm border border-components-panel-border rounded-lg bg-white input-gradient-focus focus:ring-0 outline-none transition-colors';
@@ -36,17 +38,35 @@ const ENV_TYPES = [
     { value: 'Secret', label: 'Secret', desc: 'Sensitive value (hidden)' },
 ] as const;
 
-const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd }) => {
+const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd, initialData, onUpdate }) => {
     const [envType, setEnvType] = useState<'String' | 'Number' | 'Secret'>('String');
     const [key, setKey] = useState('');
     const [value, setValue] = useState('');
     const [description, setDescription] = useState('');
     const [isTypeOpen, setIsTypeOpen] = useState(false);
 
-    const handleAdd = () => {
+    const isEditMode = !!initialData;
+
+    // Populate form when initialData changes (edit mode)
+    useEffect(() => {
+        if (initialData) {
+            setKey(initialData.key || '');
+            setValue(initialData.value || '');
+            setEnvType(initialData.type || 'String');
+            setDescription(initialData.description || '');
+        } else {
+            // Reset form for add mode
+            setKey('');
+            setValue('');
+            setEnvType('String');
+            setDescription('');
+        }
+    }, [initialData]);
+
+    const handleSubmit = () => {
         if (!key.trim() || !value.trim()) return;
 
-        const newEnv: EnvironmentVariable = {
+        const envData: EnvironmentVariable = {
             key: key.trim(),
             value: value.trim(),
             type: envType,
@@ -54,7 +74,11 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd }) => {
             ...(description.trim() && { description: description.trim() })
         };
 
-        onAdd(newEnv);
+        if (isEditMode && onUpdate) {
+            onUpdate(envData);
+        } else {
+            onAdd(envData);
+        }
         
         // Reset form
         setKey('');
@@ -71,7 +95,9 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd }) => {
             <div className="flex flex-col h-full">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-components-panel-border">
-                <span className="text-[15px] font-semibold text-text-primary">Add Environment Variable</span>
+                <span className="text-[15px] font-semibold text-text-primary">
+                    {isEditMode ? 'Edit Environment Variable' : 'Add Environment Variable'}
+                </span>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -216,10 +242,10 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd }) => {
                 <Button
                     variant="primary"
                     size="small"
-                    onClick={handleAdd}
+                    onClick={handleSubmit}
                     disabled={!isValid}
                 >
-                    Add
+                    {isEditMode ? 'Save' : 'Add'}
                 </Button>
             </div>
         </div>

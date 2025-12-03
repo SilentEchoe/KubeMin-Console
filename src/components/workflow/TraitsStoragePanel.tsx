@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, Check } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useFlowStore } from '../../stores/flowStore';
@@ -13,6 +13,8 @@ import type { TraitStorage } from '../../types/flow';
 interface TraitsStoragePanelProps {
     onClose: () => void;
     onAdd: (storage: TraitStorage) => void;
+    initialData?: TraitStorage;
+    onUpdate?: (storage: TraitStorage) => void;
 }
 
 const INPUT_STYLES = 'w-full px-3 py-2 text-sm border border-components-panel-border rounded-lg bg-white input-gradient-focus focus:ring-0 outline-none transition-colors';
@@ -37,7 +39,7 @@ const STORAGE_TYPES = [
     { value: 'config', label: 'Config', desc: 'Mount from ConfigMap' },
 ] as const;
 
-const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd }) => {
+const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd, initialData, onUpdate }) => {
     const { nodes } = useFlowStore();
     const [storageType, setStorageType] = useState<TraitStorage['type']>('persistent');
     const [name, setName] = useState('');
@@ -48,16 +50,37 @@ const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd 
     const [isTypeOpen, setIsTypeOpen] = useState(false);
     const [isSourceOpen, setIsSourceOpen] = useState(false);
 
+    const isEditMode = !!initialData;
+
     // Filter config nodes for config type storage (including config-secret type)
     const configNodes = nodes.filter(n => {
         const type = n.data.componentType;
         return type === 'config' || type === 'config-secret';
     });
 
-    const handleAdd = () => {
+    // Populate form when initialData changes (edit mode)
+    useEffect(() => {
+        if (initialData) {
+            setStorageType(initialData.type || 'persistent');
+            setName(initialData.name || '');
+            setMountPath(initialData.mountPath || '');
+            setSubPath(initialData.subPath || '');
+            setSize(initialData.size || '');
+            setSourceName(initialData.sourceName || '');
+        } else {
+            setStorageType('persistent');
+            setName('');
+            setMountPath('');
+            setSubPath('');
+            setSize('');
+            setSourceName('');
+        }
+    }, [initialData]);
+
+    const handleSubmit = () => {
         if (!name || !mountPath) return;
 
-        const newStorage: TraitStorage = {
+        const storageData: TraitStorage = {
             type: storageType,
             name,
             mountPath,
@@ -66,7 +89,11 @@ const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd 
             ...(storageType === 'config' && sourceName && { sourceName }),
         };
 
-        onAdd(newStorage);
+        if (isEditMode && onUpdate) {
+            onUpdate(storageData);
+        } else {
+            onAdd(storageData);
+        }
         
         // Reset form
         setName('');
@@ -84,7 +111,9 @@ const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd 
             <div className="flex flex-col h-full">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-components-panel-border">
-                <span className="text-[15px] font-semibold text-text-primary">Add Traits Storage</span>
+                <span className="text-[15px] font-semibold text-text-primary">
+                    {isEditMode ? 'Edit Traits Storage' : 'Add Traits Storage'}
+                </span>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -317,10 +346,10 @@ const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd 
                 <Button
                     variant="primary"
                     size="small"
-                    onClick={handleAdd}
+                    onClick={handleSubmit}
                     disabled={!isValid}
                 >
-                    Add
+                    {isEditMode ? 'Save' : 'Add'}
                 </Button>
             </div>
         </div>

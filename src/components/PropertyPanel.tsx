@@ -17,6 +17,13 @@ import type { EnvironmentVariable, Traits, TraitEnv, TraitStorage, TraitContaine
 
 type TraitsPanelType = 'env' | 'storage' | 'sidecar' | 'init' | null;
 
+// Edit state type
+interface EditState {
+    type: 'env' | 'traitsEnv' | 'traitsStorage' | 'traitsSidecar' | 'traitsInit' | null;
+    index: number;
+    data: EnvironmentVariable | TraitEnv | TraitStorage | TraitContainer | null;
+}
+
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
 const PANEL_TITLE_STYLES = 'text-[15px] font-semibold text-text-primary';
 const PANEL_CONTENT_STYLES = 'flex-1 overflow-y-auto p-4';
@@ -31,6 +38,7 @@ const PropertyPanel: React.FC = () => {
     const [editingName, setEditingName] = useState('');
     const [showEnvPanel, setShowEnvPanel] = useState(false); // Env Panel 侧边栏
     const [activeTraitsPanel, setActiveTraitsPanel] = useState<TraitsPanelType>(null); // Current active traits panel
+    const [editState, setEditState] = useState<EditState>({ type: null, index: -1, data: null }); // Edit state
 
     const selectedNode = useMemo(() => {
         return nodes.find((n) => n.id === selectedNodeId);
@@ -46,6 +54,7 @@ const PropertyPanel: React.FC = () => {
     }
 
     const handleEnvAdd = () => {
+        setEditState({ type: null, index: -1, data: null });
         setShowEnvPanel(true);
     };
 
@@ -123,6 +132,101 @@ const PropertyPanel: React.FC = () => {
         setActiveTraitsPanel(null);
     };
 
+    // Edit handlers
+    const handleEnvEdit = (index: number, env: EnvironmentVariable) => {
+        setEditState({ type: 'env', index, data: env });
+        setShowEnvPanel(true);
+    };
+
+    const handleEnvUpdate = (updatedEnv: EnvironmentVariable) => {
+        if (!selectedNode || editState.index < 0) return;
+        const currentVars = (selectedNode.data.environmentVariables as EnvironmentVariable[]) || [];
+        const newVars = [...currentVars];
+        newVars[editState.index] = updatedEnv;
+        updateNodeData(selectedNode.id, { environmentVariables: newVars });
+        setShowEnvPanel(false);
+        setEditState({ type: null, index: -1, data: null });
+    };
+
+    const handleTraitsEnvEdit = (index: number, env: TraitEnv) => {
+        setEditState({ type: 'traitsEnv', index, data: env });
+        setActiveTraitsPanel('env');
+    };
+
+    const handleTraitsEnvUpdate = (updatedEnv: TraitEnv) => {
+        if (!selectedNode || editState.index < 0) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        const newEnvs = [...(traits.envs || [])];
+        newEnvs[editState.index] = updatedEnv;
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, envs: newEnvs }
+        });
+        setActiveTraitsPanel(null);
+        setEditState({ type: null, index: -1, data: null });
+    };
+
+    const handleTraitsStorageEdit = (index: number, storage: TraitStorage) => {
+        setEditState({ type: 'traitsStorage', index, data: storage });
+        setActiveTraitsPanel('storage');
+    };
+
+    const handleTraitsStorageUpdate = (updatedStorage: TraitStorage) => {
+        if (!selectedNode || editState.index < 0) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        const newStorage = [...(traits.storage || [])];
+        newStorage[editState.index] = updatedStorage;
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, storage: newStorage }
+        });
+        setActiveTraitsPanel(null);
+        setEditState({ type: null, index: -1, data: null });
+    };
+
+    const handleTraitsSidecarEdit = (index: number, sidecar: TraitContainer) => {
+        setEditState({ type: 'traitsSidecar', index, data: sidecar });
+        setActiveTraitsPanel('sidecar');
+    };
+
+    const handleTraitsSidecarUpdate = (updatedSidecar: TraitContainer) => {
+        if (!selectedNode || editState.index < 0) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        const newSidecar = [...(traits.sidecar || [])];
+        newSidecar[editState.index] = updatedSidecar;
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, sidecar: newSidecar }
+        });
+        setActiveTraitsPanel(null);
+        setEditState({ type: null, index: -1, data: null });
+    };
+
+    const handleTraitsInitEdit = (index: number, init: TraitContainer) => {
+        setEditState({ type: 'traitsInit', index, data: init });
+        setActiveTraitsPanel('init');
+    };
+
+    const handleTraitsInitUpdate = (updatedInit: TraitContainer) => {
+        if (!selectedNode || editState.index < 0) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        const newInit = [...(traits.init || [])];
+        newInit[editState.index] = updatedInit;
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, init: newInit }
+        });
+        setActiveTraitsPanel(null);
+        setEditState({ type: null, index: -1, data: null });
+    };
+
+    // Close panel and clear edit state
+    const handleCloseEnvPanel = () => {
+        setShowEnvPanel(false);
+        setEditState({ type: null, index: -1, data: null });
+    };
+
+    const handleCloseTraitsPanel = () => {
+        setActiveTraitsPanel(null);
+        setEditState({ type: null, index: -1, data: null });
+    };
+
     return (
         <>
             {/* Floating Configuration Panel */}
@@ -166,8 +270,10 @@ const PropertyPanel: React.FC = () => {
                         }}
                     >
                         <TraitsEnvPanel
-                            onClose={() => setActiveTraitsPanel(null)}
+                            onClose={handleCloseTraitsPanel}
                             onAdd={handleTraitsEnvAdd}
+                            initialData={editState.type === 'traitsEnv' ? editState.data as TraitEnv : undefined}
+                            onUpdate={handleTraitsEnvUpdate}
                         />
                     </div>
                 )}
@@ -183,8 +289,10 @@ const PropertyPanel: React.FC = () => {
                         }}
                     >
                         <TraitsStoragePanel
-                            onClose={() => setActiveTraitsPanel(null)}
+                            onClose={handleCloseTraitsPanel}
                             onAdd={handleTraitsStorageAdd}
+                            initialData={editState.type === 'traitsStorage' ? editState.data as TraitStorage : undefined}
+                            onUpdate={handleTraitsStorageUpdate}
                         />
                     </div>
                 )}
@@ -200,8 +308,10 @@ const PropertyPanel: React.FC = () => {
                         }}
                     >
                         <TraitsSidecarPanel
-                            onClose={() => setActiveTraitsPanel(null)}
+                            onClose={handleCloseTraitsPanel}
                             onAdd={handleTraitsSidecarAdd}
+                            initialData={editState.type === 'traitsSidecar' ? editState.data as TraitContainer : undefined}
+                            onUpdate={handleTraitsSidecarUpdate}
                         />
                     </div>
                 )}
@@ -217,8 +327,10 @@ const PropertyPanel: React.FC = () => {
                         }}
                     >
                         <TraitsInitPanel
-                            onClose={() => setActiveTraitsPanel(null)}
+                            onClose={handleCloseTraitsPanel}
                             onAdd={handleTraitsInitAdd}
+                            initialData={editState.type === 'traitsInit' ? editState.data as TraitContainer : undefined}
+                            onUpdate={handleTraitsInitUpdate}
                         />
                     </div>
                 )}
@@ -235,8 +347,10 @@ const PropertyPanel: React.FC = () => {
                         }}
                     >
                         <WorkflowEnvPanel
-                            onClose={() => setShowEnvPanel(false)}
+                            onClose={handleCloseEnvPanel}
                             onAdd={handleEnvAddFromPanel}
+                            initialData={editState.type === 'env' ? editState.data as EnvironmentVariable : undefined}
+                            onUpdate={handleEnvUpdate}
                         />
                     </div>
                 )}
@@ -328,10 +442,27 @@ const PropertyPanel: React.FC = () => {
                                 activeKey={activeSection}
                                 onChange={setActiveSection}
                                 onEnvAddClick={handleEnvAdd}
-                                onTraitsEnvAddClick={() => setActiveTraitsPanel('env')}
-                                onTraitsStorageAddClick={() => setActiveTraitsPanel('storage')}
-                                onTraitsSidecarAddClick={() => setActiveTraitsPanel('sidecar')}
-                                onTraitsInitAddClick={() => setActiveTraitsPanel('init')}
+                                onEnvEditClick={handleEnvEdit}
+                                onTraitsEnvAddClick={() => {
+                                    setEditState({ type: null, index: -1, data: null });
+                                    setActiveTraitsPanel('env');
+                                }}
+                                onTraitsEnvEditClick={handleTraitsEnvEdit}
+                                onTraitsStorageAddClick={() => {
+                                    setEditState({ type: null, index: -1, data: null });
+                                    setActiveTraitsPanel('storage');
+                                }}
+                                onTraitsStorageEditClick={handleTraitsStorageEdit}
+                                onTraitsSidecarAddClick={() => {
+                                    setEditState({ type: null, index: -1, data: null });
+                                    setActiveTraitsPanel('sidecar');
+                                }}
+                                onTraitsSidecarEditClick={handleTraitsSidecarEdit}
+                                onTraitsInitAddClick={() => {
+                                    setEditState({ type: null, index: -1, data: null });
+                                    setActiveTraitsPanel('init');
+                                }}
+                                onTraitsInitEditClick={handleTraitsInitEdit}
                             />
                         </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import type { ComponentSetSectionKey } from '../PropertyPanel';
-import type { Traits, EnvironmentVariable } from '../../types/flow';
+import type { Traits, EnvironmentVariable, TraitEnv, TraitStorage, TraitContainer } from '../../types/flow';
 import { ChevronDown, Check, X } from 'lucide-react';
 import { useFlowStore } from '../../stores/flowStore';
 import EnvironmentVariableManager from '../EnvironmentVariableManager';
@@ -36,13 +36,31 @@ interface ComponentSetMenuProps {
     activeKey: ComponentSetSectionKey;
     onChange: (key: ComponentSetSectionKey) => void;
     onEnvAddClick?: () => void;
+    onEnvEditClick?: (index: number, env: EnvironmentVariable) => void;
     onTraitsEnvAddClick?: () => void;
+    onTraitsEnvEditClick?: (index: number, env: TraitEnv) => void;
     onTraitsStorageAddClick?: () => void;
+    onTraitsStorageEditClick?: (index: number, storage: TraitStorage) => void;
     onTraitsSidecarAddClick?: () => void;
+    onTraitsSidecarEditClick?: (index: number, sidecar: TraitContainer) => void;
     onTraitsInitAddClick?: () => void;
+    onTraitsInitEditClick?: (index: number, init: TraitContainer) => void;
 }
 
-const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeKey, onChange: _onChange, onEnvAddClick, onTraitsEnvAddClick, onTraitsStorageAddClick, onTraitsSidecarAddClick, onTraitsInitAddClick }) => {
+const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
+    activeKey: _activeKey,
+    onChange: _onChange,
+    onEnvAddClick,
+    onEnvEditClick,
+    onTraitsEnvAddClick,
+    onTraitsEnvEditClick,
+    onTraitsStorageAddClick,
+    onTraitsStorageEditClick,
+    onTraitsSidecarAddClick,
+    onTraitsSidecarEditClick,
+    onTraitsInitAddClick,
+    onTraitsInitEditClick
+}) => {
     const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
     const [portInput, setPortInput] = useState('');
@@ -310,12 +328,14 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                         return (
                                             <span
                                                 key={index}
-                                                className={cn("inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md border", bgColor)}
+                                                className={cn("inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md border cursor-pointer hover:opacity-80 transition-opacity", bgColor)}
+                                                onClick={() => onEnvEditClick?.(index, env)}
                                             >
                                                 {env.key}
                                                 <span className="text-[10px] opacity-70">({envType})</span>
                                                 <button
-                                                    onClick={() => {
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
                                                         const currentVars = (selectedNode.data.environmentVariables as EnvironmentVariable[]) || [];
                                                         updateNodeData(selectedNode.id, {
                                                             environmentVariables: currentVars.filter((_, i) => i !== index)
@@ -586,12 +606,14 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                     {((selectedNode.data.traits as Traits)?.envs || []).map((env, index) => (
                                         <span
                                             key={index}
-                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-md border border-blue-200"
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-md border border-blue-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => onTraitsEnvEditClick?.(index, env)}
                                         >
                                             {env.name}
                                             <span className="text-blue-400 text-[10px]">({env.valueFrom?.secret?.name})</span>
                                             <button
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
                                                     const traits = (selectedNode.data.traits as Traits) || {};
                                                     updateNodeData(selectedNode.id, {
                                                         traits: { ...traits, envs: traits.envs?.filter((_, i) => i !== index) }
@@ -627,13 +649,15 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                     {((selectedNode.data.traits as Traits)?.storage || []).map((storage, index) => (
                                         <span
                                             key={index}
-                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-50 text-green-700 rounded-md border border-green-200"
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-50 text-green-700 rounded-md border border-green-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => onTraitsStorageEditClick?.(index, storage)}
                                         >
                                             {storage.name}
                                             <span className="text-green-400 text-[10px]">({storage.type})</span>
                                             <span className="text-green-500 text-[10px]">{storage.mountPath}</span>
                                             <button
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
                                                     const traits = (selectedNode.data.traits as Traits) || {};
                                                     updateNodeData(selectedNode.id, {
                                                         traits: { ...traits, storage: traits.storage?.filter((_, i) => i !== index) }
@@ -669,12 +693,14 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                     {((selectedNode.data.traits as Traits)?.sidecar || []).map((sidecar, index) => (
                                         <span
                                             key={index}
-                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-purple-50 text-purple-700 rounded-md border border-purple-200"
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-purple-50 text-purple-700 rounded-md border border-purple-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => onTraitsSidecarEditClick?.(index, sidecar)}
                                         >
                                             {sidecar.name}
                                             {sidecar.image && <span className="text-purple-400 text-[10px] max-w-[100px] truncate">({sidecar.image.split('/').pop()})</span>}
                                             <button
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
                                                     const traits = (selectedNode.data.traits as Traits) || {};
                                                     updateNodeData(selectedNode.id, {
                                                         traits: { ...traits, sidecar: traits.sidecar?.filter((_, i) => i !== index) }
@@ -710,12 +736,14 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({ activeKey: _activeK
                                     {((selectedNode.data.traits as Traits)?.init || []).map((init, index) => (
                                         <span
                                             key={index}
-                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-orange-50 text-orange-700 rounded-md border border-orange-200"
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-orange-50 text-orange-700 rounded-md border border-orange-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => onTraitsInitEditClick?.(index, init)}
                                         >
                                             {init.name}
                                             {init.properties?.image && <span className="text-orange-400 text-[10px] max-w-[100px] truncate">({init.properties.image.split('/').pop()})</span>}
                                             <button
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
                                                     const traits = (selectedNode.data.traits as Traits) || {};
                                                     updateNodeData(selectedNode.id, {
                                                         traits: { ...traits, init: traits.init?.filter((_, i) => i !== index) }
