@@ -249,16 +249,15 @@ const FlowCanvas: React.FC = () => {
                         <div className="relative flex h-8 items-center">
                             <button
                                 onClick={() => setShowChecklist(!showChecklist)}
-                                className="flex h-8 items-center rounded-lg border-[0.5px] border-components-button-secondary-border bg-components-button-secondary-bg px-3 text-[13px] font-medium text-text-secondary hover:bg-state-base-hover cursor-pointer"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border-[0.5px] border-components-button-secondary-border bg-components-button-secondary-bg text-text-secondary hover:bg-state-base-hover cursor-pointer"
                             >
-                                <ListChecks className="mr-1.5 h-4 w-4" />
-                                Workflow
-                                {workflowIssues.length > 0 && (
-                                    <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-medium text-white">
-                                        {workflowIssues.reduce((sum, n) => sum + n.issues.length, 0)}
-                                    </span>
-                                )}
+                                <ListChecks className="h-4 w-4" />
                             </button>
+                            {workflowIssues.length > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                                    {workflowIssues.reduce((sum, n) => sum + n.issues.length, 0)}
+                                </span>
+                            )}
                         </div>
 
                         {/* Publish Button */}

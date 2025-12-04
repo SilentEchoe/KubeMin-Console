@@ -65,14 +65,17 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
     const [portInput, setPortInput] = useState('');
     const [ports, setPorts] = useState<string[]>([]);
+    const [cmdInput, setCmdInput] = useState('');
+    const [cmds, setCmds] = useState<string[]>([]);
     const [isComponentTypeOpen, setIsComponentTypeOpen] = useState(false);
 
 
     useEffect(() => {
         if (selectedNode) {
             setPorts(selectedNode.data.ports || []);
+            setCmds((selectedNode.data.cmd as string[]) || []);
         }
-    }, [selectedNode?.id, selectedNode?.data.ports]);
+    }, [selectedNode?.id, selectedNode?.data.ports, selectedNode?.data.cmd]);
 
     if (!selectedNode) {
         return null;
@@ -98,6 +101,29 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
         if (e.key === 'Enter') {
             e.preventDefault();
             handleAddPort();
+        }
+    };
+
+    const handleAddCmd = () => {
+        const cmd = cmdInput.trim();
+        if (cmd && !cmds.includes(cmd)) {
+            const newCmds = [...cmds, cmd];
+            setCmds(newCmds);
+            updateNodeData(selectedNode.id, { cmd: newCmds });
+            setCmdInput('');
+        }
+    };
+
+    const handleRemoveCmd = (cmdToRemove: string) => {
+        const newCmds = cmds.filter(c => c !== cmdToRemove);
+        setCmds(newCmds);
+        updateNodeData(selectedNode.id, { cmd: newCmds });
+    };
+
+    const handleCmdKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleAddCmd();
         }
     };
 
@@ -238,6 +264,52 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                             <button
                                                 onClick={() => handleRemovePort(port)}
                                                 className="hover:text-text-tertiary transition-colors"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Command Section */}
+                        <div className="mb-4">
+                            <FlexRow className="justify-between items-center mb-2">
+                                <label className="text-[13px] font-medium text-text-primary mb-0">
+                                    Command
+                                </label>
+                                <div className="flex items-center gap-2 ml-auto">
+                                    <input
+                                        type="text"
+                                        className={cn(INPUT_CONTAINER_STYLES, "w-[90px] h-8 outline-none input-gradient-focus focus:ring-0")}
+                                        placeholder="Enter cmd"
+                                        value={cmdInput}
+                                        onChange={(e) => setCmdInput(e.target.value)}
+                                        onKeyDown={handleCmdKeyDown}
+                                    />
+                                    <Button
+                                        variant="secondary"
+                                        size="small"
+                                        onClick={handleAddCmd}
+                                        className="h-8 px-3 text-xs whitespace-nowrap"
+                                    >
+                                        + Cmd
+                                    </Button>
+                                </div>
+                            </FlexRow>
+                            {cmds.length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                    {cmds.map((cmd) => (
+                                        <span
+                                            key={cmd}
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-md border border-blue-200 max-w-[200px]"
+                                            title={cmd}
+                                        >
+                                            <span className="truncate">{cmd}</span>
+                                            <button
+                                                onClick={() => handleRemoveCmd(cmd)}
+                                                className="hover:text-blue-900 transition-colors flex-shrink-0"
                                             >
                                                 <X size={12} />
                                             </button>
