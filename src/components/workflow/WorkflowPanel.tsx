@@ -8,6 +8,7 @@ interface WorkflowPanelProps {
     onClose: () => void;
     appId: string;
     onSelectWorkflow: (workflow: Workflow) => void;
+    selectedWorkflowId?: string;
 }
 
 const WorkflowPanel: React.FC<WorkflowPanelProps> = ({
@@ -15,17 +16,25 @@ const WorkflowPanel: React.FC<WorkflowPanelProps> = ({
     onClose,
     appId,
     onSelectWorkflow,
+    selectedWorkflowId: externalSelectedId,
 }) => {
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null);
+    const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
+
+    // Use external selected id if provided, otherwise use internal state
+    const selectedWorkflowId = externalSelectedId || internalSelectedId;
 
     useEffect(() => {
         if (isOpen && appId) {
             setIsLoading(true);
             fetchWorkflows(appId)
                 .then((data) => {
-                    setWorkflows(data);
+                    // Sort by createTime descending (newest first)
+                    const sortedData = [...data].sort((a, b) => {
+                        return new Date(b.createTime).getTime() - new Date(a.createTime).getTime();
+                    });
+                    setWorkflows(sortedData);
                 })
                 .finally(() => {
                     setIsLoading(false);
@@ -36,7 +45,7 @@ const WorkflowPanel: React.FC<WorkflowPanelProps> = ({
     if (!isOpen) return null;
 
     const handleWorkflowClick = (workflow: Workflow) => {
-        setSelectedWorkflowId(workflow.id);
+        setInternalSelectedId(workflow.id);
         onSelectWorkflow(workflow);
     };
 

@@ -29,6 +29,7 @@ import WorkflowChecklist from './workflow/WorkflowChecklist';
 import type { NodeWithIssues } from './workflow/WorkflowChecklist';
 import WorkflowPanel from './workflow/WorkflowPanel';
 import { applyWorkflowConnections, rearrangeNodesForWorkflow } from '../utils/workflowConnection';
+import { fetchWorkflows } from '../api/apps';
 
 import { useShortcuts } from '../hooks/useShortcuts';
 
@@ -91,6 +92,8 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
     const [viewport, setViewportState] = useState<Viewport>({ x: 0, y: 0, zoom: 1.0 });
     const [showChecklist, setShowChecklist] = useState(false);
     const [showWorkflowPanel, setShowWorkflowPanel] = useState(false);
+    const [currentWorkflow, setCurrentWorkflow] = useState<Workflow | null>(null);
+    const [hasAppliedInitialWorkflow, setHasAppliedInitialWorkflow] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const reactFlowInstanceRef = useRef<any>(null);
 
@@ -104,9 +107,40 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
         const newEdges = applyWorkflowConnections(workflow, rearrangedNodes);
         setEdges(newEdges);
 
+        // Update current workflow
+        setCurrentWorkflow(workflow);
+
         // Close the panel after applying
         setShowWorkflowPanel(false);
     }, [nodes, setNodes, setEdges]);
+
+    // Auto-apply the first (newest) workflow when nodes are loaded
+    useEffect(() => {
+        if (appId && nodes.length > 0 && !hasAppliedInitialWorkflow) {
+            fetchWorkflows(appId).then((workflows) => {
+                if (workflows.length > 0) {
+                    // Sort by createTime descending (newest first)
+                    const sortedWorkflows = [...workflows].sort((a, b) => {
+                        return new Date(b.createTime).getTime() - new Date(a.createTime).getTime();
+                    });
+                    
+                    const firstWorkflow = sortedWorkflows[0];
+                    
+                    // Rearrange nodes based on workflow steps
+                    const rearrangedNodes = rearrangeNodesForWorkflow(firstWorkflow, nodes);
+                    setNodes(rearrangedNodes);
+
+                    // Apply workflow connections
+                    const newEdges = applyWorkflowConnections(firstWorkflow, rearrangedNodes);
+                    setEdges(newEdges);
+
+                    // Update current workflow
+                    setCurrentWorkflow(firstWorkflow);
+                }
+                setHasAppliedInitialWorkflow(true);
+            });
+        }
+    }, [appId, nodes.length, hasAppliedInitialWorkflow, setNodes, setEdges]);
 
     // Generate workflow issues from nodes
     const getWorkflowIssues = useCallback((): NodeWithIssues[] => {
@@ -312,6 +346,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                         onClose={() => setShowWorkflowPanel(false)}
                         appId={appId}
                         onSelectWorkflow={handleSelectWorkflow}
+                        selectedWorkflowId={currentWorkflow?.id}
                     />
                 )}
                 <ZoomIndicator />
