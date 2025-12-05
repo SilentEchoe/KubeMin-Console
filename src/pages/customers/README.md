@@ -1,41 +1,40 @@
-# Customers Page - Pixel Cat Loading Animation
+# Pixel Cat Loading Animation
 
-## 🐱 像素猫加载动画测试功能
+## Feature Introduction
+The customer page now includes a cute pixel-style silver gradient British Shorthair cat loading animation. You can preview this animation by clicking the test button.
 
-### 功能介绍
-客户页面现在包含一个可爱的像素风格银色渐变英国短毛猫加载动画，您可以通过点击测试按钮来预览这个动画。
+## How to Use the Test Button
 
-### 如何使用测试按钮
+1. **Navigate to the Customer Page**
+   - Click the "Customers" menu item in the sidebar
+   - Or directly visit `http://localhost:5173/customers`
 
-1. **导航到客户页面**
-   - 点击侧边栏的 "Customers" 菜单项
-   - 或直接访问 `http://localhost:5173/customers`
+2. **Find the Test Button**
+   - In the button group at the top of the page, find the purple "Test Animation" button
+   - The button icon is a play icon
 
-2. **找到测试按钮**
-   - 在页面顶部的按钮组中，找到紫色的 "Test Animation" 按钮
-   - 按钮图标是一个播放图标 (▶)
+3. **Trigger the Animation**
+   - Click the "Test Animation" button
+   - The entire page will display a cute pixel cat sleeping animation
+   - The animation automatically disappears after 5 seconds, or click "Skip Animation" to end early
 
-3. **触发动画**
-   - 点击 "Test Animation" 按钮
-   - 整个页面将显示可爱的像素猫睡觉动画
-   - 动画持续5秒后自动消失，或点击 "Skip Animation" 提前结束
+## Animation Features
+- **Pixel Style**: Retro 8-bit pixel art style
+- **Silver Gradient**: British Shorthair's signature silver-gray gradient fur
+- **Sleep Effect**: Floating Z letters and snoring bubbles
+- **Responsive Design**: Adapts to various screen sizes
 
-### 动画特色
-- **像素风格**: 复古8位像素艺术风格
-- **银色渐变**: 英短特有的银灰色渐变毛发
-- **睡眠效果**: 漂浮的Z字母和打鼾气泡
-- **响应式设计**: 适配各种屏幕尺寸
+## Technical Implementation
+- **Component**: `PixelCatLoader.tsx`
+- **Styling**: CSS animations with pixel-perfect rendering
+- **State Management**: React useState controls show/hide
+- **Auto Close**: 5-second timer automatically ends animation
 
-### 技术实现
-- **组件**: `PixelCatLoader.tsx`
-- **样式**: CSS动画与像素完美渲染
-- **状态管理**: React useState 控制显示/隐藏
-- **自动关闭**: 5秒定时器自动结束动画
+## Use Cases
+Besides the test button, this animation also automatically displays in the following situations:
+- When loading customer data
+- During search/filter operations
+- When infinite scroll loads more data
 
-### 使用场景
-除了测试按钮，这个动画还会在以下情况自动显示：
-- 客户数据加载时
-- 搜索/筛选操作时
-- 无限滚动加载更多数据时
+Enjoy the delightful loading experience brought by this cute pixel cat!
 
-享受这只可爱的像素小猫带来的愉悦加载体验吧！ 💤🐾

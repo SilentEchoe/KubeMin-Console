@@ -112,15 +112,15 @@ export type FlowEdge = Edge;
 
 // Component deployment status types
 export type ComponentDeployStatus = 
-    | 'waiting'    // 等待中
-    | 'queued'     // 队列中
-    | 'running'    // 运行中
-    | 'completed'  // 已完成
-    | 'failed'     // 失败
-    | 'cancelled'  // 已取消
-    | 'timeout'    // 超时
-    | 'reject'     // 拒绝
-    | 'prepare';   // 准备中
+    | 'waiting'    // waiting
+    | 'queued'     // queued
+    | 'running'    // running
+    | 'completed'  // completed
+    | 'failed'     // failed
+    | 'cancelled'  // cancelled
+    | 'timeout'    // timeout
+    | 'reject'     // reject
+    | 'prepare';   // prepare
 
 export interface ComponentStatus {
     name: string;

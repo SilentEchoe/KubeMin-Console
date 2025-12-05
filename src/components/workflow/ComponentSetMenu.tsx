@@ -588,7 +588,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                                     {Number(selectedNode.data.livenessInitialDelay) || 30}
                                                 </span>
                                             </div>
-                                            <span className="text-[13px] text-text-tertiary shrink-0">秒</span>
+                                            <span className="text-[13px] text-text-tertiary shrink-0">sec</span>
                                         </div>
                                     </FlexRow>
 
@@ -616,7 +616,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                                     {Number(selectedNode.data.livenessPeriod) || 10}
                                                 </span>
                                             </div>
-                                            <span className="text-[13px] text-text-tertiary shrink-0">秒</span>
+                                            <span className="text-[13px] text-text-tertiary shrink-0">sec</span>
                                         </div>
                                     </FlexRow>
 
@@ -644,7 +644,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                                     {Number(selectedNode.data.livenessTimeout) || 5}
                                                 </span>
                                             </div>
-                                            <span className="text-[13px] text-text-tertiary shrink-0">秒</span>
+                                            <span className="text-[13px] text-text-tertiary shrink-0">sec</span>
                                         </div>
                                     </FlexRow>
                                 </div>
@@ -705,7 +705,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                                     {Number(selectedNode.data.readinessInitialDelay) || 5}
                                                 </span>
                                             </div>
-                                            <span className="text-[13px] text-text-tertiary shrink-0">秒</span>
+                                            <span className="text-[13px] text-text-tertiary shrink-0">sec</span>
                                         </div>
                                     </FlexRow>
 
@@ -733,7 +733,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                                     {Number(selectedNode.data.readinessPeriod) || 2}
                                                 </span>
                                             </div>
-                                            <span className="text-[13px] text-text-tertiary shrink-0">秒</span>
+                                            <span className="text-[13px] text-text-tertiary shrink-0">sec</span>
                                         </div>
                                     </FlexRow>
 
@@ -761,7 +761,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                                     {Number(selectedNode.data.readinessTimeout) || 1}
                                                 </span>
                                             </div>
-                                            <span className="text-[13px] text-text-tertiary shrink-0">秒</span>
+                                            <span className="text-[13px] text-text-tertiary shrink-0">sec</span>
                                         </div>
                                     </FlexRow>
                                 </div>
@@ -957,7 +957,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                 {(selectedNode.data.componentType === 'config' || selectedNode.data.componentType === 'secret') && (
                     <div className="mb-4">
                         <label className={LABEL_STYLES}>
-                            {selectedNode.data.componentType === 'secret' ? 'Secret Variables' : '环境变量'}
+                            {selectedNode.data.componentType === 'secret' ? 'Secret Variables' : 'Environment Variables'}
                         </label>
                         <EnvironmentVariableManager
                             variables={selectedNode.data.environmentVariables || []}

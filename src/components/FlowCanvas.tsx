@@ -311,25 +311,25 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
             const hasOutgoing = edges.some(e => e.source === node.id);
             
             if (!hasIncoming && !hasOutgoing) {
-                nodeIssues.push({ message: '此节点尚未连接到其他节点' });
+                nodeIssues.push({ message: 'This node is not connected to other nodes' });
             }
             
             // Check required fields based on node type
             if (node.data.componentType === 'webservice' || node.data.componentType === 'store') {
                 if (!node.data.image) {
-                    nodeIssues.push({ message: '镜像 不能为空' });
+                    nodeIssues.push({ message: 'Image cannot be empty' });
                 }
             }
             
             // Check if name is empty
             if (!node.data.name) {
-                nodeIssues.push({ message: '名称 不能为空' });
+                nodeIssues.push({ message: 'Name cannot be empty' });
             }
             
             if (nodeIssues.length > 0) {
                 issues.push({
                     id: node.id,
-                    name: node.data.name || node.data.label || '未命名节点',
+                    name: node.data.name || node.data.label || 'Unnamed Node',
                     type: node.data.componentType === 'config-secret' ? 'list' : 'reply',
                     issues: nodeIssues,
                 });

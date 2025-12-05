@@ -31,7 +31,7 @@ const EnvManager: React.FC<EnvManagerProps> = ({ variables, onChange, onAddClick
     return (
         <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[13px] font-medium text-text-primary">环境变量</h3>
+                <h3 className="text-[13px] font-medium text-text-primary">Environment Variables</h3>
                 {onClose && (
                     <button
                         onClick={onClose}
@@ -45,7 +45,7 @@ const EnvManager: React.FC<EnvManagerProps> = ({ variables, onChange, onAddClick
             <div className="flex-1 overflow-y-auto space-y-2">
                 {variables.length === 0 ? (
                     <div className="text-center py-8 text-text-tertiary text-sm">
-                        暂无环境变量
+                        No environment variables
                     </div>
                 ) : (
                     variables.map((variable) => (

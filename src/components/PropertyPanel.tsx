@@ -36,7 +36,7 @@ const PropertyPanel: React.FC = () => {
     const [activeSection, setActiveSection] = React.useState<ComponentSetSectionKey>('system');
     const [isEditingName, setIsEditingName] = useState(false);
     const [editingName, setEditingName] = useState('');
-    const [showEnvPanel, setShowEnvPanel] = useState(false); // Env Panel 侧边栏
+    const [showEnvPanel, setShowEnvPanel] = useState(false); // Env Panel sidebar
     const [activeTraitsPanel, setActiveTraitsPanel] = useState<TraitsPanelType>(null); // Current active traits panel
     const [editState, setEditState] = useState<EditState>({ type: null, index: -1, data: null }); // Edit state
 
@@ -70,7 +70,7 @@ const PropertyPanel: React.FC = () => {
 
         // Check for duplicate key
         if (currentVars.some(v => v.key === variable.key)) {
-            alert('变量名已存在');
+            alert('Variable name already exists');
             return;
         }
 
@@ -436,7 +436,7 @@ const PropertyPanel: React.FC = () => {
 
                     {/* Content */}
                     <div className={PANEL_CONTENT_STYLES}>
-                        {/* Component Set 菜单栏（一比一复刻在内容顶部） */}
+                        {/* Component Set Menu */}
                         <div className="mb-4">
                             <ComponentSetMenu
                                 activeKey={activeSection}
@@ -469,7 +469,7 @@ const PropertyPanel: React.FC = () => {
                         {/* Placeholder for other sections */}
                         {activeSection !== 'system' && (
                             <div className="mt-6 text-xs text-text-tertiary">
-                                此区域对应菜单 “{activeSection.toUpperCase()}”，后续可按需填充具体表单配置。
+                                This area corresponds to menu "{activeSection.toUpperCase()}", form configuration can be added as needed.
                             </div>
                         )}
                     </div>

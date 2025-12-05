@@ -21,15 +21,15 @@ const NODE_DATA_ITEM_STYLES = 'flex items-center gap-1.5 text-xs text-text-secon
 
 // Status-based border colors (using inline styles for reliability)
 const STATUS_BORDER_COLORS: Record<ComponentDeployStatus, string> = {
-    waiting: '#9ca3af',   // gray-400 - 等待中
-    queued: '#a78bfa',    // violet-400 - 队列中
-    running: '#06b6d4',   // cyan-500 - 运行中
-    completed: '#22c55e', // green-500 - 已完成
-    failed: '#ef4444',    // red-500 - 失败
-    cancelled: '#6b7280', // gray-500 - 已取消
-    timeout: '#f97316',   // orange-500 - 超时
-    reject: '#ec4899',    // pink-500 - 拒绝
-    prepare: '#3b82f6',   // blue-500 - 准备中
+    waiting: '#9ca3af',   // gray-400 - waiting
+    queued: '#a78bfa',    // violet-400 - queued
+    running: '#06b6d4',   // cyan-500 - running
+    completed: '#22c55e', // green-500 - completed
+    failed: '#ef4444',    // red-500 - failed
+    cancelled: '#6b7280', // gray-500 - cancelled
+    timeout: '#f97316',   // orange-500 - timeout
+    reject: '#ec4899',    // pink-500 - reject
+    prepare: '#3b82f6',   // blue-500 - prepare
 };
 
 // Status-based background colors (subtle)

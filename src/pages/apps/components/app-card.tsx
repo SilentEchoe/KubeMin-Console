@@ -135,21 +135,21 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
                             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                         >
                             <Edit className="w-4 h-4" />
-                            <span>编辑信息</span>
+                            <span>Edit Info</span>
                         </button>
                         <button
                             onClick={handleDuplicate}
                             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                         >
                             <Copy className="w-4 h-4" />
-                            <span>复制</span>
+                            <span>Duplicate</span>
                         </button>
                         <button
                             onClick={handleExport}
                             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                         >
                             <Download className="w-4 h-4" />
-                            <span>导出 DSL</span>
+                            <span>Export DSL</span>
                         </button>
                         <div className="border-t border-gray-100 my-1"></div>
                         <button
@@ -157,7 +157,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
                             className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                         >
                             <Trash2 className="w-4 h-4" />
-                            <span>删除</span>
+                            <span>Delete</span>
                         </button>
                     </div>
                 )}
@@ -189,7 +189,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onUpdate }) => {
 
             {/* Description */}
             <p className="text-xs text-gray-600 mb-2 line-clamp-2 flex-1">
-                {app.description || '暂无描述'}
+                {app.description || 'No description'}
             </p>
 
             {/* Additional Info */}

@@ -65,7 +65,7 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-components-panel-border">
                     <h2 className="text-[15px] font-semibold text-text-primary">
-                        {editingVariable ? '编辑环境变量' : '添加环境变量'}
+                        {editingVariable ? 'Edit Environment Variable' : 'Add Environment Variable'}
                     </h2>
                     <button
                         onClick={handleCancel}
@@ -80,7 +80,7 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
                     {/* Type Selection */}
                     <div>
                         <label className="mb-2 block text-[13px] font-medium text-text-primary">
-                            类型
+                            Type
                         </label>
                         <div className="flex gap-2">
                             {(['String', 'Number', 'Secret'] as const).map((t) => (
@@ -107,13 +107,13 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
                     {/* Name */}
                     <div>
                         <label className="mb-2 block text-[13px] font-medium text-text-primary">
-                            名称
+                            Name
                         </label>
                         <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="变量名"
+                            placeholder="Variable name"
                             className="w-full px-3 py-2 rounded-lg border border-components-panel-border bg-white text-[13px] text-text-primary outline-none input-gradient-focus focus:ring-0"
                             disabled={!!editingVariable}
                         />
@@ -122,12 +122,12 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
                     {/* Value */}
                     <div>
                         <label className="mb-2 block text-[13px] font-medium text-text-primary">
-                            值
+                            Value
                         </label>
                         <textarea
                             value={value}
                             onChange={(e) => setValue(e.target.value)}
-                            placeholder="变量值"
+                            placeholder="Variable value"
                             rows={3}
                             className="w-full px-3 py-2 rounded-lg border border-components-panel-border bg-white text-[13px] text-text-primary outline-none input-gradient-focus focus:ring-0 resize-none"
                         />
@@ -136,12 +136,12 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
                     {/* Description */}
                     <div>
                         <label className="mb-2 block text-[13px] font-medium text-text-primary">
-                            描述
+                            Description
                         </label>
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="变量的描述"
+                            placeholder="Variable description"
                             rows={3}
                             className="w-full px-3 py-2 rounded-lg border border-components-panel-border bg-white text-[13px] text-text-primary outline-none input-gradient-focus focus:ring-0 resize-none"
                         />
@@ -155,14 +155,14 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
                         onClick={handleCancel}
                         className="px-4 py-2 rounded-lg border border-components-button-secondary-border bg-white text-[13px] font-medium text-text-primary hover:bg-state-base-hover transition-colors"
                     >
-                        取消
+                        Cancel
                     </button>
                     <button
                         type="button"
                         onClick={handleSave}
                         className="px-4 py-2 rounded-lg bg-components-button-primary-bg text-[13px] font-medium text-components-button-primary-text hover:bg-components-button-primary-hover transition-colors"
                     >
-                        保存
+                        Save
                     </button>
                 </div>
             </div>
