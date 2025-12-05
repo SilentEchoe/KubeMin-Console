@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { Play, ChevronDown, ListChecks, AlertCircle, Loader2 } from 'lucide-react';
+import { Play, ChevronDown, ListChecks, AlertCircle, Loader2, CheckCircle2, XCircle, X } from 'lucide-react';
 import {
     ReactFlow,
     Background,
@@ -104,6 +104,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
     const [showPublishModal, setShowPublishModal] = useState(false);
     const [isPublishing, setIsPublishing] = useState(false);
     const [publishError, setPublishError] = useState<string | null>(null);
+    const [workflowResult, setWorkflowResult] = useState<{ type: 'success' | 'error'; message: string; details?: string[] } | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const reactFlowInstanceRef = useRef<any>(null);
     const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -149,15 +150,50 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                 });
                 setComponentStatuses(statusMap);
 
-                // Check if all components are completed or any has error
+                // Terminal states that indicate the workflow has finished
+                const terminalStates = ['completed', 'failed', 'cancelled', 'timeout', 'reject'];
+                const errorStates = ['failed', 'cancelled', 'timeout', 'reject'];
+                
+                // Check if all components are in a terminal state
+                const allTerminal = status.components.every(c => terminalStates.includes(c.status));
                 const allCompleted = status.components.every(c => c.status === 'completed');
-                const hasError = status.components.some(c => c.status === 'error');
+                const failedComponents = status.components.filter(c => errorStates.includes(c.status));
 
-                if (allCompleted || hasError) {
+                if (allTerminal) {
                     // Stop polling
                     if (pollingIntervalRef.current) {
                         clearInterval(pollingIntervalRef.current);
                         pollingIntervalRef.current = null;
+                    }
+
+                    if (allCompleted) {
+                        // If all completed successfully, show success message and wait 10 seconds then exit preview mode
+                        setWorkflowResult({
+                            type: 'success',
+                            message: 'Workflow completed successfully!',
+                        });
+                        setTimeout(() => {
+                            clearPreviewState();
+                            setWorkflowResult(null);
+                        }, 10000);
+                    } else if (failedComponents.length > 0) {
+                        // If there are failed components, show error message and exit preview mode
+                        const statusLabels: Record<string, string> = {
+                            failed: 'Failed',
+                            cancelled: 'Cancelled',
+                            timeout: 'Timeout',
+                            reject: 'Rejected',
+                        };
+                        const details = failedComponents.map(c => `${c.name}: ${statusLabels[c.status] || c.status}`);
+                        setWorkflowResult({
+                            type: 'error',
+                            message: 'Workflow execution failed',
+                            details,
+                        });
+                        // Exit preview mode after 3 seconds
+                        setTimeout(() => {
+                            clearPreviewState();
+                        }, 3000);
                     }
                 }
             } catch (error) {
@@ -170,7 +206,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
 
         // Set up interval for every 2 seconds
         pollingIntervalRef.current = setInterval(pollStatus, 2000);
-    }, [setComponentStatuses]);
+    }, [setComponentStatuses, clearPreviewState]);
 
     // Handle publish confirmation
     const handlePublishConfirm = useCallback(async () => {
@@ -539,6 +575,57 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                     </div>
                 </div>
             </Modal>
+
+            {/* Workflow Result Toast */}
+            {workflowResult && (
+                <div 
+                    className={`fixed top-20 right-6 z-[100] max-w-sm rounded-lg shadow-lg border p-4 animate-in slide-in-from-right ${
+                        workflowResult.type === 'success' 
+                            ? 'bg-green-50 border-green-200' 
+                            : 'bg-red-50 border-red-200'
+                    }`}
+                >
+                    <div className="flex items-start gap-3">
+                        {workflowResult.type === 'success' ? (
+                            <CheckCircle2 size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                        ) : (
+                            <XCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-medium ${
+                                workflowResult.type === 'success' ? 'text-green-800' : 'text-red-800'
+                            }`}>
+                                {workflowResult.message}
+                            </p>
+                            {workflowResult.details && workflowResult.details.length > 0 && (
+                                <ul className="mt-2 space-y-1">
+                                    {workflowResult.details.map((detail, index) => (
+                                        <li key={index} className="text-xs text-red-600">
+                                            {detail}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                            {workflowResult.type === 'success' && (
+                                <p className="mt-1 text-xs text-green-600">
+                                    Exiting preview mode in 10 seconds...
+                                </p>
+                            )}
+                        </div>
+                        <button
+                            onClick={() => {
+                                setWorkflowResult(null);
+                                if (workflowResult.type === 'error') {
+                                    clearPreviewState();
+                                }
+                            }}
+                            className="flex-shrink-0 p-1 rounded hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent"
+                        >
+                            <X size={14} className={workflowResult.type === 'success' ? 'text-green-500' : 'text-red-500'} />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

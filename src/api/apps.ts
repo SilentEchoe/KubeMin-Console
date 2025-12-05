@@ -156,7 +156,7 @@ export const executeWorkflow = async (appId: string, workflowId: string): Promis
 export interface TaskComponentStatus {
     name: string;
     type: string;
-    status: 'completed' | 'wait' | 'waiting' | 'running' | 'error';
+    status: 'waiting' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout' | 'reject' | 'prepare';
     startTime?: number;
     endTime?: number;
 }

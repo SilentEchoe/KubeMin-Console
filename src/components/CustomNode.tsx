@@ -1,24 +1,13 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
-import { Play, Cpu, Box, FileText, Database, Globe, MessageSquare, Settings, Key, File, CheckCircle2, Clock, Loader2, XCircle } from 'lucide-react';
+import { Key, File, CheckCircle2, Clock, Loader2, XCircle } from 'lucide-react';
 
 import { cn } from '../utils/cn';
 import componentIcon from '../assets/component.svg';
 import configIcon from '../assets/config.svg';
 import type { ConfigDataItem, SecretDataItem, ComponentDeployStatus } from '../types/flow';
 import { useFlowStore } from '../stores/flowStore';
-
-const icons: Record<string, React.ElementType> = {
-    play: Play,
-    cpu: Cpu,
-    output: Box,
-    file: FileText,
-    database: Database,
-    web: Globe,
-    chat: MessageSquare,
-    settings: Settings,
-};
 
 const NODE_WIDTH = 'w-[240px]';
 const NODE_CONTAINER_STYLES = 'rounded-[15px] bg-workflow-block-bg border-2 shadow-xs hover:shadow-lg transition-all duration-200';
@@ -30,48 +19,64 @@ const NODE_BADGE_STYLES = 'flex h-[18px] items-center rounded-[5px] border borde
 const NODE_DATA_LIST_STYLES = 'mt-2 space-y-1';
 const NODE_DATA_ITEM_STYLES = 'flex items-center gap-1.5 text-xs text-text-secondary truncate';
 
-// Status-based border colors
-const STATUS_BORDER_STYLES: Record<ComponentDeployStatus, string> = {
-    completed: 'border-green-500',
-    wait: 'border-gray-400',
-    waiting: 'border-gray-400',
-    running: 'border-cyan-500',
-    error: 'border-red-500',
+// Status-based border colors (using inline styles for reliability)
+const STATUS_BORDER_COLORS: Record<ComponentDeployStatus, string> = {
+    waiting: '#9ca3af',   // gray-400 - 等待中
+    queued: '#a78bfa',    // violet-400 - 队列中
+    running: '#06b6d4',   // cyan-500 - 运行中
+    completed: '#22c55e', // green-500 - 已完成
+    failed: '#ef4444',    // red-500 - 失败
+    cancelled: '#6b7280', // gray-500 - 已取消
+    timeout: '#f97316',   // orange-500 - 超时
+    reject: '#ec4899',    // pink-500 - 拒绝
+    prepare: '#3b82f6',   // blue-500 - 准备中
 };
 
 // Status-based background colors (subtle)
-const STATUS_BG_STYLES: Record<ComponentDeployStatus, string> = {
-    completed: 'bg-green-50',
-    wait: 'bg-gray-50',
-    waiting: 'bg-gray-50',
-    running: 'bg-cyan-50',
-    error: 'bg-red-50',
+const STATUS_BG_COLORS: Record<ComponentDeployStatus, string> = {
+    waiting: '#f9fafb',   // gray-50
+    queued: '#f5f3ff',    // violet-50
+    running: '#ecfeff',   // cyan-50
+    completed: '#f0fdf4', // green-50
+    failed: '#fef2f2',    // red-50
+    cancelled: '#f9fafb', // gray-50
+    timeout: '#fff7ed',   // orange-50
+    reject: '#fdf2f8',    // pink-50
+    prepare: '#eff6ff',   // blue-50
 };
 
 // Status icons
 const StatusIcon: React.FC<{ status: ComponentDeployStatus }> = ({ status }) => {
     switch (status) {
         case 'completed':
-            return <CheckCircle2 size={14} className="text-green-500" />;
-        case 'wait':
+            return <CheckCircle2 size={14} style={{ color: '#22c55e' }} />;
         case 'waiting':
-            return <Clock size={14} className="text-gray-400" />;
+            return <Clock size={14} style={{ color: '#9ca3af' }} />;
+        case 'queued':
+            return <Clock size={14} style={{ color: '#a78bfa' }} />;
         case 'running':
-            return <Loader2 size={14} className="text-cyan-500 animate-spin" />;
-        case 'error':
-            return <XCircle size={14} className="text-red-500" />;
+            return <Loader2 size={14} style={{ color: '#06b6d4' }} className="animate-spin" />;
+        case 'failed':
+            return <XCircle size={14} style={{ color: '#ef4444' }} />;
+        case 'cancelled':
+            return <XCircle size={14} style={{ color: '#6b7280' }} />;
+        case 'timeout':
+            return <Clock size={14} style={{ color: '#f97316' }} />;
+        case 'reject':
+            return <XCircle size={14} style={{ color: '#ec4899' }} />;
+        case 'prepare':
+            return <Loader2 size={14} style={{ color: '#3b82f6' }} className="animate-spin" />;
         default:
             return null;
     }
 };
 
 const CustomNode = ({ data, selected }: NodeProps) => {
-    const Icon = icons[data.icon as string] || Box;
     const isConfigSecret = (data.componentType as string) === 'config-secret';
     const originalType = data.originalType as string;
     const configData = data.configData as ConfigDataItem[] | undefined;
     const secretData = data.secretData as SecretDataItem[] | undefined;
-    
+
     // Get component status from store
     const { componentStatuses, isPreviewMode } = useFlowStore();
     const nodeName = data.name as string;
@@ -108,29 +113,34 @@ const CustomNode = ({ data, selected }: NodeProps) => {
         );
     };
 
+    // Get status-based styles
+    const statusBorderColor = isPreviewMode && deployStatus ? STATUS_BORDER_COLORS[deployStatus] : undefined;
+    const statusBgColor = isPreviewMode && deployStatus ? STATUS_BG_COLORS[deployStatus] : undefined;
+
     return (
         <div
             className={cn(
                 NODE_WIDTH,
                 NODE_CONTAINER_STYLES,
                 selected && NODE_SELECTED_STYLES,
-                // Apply status-based styles when in preview mode
-                isPreviewMode && deployStatus && STATUS_BORDER_STYLES[deployStatus],
-                isPreviewMode && deployStatus && STATUS_BG_STYLES[deployStatus],
                 // Default border when not in preview mode or no status
                 !isPreviewMode && 'border-transparent'
             )}
+            style={{
+                ...(statusBorderColor && { borderColor: statusBorderColor }),
+                ...(statusBgColor && { backgroundColor: statusBgColor }),
+            }}
         >
             <div className={NODE_BODY_STYLES}>
                 {/* Node Name - Displayed prominently */}
-                {data.name && (
+                {nodeName && (
                     <div className="text-sm font-bold text-text-primary mb-1 truncate flex items-center gap-1">
                         <img
                             src={isConfigSecret ? configIcon : componentIcon}
                             alt="icon"
                             className="w-5 h-5"
                         />
-                        {String(data.name)}
+                        {nodeName}
                         {/* Status icon when in preview mode */}
                         {isPreviewMode && deployStatus && (
                             <StatusIcon status={deployStatus} />
@@ -147,13 +157,13 @@ const CustomNode = ({ data, selected }: NodeProps) => {
                     </div>
                     <div className={NODE_BADGE_STYLES}>
                         {(data.componentType as string) === 'webservice' ? 'Web Service' :
-                         (data.componentType as string) === 'store' ? 'Store' :
-                         (data.componentType as string) === 'config-secret' ? (
-                            originalType === 'config' ? 'Config' : 'Secret'
-                         ) :
-                         (data.componentType as string) === 'config' ? 'Config' :
-                         (data.componentType as string) === 'secret' ? 'Secret' :
-                         'Web Service'}
+                            (data.componentType as string) === 'store' ? 'Store' :
+                                (data.componentType as string) === 'config-secret' ? (
+                                    originalType === 'config' ? 'Config' : 'Secret'
+                                ) :
+                                    (data.componentType as string) === 'config' ? 'Config' :
+                                        (data.componentType as string) === 'secret' ? 'Secret' :
+                                            'Web Service'}
                     </div>
                 </div>
 
