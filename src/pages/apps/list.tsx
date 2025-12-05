@@ -138,7 +138,7 @@ export const List: React.FC = () => {
 
             {/* Apps Grid */}
             {isEmpty ? (
-                <Empty isLoading={false} />
+                <Empty isLoading={isLoading} />
             ) : (
                 <>
                     <div className="flex flex-wrap gap-6">

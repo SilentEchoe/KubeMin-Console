@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Plus, Download, Upload, Play } from 'lucide-react';
+import { Search, Filter, Plus, Download, Upload } from 'lucide-react';
 import useSWRInfinite from 'swr/infinite';
 import { fetchCustomers } from '../../api/customers';
 import type { CustomerFilters } from '../../types/customer';
@@ -7,7 +7,6 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { CustomerCard } from './components/CustomerCard';
 import { Empty } from './components/Empty';
-import PixelCatLoader32 from './components/PixelCatLoader32';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -15,7 +14,6 @@ export const List: React.FC = () => {
     const [searchInput, setSearchInput] = useState('');
     const [statusFilter, setStatusFilter] = useState<string[]>([]);
     const [showFilters, setShowFilters] = useState(false);
-    const [showTestLoader, setShowTestLoader] = useState(false);
 
     const debouncedSearch = useDebounce(searchInput, 500);
 
@@ -71,14 +69,6 @@ export const List: React.FC = () => {
     const handleExportCustomers = () => {
         console.log('Export customers');
         // TODO: Implement customer export
-    };
-
-    const handleTestLoadingAnimation = () => {
-        setShowTestLoader(true);
-        // Hide the loader after 5 seconds
-        setTimeout(() => {
-            setShowTestLoader(false);
-        }, 5000);
     };
 
     const handleEditCustomer = (customer: any) => {
@@ -177,50 +167,31 @@ export const List: React.FC = () => {
                 </div>
             )}
 
-            {/* Test Loading Animation */}
-            {showTestLoader && (
-                <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
-                    <div className="text-center">
-                        <PixelCatLoader32 />
-                        <button
-                            onClick={() => setShowTestLoader(false)}
-                            className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                        >
-                            Skip Animation
-                        </button>
-                    </div>
-                </div>
-            )}
-
             {/* Customers Grid */}
-            {!showTestLoader && (
+            {isEmpty ? (
+                <Empty isLoading={isLoading} onCreateCustomer={handleCreateCustomer} />
+            ) : (
                 <>
-                    {isEmpty ? (
-                        <Empty isLoading={isLoading} onCreateCustomer={handleCreateCustomer} />
-                    ) : (
-                        <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {customers.map(customer => (
-                                    <CustomerCard
-                                        key={customer.id}
-                                        customer={customer}
-                                        onEdit={handleEditCustomer}
-                                        onDelete={handleDeleteCustomer}
-                                    />
-                                ))}
-                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {customers.map(customer => (
+                            <CustomerCard
+                                key={customer.id}
+                                customer={customer}
+                                onEdit={handleEditCustomer}
+                                onDelete={handleDeleteCustomer}
+                            />
+                        ))}
+                    </div>
 
-                            {/* Loading indicator - Compact 32px pixel sleeping cat */}
-                            {isLoading && (
-                                <div className="mt-6 flex justify-center">
-                                    <PixelCatLoader32 />
-                                </div>
-                            )}
-
-                            {/* Infinite scroll trigger */}
-                            <div ref={observerTarget} className="h-4 mt-6" />
-                        </>
+                    {/* Loading indicator */}
+                    {isLoading && (
+                        <div className="mt-6 text-center">
+                            <div className="inline-block w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+                        </div>
                     )}
+
+                    {/* Infinite scroll trigger */}
+                    <div ref={observerTarget} className="h-4 mt-6" />
                 </>
             )}
         </div>
