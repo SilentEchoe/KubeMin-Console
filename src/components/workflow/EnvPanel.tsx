@@ -42,7 +42,6 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd, initialData, onUpda
     const [envType, setEnvType] = useState<'String' | 'Number' | 'Secret'>('String');
     const [key, setKey] = useState('');
     const [value, setValue] = useState('');
-    const [description, setDescription] = useState('');
     const [isTypeOpen, setIsTypeOpen] = useState(false);
 
     const isEditMode = !!initialData;
@@ -53,13 +52,11 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd, initialData, onUpda
             setKey(initialData.key || '');
             setValue(initialData.value || '');
             setEnvType(initialData.type || 'String');
-            setDescription(initialData.description || '');
         } else {
             // Reset form for add mode
             setKey('');
             setValue('');
             setEnvType('String');
-            setDescription('');
         }
     }, [initialData]);
 
@@ -71,7 +68,6 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd, initialData, onUpda
             value: value.trim(),
             type: envType,
             isSecret: envType === 'Secret',
-            ...(description.trim() && { description: description.trim() })
         };
 
         if (isEditMode && onUpdate) {
@@ -83,7 +79,6 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd, initialData, onUpda
         // Reset form
         setKey('');
         setValue('');
-        setDescription('');
         setEnvType('String');
     };
 
@@ -216,18 +211,6 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd, initialData, onUpda
                     </p>
                 </div>
 
-                {/* Description */}
-                <div>
-                    <label className="text-[13px] font-medium text-text-primary mb-2 block">
-                        Description <span className="text-text-tertiary">(optional)</span>
-                    </label>
-                    <textarea
-                        className={cn(INPUT_STYLES, "min-h-[60px] resize-y")}
-                        placeholder="Optional description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                    />
-                </div>
             </div>
 
             {/* Footer Actions */}

@@ -68,6 +68,8 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
     const [cmdInput, setCmdInput] = useState('');
     const [cmds, setCmds] = useState<string[]>([]);
     const [isComponentTypeOpen, setIsComponentTypeOpen] = useState(false);
+    const [editingCmdIndex, setEditingCmdIndex] = useState<number | null>(null);
+    const [editingCmdValue, setEditingCmdValue] = useState('');
 
 
     useEffect(() => {
@@ -125,6 +127,45 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
             e.preventDefault();
             handleAddCmd();
         }
+    };
+
+    const handleCmdTagClick = (index: number, cmd: string) => {
+        setEditingCmdIndex(index);
+        setEditingCmdValue(cmd);
+    };
+
+    const handleCmdEditSave = () => {
+        if (editingCmdIndex !== null && editingCmdValue.trim()) {
+            const newCmds = [...cmds];
+            newCmds[editingCmdIndex] = editingCmdValue.trim();
+            setCmds(newCmds);
+            updateNodeData(selectedNode.id, { cmd: newCmds });
+        }
+        setEditingCmdIndex(null);
+        setEditingCmdValue('');
+    };
+
+    const handleCmdEditCancel = () => {
+        setEditingCmdIndex(null);
+        setEditingCmdValue('');
+    };
+
+    const handleCmdEditKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleCmdEditSave();
+        } else if (e.key === 'Escape') {
+            handleCmdEditCancel();
+        }
+    };
+
+    const handleCmdEditDelete = () => {
+        if (editingCmdIndex !== null) {
+            const cmdToRemove = cmds[editingCmdIndex];
+            handleRemoveCmd(cmdToRemove);
+        }
+        setEditingCmdIndex(null);
+        setEditingCmdValue('');
     };
 
     return (
@@ -300,20 +341,89 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                             </FlexRow>
                             {cmds.length > 0 && (
                                 <div className="flex flex-wrap gap-2">
-                                    {cmds.map((cmd) => (
-                                        <span
-                                            key={cmd}
-                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-md border border-blue-200 max-w-[200px]"
-                                            title={cmd}
+                                    {cmds.map((cmd, index) => (
+                                        <PortalToFollowElem
+                                            key={`${cmd}-${index}`}
+                                            placement="left-start"
+                                            offsetValue={8}
+                                            trigger="click"
+                                            open={editingCmdIndex === index}
+                                            onOpenChange={(open) => {
+                                                if (open) {
+                                                    handleCmdTagClick(index, cmd);
+                                                } else {
+                                                    handleCmdEditCancel();
+                                                }
+                                            }}
                                         >
-                                            <span className="truncate">{cmd}</span>
-                                            <button
-                                                onClick={() => handleRemoveCmd(cmd)}
-                                                className="hover:text-blue-900 transition-colors flex-shrink-0"
-                                            >
-                                                <X size={12} />
-                                            </button>
-                                        </span>
+                                            <PortalToFollowElemTrigger asChild>
+                                                <span
+                                                    className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-md border border-blue-200 max-w-[200px] cursor-pointer hover:bg-blue-100 transition-colors"
+                                                    title={cmd}
+                                                >
+                                                    <span className="truncate">{cmd}</span>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleRemoveCmd(cmd);
+                                                        }}
+                                                        className="hover:text-blue-900 transition-colors flex-shrink-0"
+                                                    >
+                                                        <X size={12} />
+                                                    </button>
+                                                </span>
+                                            </PortalToFollowElemTrigger>
+                                            <PortalToFollowElemContent className="w-[280px] p-3 bg-white border border-components-panel-border shadow-lg rounded-lg z-[100]">
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm font-medium text-text-primary">Edit Command</span>
+                                                        <button
+                                                            onClick={handleCmdEditCancel}
+                                                            className="text-text-tertiary hover:text-text-primary transition-colors"
+                                                        >
+                                                            <X size={16} />
+                                                        </button>
+                                                    </div>
+                                                    <textarea
+                                                        className={cn(
+                                                            INPUT_CONTAINER_STYLES,
+                                                            "w-full min-h-[80px] resize-none outline-none input-gradient-focus focus:ring-0 text-sm"
+                                                        )}
+                                                        placeholder="Enter command..."
+                                                        value={editingCmdValue}
+                                                        onChange={(e) => setEditingCmdValue(e.target.value)}
+                                                        onKeyDown={handleCmdEditKeyDown}
+                                                        autoFocus
+                                                    />
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <Button
+                                                            variant="secondary"
+                                                            size="small"
+                                                            onClick={handleCmdEditDelete}
+                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                        <div className="flex items-center gap-2">
+                                                            <Button
+                                                                variant="secondary"
+                                                                size="small"
+                                                                onClick={handleCmdEditCancel}
+                                                            >
+                                                                Cancel
+                                                            </Button>
+                                                            <Button
+                                                                variant="primary"
+                                                                size="small"
+                                                                onClick={handleCmdEditSave}
+                                                            >
+                                                                Save
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </PortalToFollowElemContent>
+                                        </PortalToFollowElem>
                                     ))}
                                 </div>
                             )}
