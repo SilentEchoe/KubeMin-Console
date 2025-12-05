@@ -9,6 +9,7 @@ export interface App {
   name: string;
   alias: string;
   project: string;
+  version?: string;
   description: string;
   createTime: string;
   updateTime: string;

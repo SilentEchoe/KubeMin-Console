@@ -30,7 +30,7 @@ import type { NodeWithIssues } from './workflow/WorkflowChecklist';
 import WorkflowPanel from './workflow/WorkflowPanel';
 import Modal from './base/Modal';
 import { applyWorkflowConnections, rearrangeNodesForWorkflow } from '../utils/workflowConnection';
-import { fetchWorkflows, executeWorkflow, getTaskStatus } from '../api/apps';
+import { fetchWorkflows, executeWorkflow, getTaskStatus, cancelWorkflow } from '../api/apps';
 
 import { useShortcuts } from '../hooks/useShortcuts';
 
@@ -105,6 +105,8 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
     const [isPublishing, setIsPublishing] = useState(false);
     const [publishError, setPublishError] = useState<string | null>(null);
     const [workflowResult, setWorkflowResult] = useState<{ type: 'success' | 'error'; message: string; details?: string[] } | null>(null);
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const reactFlowInstanceRef = useRef<any>(null);
     const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -233,6 +235,31 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
             setIsPublishing(false);
         }
     }, [appId, currentWorkflow, setPreviewMode, setTaskId, startPolling]);
+
+    // Handle cancel workflow
+    const handleCancelWorkflow = useCallback(async () => {
+        if (!appId || !taskId) return;
+
+        setIsCancelling(true);
+
+        try {
+            await cancelWorkflow(appId, taskId);
+            
+            // Stop polling
+            if (pollingIntervalRef.current) {
+                clearInterval(pollingIntervalRef.current);
+                pollingIntervalRef.current = null;
+            }
+            
+            // Exit preview mode
+            clearPreviewState();
+            setShowCancelModal(false);
+        } catch (error) {
+            console.error('Failed to cancel workflow:', error);
+        } finally {
+            setIsCancelling(false);
+        }
+    }, [appId, taskId, clearPreviewState]);
 
     // Cleanup polling on unmount
     useEffect(() => {
@@ -472,7 +499,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                         {isPreviewMode && (
                             <div className="flex h-8 items-center">
                                 <button
-                                    onClick={() => clearPreviewState()}
+                                    onClick={() => setShowCancelModal(true)}
                                     className="flex h-8 items-center rounded-lg bg-gray-600 px-3 text-[13px] font-medium text-white hover:bg-gray-700 border-none cursor-pointer"
                                 >
                                     Exit Preview
@@ -571,6 +598,47 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                         >
                             {isPublishing && <Loader2 size={14} className="animate-spin" />}
                             {isPublishing ? 'Publishing...' : 'Confirm'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Cancel Workflow Confirmation Modal */}
+            <Modal
+                isShow={showCancelModal}
+                onClose={() => setShowCancelModal(false)}
+                title="Cancel Workflow"
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                        Are you sure you want to cancel the workflow execution? This action cannot be undone.
+                    </p>
+                    
+                    <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <div className="flex items-center gap-2 text-yellow-700">
+                            <AlertCircle size={16} />
+                            <span className="text-sm">Running components will be stopped.</span>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button
+                            onClick={() => setShowCancelModal(false)}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+                        >
+                            Continue Running
+                        </button>
+                        <button
+                            onClick={handleCancelWorkflow}
+                            disabled={isCancelling}
+                            className={`px-4 py-2 text-sm font-medium text-white rounded-lg flex items-center gap-2 ${
+                                isCancelling
+                                    ? 'bg-red-300 cursor-not-allowed'
+                                    : 'bg-red-600 hover:bg-red-700 cursor-pointer'
+                            }`}
+                        >
+                            {isCancelling && <Loader2 size={14} className="animate-spin" />}
+                            {isCancelling ? 'Cancelling...' : 'Cancel Workflow'}
                         </button>
                     </div>
                 </div>

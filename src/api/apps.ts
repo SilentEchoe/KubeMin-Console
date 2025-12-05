@@ -178,3 +178,17 @@ export const getTaskStatus = async (taskId: string): Promise<TaskStatusResponse>
     }
     return response.json();
 };
+
+// Cancel workflow execution
+export const cancelWorkflow = async (appId: string, taskId: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/applications/${appId}/workflow/cancel`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ taskId }),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to cancel workflow');
+    }
+};
