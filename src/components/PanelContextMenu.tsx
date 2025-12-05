@@ -3,6 +3,7 @@ import { useFlowStore } from '../stores/flowStore';
 import { Plus, Play, Clipboard, Download, Upload, ChevronRight } from 'lucide-react';
 import BlockSelector from './BlockSelector';
 import { componentsToNodes } from '../utils/componentToNode';
+import { nodesToDSL } from '../utils/nodeToComponent';
 import type { Component } from '../types/app';
 
 const PanelContextMenu: React.FC = () => {
@@ -69,72 +70,14 @@ const PanelContextMenu: React.FC = () => {
     };
 
     const handleExportDSL = () => {
-        const components = nodes
-            .map(node => {
-                const ports = node.data.properties?.map(p => ({ port: parseInt(p.value) || 0 })) || [];
-                const env = node.data.envConfig?.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {}) || {};
-
-                // Handle config-secret type nodes
-                if (node.data.componentType === 'config-secret') {
-                    const conf: Record<string, string> = {};
-                    const secret: Record<string, string> = {};
-
-                    // Separate environmentVariables into conf and secret
-                    node.data.environmentVariables?.forEach((envVar: any) => {
-                        if (envVar.isSecret) {
-                            secret[envVar.key] = envVar.value;
-                        } else {
-                            conf[envVar.key] = envVar.value;
-                        }
-                    });
-
-                    // Determine the actual type based on what data exists
-                    const hasConf = Object.keys(conf).length > 0;
-                    const hasSecret = Object.keys(secret).length > 0;
-
-                    let actualType = 'config-secret';
-                    if (hasSecret && !hasConf) {
-                        actualType = 'secret';
-                    } else if (hasConf && !hasSecret) {
-                        actualType = 'config';
-                    }
-
-                    return {
-                        name: node.data.name || node.data.label || 'component',
-                        type: actualType,
-                        replicas: node.data.replicas || 1,
-                        image: node.data.image || '',
-                        properties: {
-                            ports: null,
-                            env: null,
-                            conf: Object.keys(conf).length > 0 ? conf : null,
-                            secret: Object.keys(secret).length > 0 ? secret : null,
-                            command: null,
-                            labels: null
-                        }
-                    };
-                }
-
-                return {
-                    name: node.data.name || node.data.label || 'component',
-                    type: node.data.componentType || 'webservice',
-                    replicas: node.data.replicas || 1,
-                    image: node.data.image || 'nginx:latest',
-                    properties: {
-                        ports: ports,
-                        env: env
-                    }
-                };
-            });
-
-        const dsl = {
-            name: "project-export", // Placeholder
-            alias: "project",
-            version: "1.0.0",
-            project: "",
-            description: "Exported Project",
-            component: components
-        };
+        // Use the new nodesToDSL utility function for complete export
+        const dsl = nodesToDSL(nodes, {
+            name: 'project-export',
+            alias: 'project',
+            version: '1.0.0',
+            project: '',
+            description: 'Exported Project',
+        });
 
         const blob = new Blob([JSON.stringify(dsl, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -159,67 +102,138 @@ const PanelContextMenu: React.FC = () => {
                 const dsl = JSON.parse(content);
 
                 if (dsl.component && Array.isArray(dsl.component)) {
-                    dsl.component.forEach((comp: any, index: number) => {
-                        const id = Math.random().toString(36).substr(2, 9);
+                    // Convert DSL components to API Component format for componentsToNodes
+                    const apiComponents: Component[] = dsl.component.map((comp: any, index: number) => {
+                        // Build the component in API format
+                        const apiComponent: Component = {
+                            id: index + 1,
+                            appId: '',
+                            name: comp.name || 'Component',
+                            namespace: '',
+                            replicas: comp.replicas || 1,
+                            type: comp.type || 'webservice',
+                            image: comp.image,
+                            properties: {
+                                image: comp.image,
+                                ports: comp.properties?.ports || null,
+                                env: comp.properties?.env || null,
+                                conf: comp.properties?.conf || null,
+                                secret: comp.properties?.secret || null,
+                                command: comp.properties?.command || null,
+                                labels: comp.properties?.labels || null,
+                            },
+                            traits: {},
+                            createTime: new Date().toISOString(),
+                            updateTime: new Date().toISOString(),
+                        };
 
-                        // Map properties
-                        const properties = comp.properties?.ports?.map((p: any) => ({
-                            id: `prop-${Math.random().toString(36).substr(2, 9)}`,
-                            value: p.port.toString()
-                        })) || [];
-
-                        // Map env
-                        const envConfig = comp.properties?.env ? Object.entries(comp.properties.env).map(([key, value]) => ({
-                            id: `env-${Math.random().toString(36).substr(2, 9)}`,
-                            key,
-                            value: String(value)
-                        })) : [];
-
-                        let componentType = comp.type || 'webservice';
-                        let environmentVariables: any[] = [];
-
-                        // Handle config-secret type nodes from DSL
-                        if (comp.type === 'config-secret') {
-                            // Map conf properties
-                            if (comp.properties?.conf) {
-                                Object.entries(comp.properties.conf).forEach(([key, value]) => {
-                                    environmentVariables.push({
-                                        key,
-                                        value: String(value),
-                                        isSecret: false,
-                                        description: 'Imported config'
-                                    });
-                                });
+                        // Convert traits if present
+                        if (comp.traits) {
+                            // Convert envs
+                            if (comp.traits.envs) {
+                                apiComponent.traits.envs = comp.traits.envs.map((env: any) => ({
+                                    name: env.name,
+                                    valueFrom: env.valueFrom ? {
+                                        secret: env.valueFrom.secret,
+                                        field: env.valueFrom.field,
+                                    } : undefined,
+                                }));
                             }
 
-                            // Map secret properties
-                            if (comp.properties?.secret) {
-                                Object.entries(comp.properties.secret).forEach(([key, value]) => {
-                                    environmentVariables.push({
-                                        key,
-                                        value: String(value),
-                                        isSecret: true,
-                                        description: 'Imported secret'
-                                    });
-                                });
+                            // Convert probes
+                            if (comp.traits.probes) {
+                                apiComponent.traits.probes = comp.traits.probes.map((probe: any) => ({
+                                    type: probe.type,
+                                    initialDelaySeconds: probe.initialDelaySeconds,
+                                    periodSeconds: probe.periodSeconds,
+                                    timeoutSeconds: probe.timeoutSeconds,
+                                    exec: probe.exec,
+                                }));
+                            }
+
+                            // Convert storage
+                            if (comp.traits.storage) {
+                                apiComponent.traits.storage = comp.traits.storage.map((storage: any) => ({
+                                    type: storage.type,
+                                    name: storage.name,
+                                    mountPath: storage.mountPath,
+                                    subPath: storage.subPath,
+                                    size: storage.size,
+                                    sourceName: storage.sourceName,
+                                }));
+                            }
+
+                            // Convert sidecar
+                            if (comp.traits.sidecar) {
+                                apiComponent.traits.sidecar = comp.traits.sidecar.map((sidecar: any) => ({
+                                    name: sidecar.name,
+                                    image: sidecar.image,
+                                    command: sidecar.command,
+                                    traits: sidecar.traits ? {
+                                        envs: sidecar.traits.envs?.map((env: any) => ({
+                                            name: env.name,
+                                            valueFrom: env.valueFrom ? {
+                                                secret: env.valueFrom.secret,
+                                                field: env.valueFrom.field,
+                                            } : undefined,
+                                        })),
+                                        storage: sidecar.traits.storage?.map((s: any) => ({
+                                            type: s.type,
+                                            name: s.name,
+                                            mountPath: s.mountPath,
+                                            subPath: s.subPath,
+                                            size: s.size,
+                                            sourceName: s.sourceName,
+                                        })),
+                                    } : undefined,
+                                }));
+                            }
+
+                            // Convert init containers
+                            if (comp.traits.init) {
+                                apiComponent.traits.init = comp.traits.init.map((init: any) => ({
+                                    name: init.name,
+                                    properties: init.properties ? {
+                                        image: init.properties.image,
+                                        env: init.properties.env,
+                                        command: init.properties.command,
+                                    } : undefined,
+                                    traits: init.traits ? {
+                                        envs: init.traits.envs?.map((env: any) => ({
+                                            name: env.name,
+                                            valueFrom: env.valueFrom ? {
+                                                secret: env.valueFrom.secret,
+                                                field: env.valueFrom.field,
+                                            } : undefined,
+                                        })),
+                                        storage: init.traits.storage?.map((s: any) => ({
+                                            type: s.type,
+                                            name: s.name,
+                                            mountPath: s.mountPath,
+                                            subPath: s.subPath,
+                                            size: s.size,
+                                            sourceName: s.sourceName,
+                                        })),
+                                    } : undefined,
+                                }));
                             }
                         }
 
+                        return apiComponent;
+                    });
+
+                    // Use componentsToNodes to properly convert to FlowNodes
+                    const convertedNodes = componentsToNodes(apiComponents);
+
+                    // Add each converted node with position offset from context menu location
+                    convertedNodes.forEach((node, index) => {
+                        const id = Math.random().toString(36).substr(2, 9);
                         addNode({
+                            ...node,
                             id,
-                            type: 'custom',
-                            position: { x: panelMenu.left + (index * 50), y: panelMenu.top + (index * 50) },
-                            data: {
-                                name: comp.name || 'Component',
-                                label: comp.name || 'Component',
-                                description: 'Imported component',
-                                icon: componentType === 'config-secret' ? 'settings' : 'box',
-                                componentType,
-                                image: comp.image,
-                                replicas: comp.replicas,
-                                properties,
-                                envConfig,
-                                environmentVariables,
+                            position: {
+                                x: panelMenu.left + (index % 3) * 320,
+                                y: panelMenu.top + Math.floor(index / 3) * 150,
                             },
                         });
                     });
@@ -230,6 +244,8 @@ const PanelContextMenu: React.FC = () => {
             }
         };
         reader.readAsText(file);
+        // Reset the file input so the same file can be imported again
+        event.target.value = '';
         setPanelMenu(null);
     };
 
