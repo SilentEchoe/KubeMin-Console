@@ -132,3 +132,49 @@ export const fetchWorkflows = async (appId: string): Promise<Workflow[]> => {
         return [];
     }
 };
+
+// Execute workflow and get task ID
+export interface ExecuteWorkflowResponse {
+    taskId: string;
+}
+
+export const executeWorkflow = async (appId: string, workflowId: string): Promise<ExecuteWorkflowResponse> => {
+    const response = await fetch(`${API_BASE_URL}/applications/${appId}/workflow/exec`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ workflowId }),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to execute workflow');
+    }
+    return response.json();
+};
+
+// Task status types
+export interface TaskComponentStatus {
+    name: string;
+    type: string;
+    status: 'completed' | 'wait' | 'waiting' | 'running' | 'error';
+    startTime?: number;
+    endTime?: number;
+}
+
+export interface TaskStatusResponse {
+    taskId: string;
+    status: string;
+    workflowId: string;
+    workflowName: string;
+    appId: string;
+    type: string;
+    components: TaskComponentStatus[];
+}
+
+export const getTaskStatus = async (taskId: string): Promise<TaskStatusResponse> => {
+    const response = await fetch(`${API_BASE_URL}/workflow/tasks/${taskId}/status`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch task status');
+    }
+    return response.json();
+};

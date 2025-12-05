@@ -9,7 +9,7 @@ import type {
     EdgeChange,
     NodeChange,
 } from '@xyflow/react';
-import type { FlowState, FlowNode, FlowNodeData } from '../types/flow';
+import type { FlowState, FlowNode, FlowNodeData, ComponentStatus } from '../types/flow';
 import { ControlMode } from '../types/flow';
 
 // Helper function to generate unique node names
@@ -231,4 +231,16 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     setEnvironmentVariables: (vars) => set({ environmentVariables: vars }),
     envSecrets: {},
     setEnvSecrets: (secrets) => set({ envSecrets: secrets }),
+    // Preview mode state
+    isPreviewMode: false,
+    setPreviewMode: (mode: boolean) => set({ isPreviewMode: mode }),
+    taskId: null,
+    setTaskId: (id: string | null) => set({ taskId: id }),
+    componentStatuses: {},
+    setComponentStatuses: (statuses: Record<string, ComponentStatus>) => set({ componentStatuses: statuses }),
+    clearPreviewState: () => set({ 
+        isPreviewMode: false, 
+        taskId: null, 
+        componentStatuses: {} 
+    }),
 }));

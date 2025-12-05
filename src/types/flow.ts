@@ -110,6 +110,17 @@ export interface FlowNodeData extends Record<string, unknown> {
 export type FlowNode = Node<FlowNodeData>;
 export type FlowEdge = Edge;
 
+// Component deployment status types
+export type ComponentDeployStatus = 'completed' | 'wait' | 'waiting' | 'running' | 'error';
+
+export interface ComponentStatus {
+    name: string;
+    type: string;
+    status: ComponentDeployStatus;
+    startTime?: number;
+    endTime?: number;
+}
+
 export const ControlMode = {
     Pointer: 'pointer',
     Hand: 'hand',
@@ -145,4 +156,12 @@ export type FlowState = {
     setEnvironmentVariables: (vars: EnvironmentVariable[]) => void;
     envSecrets: Record<string, string>;
     setEnvSecrets: (secrets: Record<string, string>) => void;
+    // Preview mode state
+    isPreviewMode: boolean;
+    setPreviewMode: (mode: boolean) => void;
+    taskId: string | null;
+    setTaskId: (id: string | null) => void;
+    componentStatuses: Record<string, ComponentStatus>;
+    setComponentStatuses: (statuses: Record<string, ComponentStatus>) => void;
+    clearPreviewState: () => void;
 };

@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { Play, ChevronDown, ListChecks } from 'lucide-react';
+import { Play, ChevronDown, ListChecks, AlertCircle, Loader2 } from 'lucide-react';
 import {
     ReactFlow,
     Background,
@@ -20,7 +20,7 @@ import { useFlowStore } from '../stores/flowStore';
 import CustomNode from './CustomNode';
 import CanvasControl from './CanvasControl';
 import { ControlMode } from '../types/flow';
-import type { FlowNode } from '../types/flow';
+import type { FlowNode, ComponentStatus } from '../types/flow';
 import type { Workflow } from '../types/app';
 import PanelContextMenu from './PanelContextMenu';
 import CustomEdge from './workflow/CustomEdge';
@@ -28,8 +28,9 @@ import CustomConnectionLine from './workflow/CustomConnectionLine';
 import WorkflowChecklist from './workflow/WorkflowChecklist';
 import type { NodeWithIssues } from './workflow/WorkflowChecklist';
 import WorkflowPanel from './workflow/WorkflowPanel';
+import Modal from './base/Modal';
 import { applyWorkflowConnections, rearrangeNodesForWorkflow } from '../utils/workflowConnection';
-import { fetchWorkflows } from '../api/apps';
+import { fetchWorkflows, executeWorkflow, getTaskStatus } from '../api/apps';
 
 import { useShortcuts } from '../hooks/useShortcuts';
 
@@ -87,6 +88,12 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
         setPanelMenu,
         setNodes,
         setEdges,
+        isPreviewMode,
+        setPreviewMode,
+        taskId,
+        setTaskId,
+        setComponentStatuses,
+        clearPreviewState,
     } = useFlowStore();
 
     const [viewport, setViewportState] = useState<Viewport>({ x: 0, y: 0, zoom: 1.0 });
@@ -94,8 +101,12 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
     const [showWorkflowPanel, setShowWorkflowPanel] = useState(false);
     const [currentWorkflow, setCurrentWorkflow] = useState<Workflow | null>(null);
     const [hasAppliedInitialWorkflow, setHasAppliedInitialWorkflow] = useState(false);
+    const [showPublishModal, setShowPublishModal] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
+    const [publishError, setPublishError] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const reactFlowInstanceRef = useRef<any>(null);
+    const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     // Handle workflow selection
     const handleSelectWorkflow = useCallback((workflow: Workflow) => {
@@ -113,6 +124,89 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
         // Close the panel after applying
         setShowWorkflowPanel(false);
     }, [nodes, setNodes, setEdges]);
+
+    // Start polling for task status
+    const startPolling = useCallback((taskIdToPolling: string) => {
+        // Clear any existing polling
+        if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+        }
+
+        const pollStatus = async () => {
+            try {
+                const status = await getTaskStatus(taskIdToPolling);
+                
+                // Update component statuses
+                const statusMap: Record<string, ComponentStatus> = {};
+                status.components.forEach((comp) => {
+                    statusMap[comp.name] = {
+                        name: comp.name,
+                        type: comp.type,
+                        status: comp.status,
+                        startTime: comp.startTime,
+                        endTime: comp.endTime,
+                    };
+                });
+                setComponentStatuses(statusMap);
+
+                // Check if all components are completed or any has error
+                const allCompleted = status.components.every(c => c.status === 'completed');
+                const hasError = status.components.some(c => c.status === 'error');
+
+                if (allCompleted || hasError) {
+                    // Stop polling
+                    if (pollingIntervalRef.current) {
+                        clearInterval(pollingIntervalRef.current);
+                        pollingIntervalRef.current = null;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to poll task status:', error);
+            }
+        };
+
+        // Initial poll
+        pollStatus();
+
+        // Set up interval for every 2 seconds
+        pollingIntervalRef.current = setInterval(pollStatus, 2000);
+    }, [setComponentStatuses]);
+
+    // Handle publish confirmation
+    const handlePublishConfirm = useCallback(async () => {
+        if (!appId || !currentWorkflow) return;
+
+        setIsPublishing(true);
+        setPublishError(null);
+
+        try {
+            const response = await executeWorkflow(appId, currentWorkflow.id);
+            
+            // Enter preview mode
+            setPreviewMode(true);
+            setTaskId(response.taskId);
+            
+            // Close modal
+            setShowPublishModal(false);
+            
+            // Start polling for status
+            startPolling(response.taskId);
+        } catch (error) {
+            setPublishError(error instanceof Error ? error.message : 'Failed to execute workflow');
+        } finally {
+            setIsPublishing(false);
+        }
+    }, [appId, currentWorkflow, setPreviewMode, setTaskId, startPolling]);
+
+    // Cleanup polling on unmount
+    useEffect(() => {
+        return () => {
+            if (pollingIntervalRef.current) {
+                clearInterval(pollingIntervalRef.current);
+            }
+            clearPreviewState();
+        };
+    }, [clearPreviewState]);
 
     // Auto-apply the first (newest) workflow when nodes are loaded
     useEffect(() => {
@@ -252,12 +346,12 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                onNodeClick={onNodeClick}
+                onNodesChange={isPreviewMode ? undefined : onNodesChange}
+                onEdgesChange={isPreviewMode ? undefined : onEdgesChange}
+                onConnect={isPreviewMode ? undefined : onConnect}
+                onNodeClick={isPreviewMode ? undefined : onNodeClick}
                 onPaneClick={onPaneClick}
-                onPaneContextMenu={handlePaneContextMenu}
+                onPaneContextMenu={isPreviewMode ? undefined : handlePaneContextMenu}
                 onMove={onMove}
                 onInit={(instance) => {
                     reactFlowInstanceRef.current = instance;
@@ -271,13 +365,16 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                 deleteKeyCode={null} // Disable default delete to use custom shortcuts
                 panOnScroll={controlMode === ControlMode.Pointer}
                 panOnDrag={controlMode === ControlMode.Hand || [1, 2]}
-                selectionOnDrag={controlMode === ControlMode.Pointer}
+                selectionOnDrag={isPreviewMode ? false : controlMode === ControlMode.Pointer}
                 panOnScrollMode={PanOnScrollMode.Free} // Free pan on scroll
                 minZoom={MIN_ZOOM}
                 maxZoom={MAX_ZOOM}
                 zoomOnScroll={false} // Disabled to use custom 1% zoom step
                 zoomOnPinch={true}
                 zoomOnDoubleClick={false}
+                nodesDraggable={!isPreviewMode}
+                nodesConnectable={!isPreviewMode}
+                elementsSelectable={!isPreviewMode}
             >
                 <Background color="#94a3b8" gap={20} size={1} variant={BackgroundVariant.Dots} />
                 <Controls />
@@ -322,13 +419,30 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                         {/* Publish Button */}
                         <div className="flex h-8 items-center">
                             <button
-                                onClick={() => console.log('Publish')}
-                                className="flex h-8 items-center rounded-lg bg-components-button-primary-bg px-3 text-[13px] font-medium text-components-button-primary-text hover:bg-components-button-primary-hover border-none cursor-pointer"
+                                onClick={() => setShowPublishModal(true)}
+                                disabled={isPreviewMode}
+                                className={`flex h-8 items-center rounded-lg px-3 text-[13px] font-medium border-none ${
+                                    isPreviewMode 
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                        : 'bg-components-button-primary-bg text-components-button-primary-text hover:bg-components-button-primary-hover cursor-pointer'
+                                }`}
                             >
                                 Publish
                                 <ChevronDown className="ml-1 h-4 w-4" />
                             </button>
                         </div>
+
+                        {/* Exit Preview Mode Button */}
+                        {isPreviewMode && (
+                            <div className="flex h-8 items-center">
+                                <button
+                                    onClick={() => clearPreviewState()}
+                                    className="flex h-8 items-center rounded-lg bg-gray-600 px-3 text-[13px] font-medium text-white hover:bg-gray-700 border-none cursor-pointer"
+                                >
+                                    Exit Preview
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </Panel>
                 
@@ -351,6 +465,80 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                 )}
                 <ZoomIndicator />
             </ReactFlow>
+
+            {/* Publish Confirmation Modal */}
+            <Modal
+                isShow={showPublishModal}
+                onClose={() => {
+                    setShowPublishModal(false);
+                    setPublishError(null);
+                }}
+                title="Publish Workflow"
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                        Are you sure you want to publish this workflow?
+                    </p>
+                    
+                    {currentWorkflow ? (
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="flex items-center gap-2">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
+                                    <Play size={14} className="text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">
+                                        {currentWorkflow.alias || currentWorkflow.name}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        {currentWorkflow.steps.length} steps
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <div className="flex items-center gap-2 text-yellow-700">
+                                <AlertCircle size={16} />
+                                <span className="text-sm">No workflow selected. Please select a workflow first.</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {publishError && (
+                        <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+                            <div className="flex items-center gap-2 text-red-700">
+                                <AlertCircle size={16} />
+                                <span className="text-sm">{publishError}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button
+                            onClick={() => {
+                                setShowPublishModal(false);
+                                setPublishError(null);
+                            }}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handlePublishConfirm}
+                            disabled={!currentWorkflow || isPublishing}
+                            className={`px-4 py-2 text-sm font-medium text-white rounded-lg flex items-center gap-2 ${
+                                !currentWorkflow || isPublishing
+                                    ? 'bg-blue-300 cursor-not-allowed'
+                                    : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                            }`}
+                        >
+                            {isPublishing && <Loader2 size={14} className="animate-spin" />}
+                            {isPublishing ? 'Publishing...' : 'Confirm'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };
