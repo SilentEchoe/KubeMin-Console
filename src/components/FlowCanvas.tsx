@@ -21,11 +21,14 @@ import CustomNode from './CustomNode';
 import CanvasControl from './CanvasControl';
 import { ControlMode } from '../types/flow';
 import type { FlowNode } from '../types/flow';
+import type { Workflow } from '../types/app';
 import PanelContextMenu from './PanelContextMenu';
 import CustomEdge from './workflow/CustomEdge';
 import CustomConnectionLine from './workflow/CustomConnectionLine';
 import WorkflowChecklist from './workflow/WorkflowChecklist';
 import type { NodeWithIssues } from './workflow/WorkflowChecklist';
+import WorkflowPanel from './workflow/WorkflowPanel';
+import { applyWorkflowConnections, rearrangeNodesForWorkflow } from '../utils/workflowConnection';
 
 import { useShortcuts } from '../hooks/useShortcuts';
 
@@ -66,7 +69,11 @@ const ZoomIndicator = () => {
     );
 };
 
-const FlowCanvas: React.FC = () => {
+interface FlowCanvasProps {
+    appId?: string;
+}
+
+const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
     useShortcuts();
     const {
         nodes,
@@ -77,12 +84,29 @@ const FlowCanvas: React.FC = () => {
         setSelectedNode,
         controlMode,
         setPanelMenu,
+        setNodes,
+        setEdges,
     } = useFlowStore();
 
     const [viewport, setViewportState] = useState<Viewport>({ x: 0, y: 0, zoom: 1.0 });
     const [showChecklist, setShowChecklist] = useState(false);
+    const [showWorkflowPanel, setShowWorkflowPanel] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const reactFlowInstanceRef = useRef<any>(null);
+
+    // Handle workflow selection
+    const handleSelectWorkflow = useCallback((workflow: Workflow) => {
+        // Rearrange nodes based on workflow steps
+        const rearrangedNodes = rearrangeNodesForWorkflow(workflow, nodes);
+        setNodes(rearrangedNodes);
+
+        // Apply workflow connections
+        const newEdges = applyWorkflowConnections(workflow, rearrangedNodes);
+        setEdges(newEdges);
+
+        // Close the panel after applying
+        setShowWorkflowPanel(false);
+    }, [nodes, setNodes, setEdges]);
 
     // Generate workflow issues from nodes
     const getWorkflowIssues = useCallback((): NodeWithIssues[] => {
@@ -239,9 +263,10 @@ const FlowCanvas: React.FC = () => {
                             </button>
                             <div className="mx-0.5 h-3.5 w-[1px] bg-divider-regular"></div>
                             <button
-                                className="flex h-7 cursor-pointer items-center rounded-md px-2.5 text-[13px] font-medium text-text-secondary hover:bg-state-base-hover border-none bg-transparent"
+                                onClick={() => setShowWorkflowPanel(!showWorkflowPanel)}
+                                className={`flex h-7 cursor-pointer items-center rounded-md px-2.5 text-[13px] font-medium hover:bg-state-base-hover border-none bg-transparent ${showWorkflowPanel ? 'text-blue-600 bg-blue-50' : 'text-text-secondary'}`}
                             >
-                                History
+                                Workflow
                             </button>
                         </div>
 
@@ -279,6 +304,16 @@ const FlowCanvas: React.FC = () => {
                     onClose={() => setShowChecklist(false)}
                     nodes={workflowIssues}
                 />
+                
+                {/* Workflow Selection Panel */}
+                {appId && (
+                    <WorkflowPanel
+                        isOpen={showWorkflowPanel}
+                        onClose={() => setShowWorkflowPanel(false)}
+                        appId={appId}
+                        onSelectWorkflow={handleSelectWorkflow}
+                    />
+                )}
                 <ZoomIndicator />
             </ReactFlow>
         </div>

@@ -53,6 +53,9 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     setNodes: (nodes: FlowNode[]) => {
         set({ nodes });
     },
+    setEdges: (edges) => {
+        set({ edges });
+    },
     clearNodes: () => {
         set({ nodes: [], edges: [], selectedNodeId: null });
     },

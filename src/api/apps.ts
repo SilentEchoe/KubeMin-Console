@@ -1,4 +1,4 @@
-import type { App, AppListResponse, AppFilters, Component } from '../types/app';
+import type { App, AppListResponse, AppFilters, Component, Workflow } from '../types/app';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 
@@ -117,4 +117,18 @@ export const exportApp = async (id: string): Promise<Blob> => {
     // TODO: Implement export API call
     console.log('Export app:', id);
     throw new Error('Export not implemented');
+};
+
+export const fetchWorkflows = async (appId: string): Promise<Workflow[]> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/applications/${appId}/workflows`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch workflows');
+        }
+        const data = await response.json();
+        return data.workflows || [];
+    } catch (error) {
+        console.error('Error fetching workflows:', error);
+        return [];
+    }
 };

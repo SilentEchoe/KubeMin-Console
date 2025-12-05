@@ -145,3 +145,30 @@ export interface Component {
 export interface ComponentsResponse {
   components: Component[];
 }
+
+// Workflow types from API
+export interface WorkflowStep {
+  name: string;
+  workflowType: string;
+  mode: 'StepByStep' | 'DAG';
+  components: string[];
+}
+
+export interface Workflow {
+  id: string;
+  name: string;
+  alias: string;
+  namespace: string;
+  projectId?: string;
+  description: string;
+  status: string;
+  disabled: boolean;
+  steps: WorkflowStep[];
+  createTime: string;
+  updateTime: string;
+  workflowType: string;
+}
+
+export interface WorkflowsResponse {
+  workflows: Workflow[];
+}

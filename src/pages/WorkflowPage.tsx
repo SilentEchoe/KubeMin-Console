@@ -141,7 +141,7 @@ const WorkflowPage: React.FC = () => {
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
                 <Sidebar />
                 <main style={{ flex: 1, position: 'relative' }}>
-                    <FlowCanvas />
+                    <FlowCanvas appId={appId} />
                     <PropertyPanel />
                 </main>
             </div>

@@ -335,7 +335,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                         onClick={handleAddCmd}
                                         className="h-8 px-3 text-xs whitespace-nowrap"
                                     >
-                                        + Cmd
+                                        + Command
                                     </Button>
                                 </div>
                             </FlexRow>

@@ -125,6 +125,7 @@ export type FlowState = {
     panelMenu: { top: number; left: number; edgeId?: string } | null;
     clipboard: FlowNode | null;
     setNodes: (nodes: FlowNode[]) => void;
+    setEdges: (edges: FlowEdge[]) => void;
     clearNodes: () => void;
     onNodesChange: (changes: any) => void;
     onEdgesChange: (changes: any) => void;
