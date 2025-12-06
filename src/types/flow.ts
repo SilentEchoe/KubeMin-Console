@@ -64,12 +64,19 @@ export interface TraitContainer {
     traits?: Traits;
 }
 
+export interface TraitResource {
+    cpu?: string;
+    memory?: string;
+    gpu?: string;
+}
+
 export interface Traits {
     envs?: TraitEnv[];
     probes?: TraitProbe[];
     storage?: TraitStorage[];
     sidecar?: TraitContainer[];
     init?: TraitContainer[];
+    resource?: TraitResource;
 }
 
 // Config data item (key-value pair for config files like master.cnf, slave.cnf)

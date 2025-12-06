@@ -955,6 +955,192 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                             )}
                         </div>
 
+                        {/* Traits Resource Section */}
+                        <div className="mb-4">
+                            <FlexRow className="justify-between items-center mb-2">
+                                <label className="text-[13px] font-medium text-text-primary mb-0">
+                                    Traits Resource
+                                </label>
+                                <Switch
+                                    checked={Boolean((selectedNode.data.traits as Traits)?.resource)}
+                                    onChange={(checked) => {
+                                        const traits = (selectedNode.data.traits as Traits) || {};
+                                        if (checked) {
+                                            updateNodeData(selectedNode.id, {
+                                                traits: { ...traits, resource: { cpu: '', memory: '', gpu: '' } }
+                                            });
+                                        } else {
+                                            const { resource, ...restTraits } = traits;
+                                            updateNodeData(selectedNode.id, { traits: restTraits });
+                                        }
+                                    }}
+                                    size="md"
+                                />
+                            </FlexRow>
+                            {Boolean((selectedNode.data.traits as Traits)?.resource) && (
+                            <div className="space-y-3 p-3 rounded-lg border border-components-panel-border bg-gray-50/50">
+                                {/* CPU */}
+                                <FlexRow className="justify-between items-center">
+                                    <label className="text-[13px] font-medium text-text-secondary mb-0 w-[60px]">
+                                        CPU
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            className={cn(INPUT_CONTAINER_STYLES, "w-[80px] h-8 outline-none input-gradient-focus focus:ring-0")}
+                                            placeholder="e.g. 100"
+                                            value={((selectedNode.data.traits as Traits)?.resource?.cpu || '').replace(/m$/, '')}
+                                            onChange={(e) => {
+                                                const traits = (selectedNode.data.traits as Traits) || {};
+                                                const currentCpu = traits.resource?.cpu || '';
+                                                const unit = currentCpu.endsWith('m') ? 'm' : '';
+                                                const value = e.target.value;
+                                                updateNodeData(selectedNode.id, {
+                                                    traits: { 
+                                                        ...traits, 
+                                                        resource: { 
+                                                            ...traits.resource, 
+                                                            cpu: value ? `${value}${unit}` : '' 
+                                                        } 
+                                                    }
+                                                });
+                                            }}
+                                        />
+                                        <select
+                                            className="h-8 w-[50px] px-2 text-[13px] rounded-md border border-components-panel-border bg-white text-text-primary outline-none cursor-pointer"
+                                            value={((selectedNode.data.traits as Traits)?.resource?.cpu || '').endsWith('m') ? 'm' : ''}
+                                            onChange={(e) => {
+                                                const traits = (selectedNode.data.traits as Traits) || {};
+                                                const currentCpu = traits.resource?.cpu || '';
+                                                const numValue = currentCpu.replace(/m$/, '');
+                                                if (numValue) {
+                                                    updateNodeData(selectedNode.id, {
+                                                        traits: { 
+                                                            ...traits, 
+                                                            resource: { 
+                                                                ...traits.resource, 
+                                                                cpu: e.target.value ? `${numValue}${e.target.value}` : numValue 
+                                                            } 
+                                                        }
+                                                    });
+                                                }
+                                            }}
+                                        >
+                                            <option value="">1</option>
+                                            <option value="m">m</option>
+                                        </select>
+                                    </div>
+                                </FlexRow>
+
+                                {/* Memory */}
+                                <FlexRow className="justify-between items-center">
+                                    <label className="text-[13px] font-medium text-text-secondary mb-0 w-[60px]">
+                                        Memory
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            className={cn(INPUT_CONTAINER_STYLES, "w-[80px] h-8 outline-none input-gradient-focus focus:ring-0")}
+                                            placeholder="e.g. 256"
+                                            value={((selectedNode.data.traits as Traits)?.resource?.memory || '').replace(/(Mi|Gi)$/, '')}
+                                            onChange={(e) => {
+                                                const traits = (selectedNode.data.traits as Traits) || {};
+                                                const currentMemory = traits.resource?.memory || '';
+                                                const unit = currentMemory.endsWith('Gi') ? 'Gi' : 'Mi';
+                                                const value = e.target.value;
+                                                updateNodeData(selectedNode.id, {
+                                                    traits: { 
+                                                        ...traits, 
+                                                        resource: { 
+                                                            ...traits.resource, 
+                                                            memory: value ? `${value}${unit}` : '' 
+                                                        } 
+                                                    }
+                                                });
+                                            }}
+                                        />
+                                        <select
+                                            className="h-8 w-[50px] px-2 text-[13px] rounded-md border border-components-panel-border bg-white text-text-primary outline-none cursor-pointer"
+                                            value={((selectedNode.data.traits as Traits)?.resource?.memory || '').endsWith('Gi') ? 'Gi' : 'Mi'}
+                                            onChange={(e) => {
+                                                const traits = (selectedNode.data.traits as Traits) || {};
+                                                const currentMemory = traits.resource?.memory || '';
+                                                const numValue = currentMemory.replace(/(Mi|Gi)$/, '');
+                                                if (numValue) {
+                                                    updateNodeData(selectedNode.id, {
+                                                        traits: { 
+                                                            ...traits, 
+                                                            resource: { 
+                                                                ...traits.resource, 
+                                                                memory: `${numValue}${e.target.value}` 
+                                                            } 
+                                                        }
+                                                    });
+                                                }
+                                            }}
+                                        >
+                                            <option value="Mi">Mi</option>
+                                            <option value="Gi">Gi</option>
+                                        </select>
+                                    </div>
+                                </FlexRow>
+
+                                {/* GPU */}
+                                <FlexRow className="justify-between items-center">
+                                    <label className="text-[13px] font-medium text-text-secondary mb-0 w-[60px]">
+                                        GPU
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            className={cn(INPUT_CONTAINER_STYLES, "w-[80px] h-8 outline-none input-gradient-focus focus:ring-0")}
+                                            placeholder="e.g. 1"
+                                            value={((selectedNode.data.traits as Traits)?.resource?.gpu || '').replace(/(Mi)?$/, '')}
+                                            onChange={(e) => {
+                                                const traits = (selectedNode.data.traits as Traits) || {};
+                                                const currentGpu = traits.resource?.gpu || '';
+                                                const unit = currentGpu.endsWith('Mi') ? 'Mi' : '';
+                                                const value = e.target.value;
+                                                updateNodeData(selectedNode.id, {
+                                                    traits: { 
+                                                        ...traits, 
+                                                        resource: { 
+                                                            ...traits.resource, 
+                                                            gpu: value ? `${value}${unit}` : '' 
+                                                        } 
+                                                    }
+                                                });
+                                            }}
+                                        />
+                                        <select
+                                            className="h-8 w-[50px] px-2 text-[13px] rounded-md border border-components-panel-border bg-white text-text-primary outline-none cursor-pointer"
+                                            value={((selectedNode.data.traits as Traits)?.resource?.gpu || '').endsWith('Mi') ? 'Mi' : ''}
+                                            onChange={(e) => {
+                                                const traits = (selectedNode.data.traits as Traits) || {};
+                                                const currentGpu = traits.resource?.gpu || '';
+                                                const numValue = currentGpu.replace(/(Mi)?$/, '');
+                                                if (numValue) {
+                                                    updateNodeData(selectedNode.id, {
+                                                        traits: { 
+                                                            ...traits, 
+                                                            resource: { 
+                                                                ...traits.resource, 
+                                                                gpu: e.target.value ? `${numValue}${e.target.value}` : numValue 
+                                                            } 
+                                                        }
+                                                    });
+                                                }
+                                            }}
+                                        >
+                                            <option value="">1</option>
+                                            <option value="Mi">Mi</option>
+                                        </select>
+                                    </div>
+                                </FlexRow>
+                            </div>
+                            )}
+                        </div>
+
                         {/* Enabled Toggle */}
                         <FlexRow className="justify-between mb-4">
                             <label className="text-[13px] font-medium text-text-primary mb-0">TmpEnabled</label>
