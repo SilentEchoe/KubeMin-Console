@@ -1,4 +1,4 @@
-import type { FlowNode, Traits, TraitEnv, TraitStorage, TraitProbe, TraitContainer } from '../types/flow';
+import type { FlowNode, Traits, TraitEnv, TraitStorage, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule } from '../types/flow';
 
 /**
  * Export component structure matching the target JSON format
@@ -19,12 +19,29 @@ export interface ExportComponent {
     traits?: ExportTraits;
 }
 
+export interface ExportTraitRbacRule {
+    apiGroups: string[];
+    resources: string[];
+    verbs: string[];
+}
+
+export interface ExportTraitRbac {
+    serviceAccount: string;
+    roleName: string;
+    bindingName: string;
+    rules: ExportTraitRbacRule[];
+    serviceAccountLabels?: Record<string, string>;
+    roleLabels?: Record<string, string>;
+    bindingLabels?: Record<string, string>;
+}
+
 export interface ExportTraits {
     envs?: ExportTraitEnv[];
     probes?: ExportTraitProbe[];
     storage?: ExportTraitStorage[];
     sidecar?: ExportSidecar[];
     init?: ExportInitContainer[];
+    rbac?: ExportTraitRbac[];
 }
 
 export interface ExportTraitEnv {
@@ -221,6 +238,41 @@ function convertInitContainerToExport(init: TraitContainer): ExportInitContainer
 }
 
 /**
+ * Convert TraitRbacRule from FlowNode format to export format
+ */
+function convertRbacRuleToExport(rule: TraitRbacRule): ExportTraitRbacRule {
+    return {
+        apiGroups: rule.apiGroups,
+        resources: rule.resources,
+        verbs: rule.verbs,
+    };
+}
+
+/**
+ * Convert TraitRbac from FlowNode format to export format
+ */
+function convertRbacToExport(rbac: TraitRbac): ExportTraitRbac {
+    const result: ExportTraitRbac = {
+        serviceAccount: rbac.serviceAccount,
+        roleName: rbac.roleName,
+        bindingName: rbac.bindingName,
+        rules: rbac.rules.map(convertRbacRuleToExport),
+    };
+
+    if (rbac.serviceAccountLabels && Object.keys(rbac.serviceAccountLabels).length > 0) {
+        result.serviceAccountLabels = rbac.serviceAccountLabels;
+    }
+    if (rbac.roleLabels && Object.keys(rbac.roleLabels).length > 0) {
+        result.roleLabels = rbac.roleLabels;
+    }
+    if (rbac.bindingLabels && Object.keys(rbac.bindingLabels).length > 0) {
+        result.bindingLabels = rbac.bindingLabels;
+    }
+
+    return result;
+}
+
+/**
  * Convert FlowNode traits to export format
  */
 function convertTraitsToExport(traits: Traits, nodeData: FlowNode['data']): ExportTraits | undefined {
@@ -304,6 +356,12 @@ function convertTraitsToExport(traits: Traits, nodeData: FlowNode['data']): Expo
     // Convert init
     if (traits.init && traits.init.length > 0) {
         result.init = traits.init.map(convertInitContainerToExport);
+        hasTraits = true;
+    }
+
+    // Convert rbac
+    if (traits.rbac && traits.rbac.length > 0) {
+        result.rbac = traits.rbac.map(convertRbacToExport);
         hasTraits = true;
     }
 
@@ -518,5 +576,7 @@ export function nodesToDSL(
 }
 
 export default nodesToDSL;
+
+
 
 

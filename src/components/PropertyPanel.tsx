@@ -9,19 +9,20 @@ import TraitsEnvPanel from './workflow/TraitsEnvPanel';
 import TraitsStoragePanel from './workflow/TraitsStoragePanel';
 import TraitsSidecarPanel from './workflow/TraitsSidecarPanel';
 import TraitsInitPanel from './workflow/TraitsInitPanel';
+import TraitsRbacPanel from './workflow/TraitsRbacPanel';
 import { Button } from './ui/Button';
 import TraitsPanel from './TraitsPanel';
 import componentIcon from '../assets/component.svg';
 import configIcon from '../assets/config.svg';
-import type { EnvironmentVariable, Traits, TraitEnv, TraitStorage, TraitContainer } from '../types/flow';
+import type { EnvironmentVariable, Traits, TraitEnv, TraitStorage, TraitContainer, TraitRbac } from '../types/flow';
 
-type TraitsPanelType = 'env' | 'storage' | 'sidecar' | 'init' | null;
+type TraitsPanelType = 'env' | 'storage' | 'sidecar' | 'init' | 'rbac' | null;
 
 // Edit state type
 interface EditState {
-    type: 'env' | 'traitsEnv' | 'traitsStorage' | 'traitsSidecar' | 'traitsInit' | null;
+    type: 'env' | 'traitsEnv' | 'traitsStorage' | 'traitsSidecar' | 'traitsInit' | 'traitsRbac' | null;
     index: number;
-    data: EnvironmentVariable | TraitEnv | TraitStorage | TraitContainer | null;
+    data: EnvironmentVariable | TraitEnv | TraitStorage | TraitContainer | TraitRbac | null;
 }
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
@@ -216,6 +217,32 @@ const PropertyPanel: React.FC = () => {
         setEditState({ type: null, index: -1, data: null });
     };
 
+    const handleTraitsRbacAdd = (newRbac: TraitRbac) => {
+        if (!selectedNode) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, rbac: [...(traits.rbac || []), newRbac] }
+        });
+        setActiveTraitsPanel(null);
+    };
+
+    const handleTraitsRbacEdit = (index: number, rbac: TraitRbac) => {
+        setEditState({ type: 'traitsRbac', index, data: rbac });
+        setActiveTraitsPanel('rbac');
+    };
+
+    const handleTraitsRbacUpdate = (updatedRbac: TraitRbac) => {
+        if (!selectedNode || editState.index < 0) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        const newRbac = [...(traits.rbac || [])];
+        newRbac[editState.index] = updatedRbac;
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, rbac: newRbac }
+        });
+        setActiveTraitsPanel(null);
+        setEditState({ type: null, index: -1, data: null });
+    };
+
     // Close panel and clear edit state
     const handleCloseEnvPanel = () => {
         setShowEnvPanel(false);
@@ -331,6 +358,25 @@ const PropertyPanel: React.FC = () => {
                             onAdd={handleTraitsInitAdd}
                             initialData={editState.type === 'traitsInit' ? editState.data as TraitContainer : undefined}
                             onUpdate={handleTraitsInitUpdate}
+                        />
+                    </div>
+                )}
+
+                {activeTraitsPanel === 'rbac' && (
+                    <div
+                        className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl transition-all duration-200"
+                        style={{
+                            minWidth: '420px',
+                            maxWidth: '420px',
+                            width: '420px',
+                            height: '100%',
+                        }}
+                    >
+                        <TraitsRbacPanel
+                            onClose={handleCloseTraitsPanel}
+                            onAdd={handleTraitsRbacAdd}
+                            initialData={editState.type === 'traitsRbac' ? editState.data as TraitRbac : undefined}
+                            onUpdate={handleTraitsRbacUpdate}
                         />
                     </div>
                 )}
@@ -463,6 +509,11 @@ const PropertyPanel: React.FC = () => {
                                     setActiveTraitsPanel('init');
                                 }}
                                 onTraitsInitEditClick={handleTraitsInitEdit}
+                                onTraitsRbacAddClick={() => {
+                                    setEditState({ type: null, index: -1, data: null });
+                                    setActiveTraitsPanel('rbac');
+                                }}
+                                onTraitsRbacEditClick={handleTraitsRbacEdit}
                             />
                         </div>
 

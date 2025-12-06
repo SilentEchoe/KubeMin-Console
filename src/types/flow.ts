@@ -70,6 +70,22 @@ export interface TraitResource {
     gpu?: string;
 }
 
+export interface TraitRbacRule {
+    apiGroups: string[];
+    resources: string[];
+    verbs: string[];
+}
+
+export interface TraitRbac {
+    serviceAccount: string;
+    roleName: string;
+    bindingName: string;
+    rules: TraitRbacRule[];
+    serviceAccountLabels?: Record<string, string>;
+    roleLabels?: Record<string, string>;
+    bindingLabels?: Record<string, string>;
+}
+
 export interface Traits {
     envs?: TraitEnv[];
     probes?: TraitProbe[];
@@ -77,6 +93,7 @@ export interface Traits {
     sidecar?: TraitContainer[];
     init?: TraitContainer[];
     resource?: TraitResource;
+    rbac?: TraitRbac[];
 }
 
 // Config data item (key-value pair for config files like master.cnf, slave.cnf)

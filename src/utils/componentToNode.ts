@@ -1,5 +1,5 @@
 import type { Component } from '../types/app';
-import type { FlowNode, FlowNodeData, Traits, TraitStorage, TraitEnv, TraitProbe, TraitContainer, ConfigDataItem, SecretDataItem } from '../types/flow';
+import type { FlowNode, FlowNodeData, Traits, TraitStorage, TraitEnv, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule, ConfigDataItem, SecretDataItem } from '../types/flow';
 
 // Node layout configuration
 const NODE_WIDTH = 240;
@@ -216,6 +216,23 @@ function convertTraits(apiTraits: Component['traits']): Traits {
           } : undefined,
         })),
       } : undefined,
+    }));
+  }
+
+  // Convert rbac
+  if (apiTraits.rbac) {
+    traits.rbac = apiTraits.rbac.map((r): TraitRbac => ({
+      serviceAccount: r.serviceAccount,
+      roleName: r.roleName,
+      bindingName: r.bindingName,
+      rules: r.rules.map((rule): TraitRbacRule => ({
+        apiGroups: rule.apiGroups,
+        resources: rule.resources,
+        verbs: rule.verbs,
+      })),
+      serviceAccountLabels: r.serviceAccountLabels,
+      roleLabels: r.roleLabels,
+      bindingLabels: r.bindingLabels,
     }));
   }
 

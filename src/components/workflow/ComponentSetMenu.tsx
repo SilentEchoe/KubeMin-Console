@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import type { ComponentSetSectionKey } from '../PropertyPanel';
-import type { Traits, EnvironmentVariable, TraitEnv, TraitStorage, TraitContainer } from '../../types/flow';
+import type { Traits, EnvironmentVariable, TraitEnv, TraitStorage, TraitContainer, TraitRbac } from '../../types/flow';
 import { ChevronDown, Check, X } from 'lucide-react';
 import { useFlowStore } from '../../stores/flowStore';
 import EnvironmentVariableManager from '../EnvironmentVariableManager';
@@ -45,6 +45,8 @@ interface ComponentSetMenuProps {
     onTraitsSidecarEditClick?: (index: number, sidecar: TraitContainer) => void;
     onTraitsInitAddClick?: () => void;
     onTraitsInitEditClick?: (index: number, init: TraitContainer) => void;
+    onTraitsRbacAddClick?: () => void;
+    onTraitsRbacEditClick?: (index: number, rbac: TraitRbac) => void;
 }
 
 const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
@@ -59,7 +61,9 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
     onTraitsSidecarAddClick,
     onTraitsSidecarEditClick,
     onTraitsInitAddClick,
-    onTraitsInitEditClick
+    onTraitsInitEditClick,
+    onTraitsRbacAddClick,
+    onTraitsRbacEditClick
 }) => {
     const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
@@ -946,6 +950,49 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                                     });
                                                 }}
                                                 className="hover:text-orange-900 transition-colors"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Traits RBAC Section */}
+                        <div className="mb-4">
+                            <FlexRow className="justify-between items-center mb-2">
+                                <label className="text-[13px] font-medium text-text-primary mb-0">
+                                    Traits RBAC
+                                </label>
+                                <Button
+                                    variant="secondary"
+                                    size="small"
+                                    onClick={onTraitsRbacAddClick}
+                                    className="h-8 w-[120px] text-xs whitespace-nowrap"
+                                >
+                                    + Add RBAC
+                                </Button>
+                            </FlexRow>
+                            {((selectedNode.data.traits as Traits)?.rbac || []).length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                    {((selectedNode.data.traits as Traits)?.rbac || []).map((rbac, index) => (
+                                        <span
+                                            key={index}
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-cyan-50 text-cyan-700 rounded-md border border-cyan-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => onTraitsRbacEditClick?.(index, rbac)}
+                                        >
+                                            {rbac.serviceAccount}
+                                            <span className="text-cyan-400 text-[10px]">({rbac.rules.length} rules)</span>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const traits = (selectedNode.data.traits as Traits) || {};
+                                                    updateNodeData(selectedNode.id, {
+                                                        traits: { ...traits, rbac: traits.rbac?.filter((_, i) => i !== index) }
+                                                    });
+                                                }}
+                                                className="hover:text-cyan-900 transition-colors"
                                             >
                                                 <X size={12} />
                                             </button>

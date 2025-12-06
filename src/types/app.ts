@@ -76,11 +76,13 @@ export interface ComponentTraitRbacRule {
 
 export interface ComponentTraitRbac {
   serviceAccount: string;
-  namespace: string;
+  namespace?: string;
   roleName: string;
   bindingName: string;
-  roleLabels?: Record<string, string>;
   rules: ComponentTraitRbacRule[];
+  serviceAccountLabels?: Record<string, string>;
+  roleLabels?: Record<string, string>;
+  bindingLabels?: Record<string, string>;
 }
 
 export interface ComponentInitContainer {

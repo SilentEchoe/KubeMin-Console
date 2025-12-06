@@ -6,6 +6,7 @@ import TraitsEnvsManager from './traits/TraitsEnvsManager';
 import TraitsProbesManager from './traits/TraitsProbesManager';
 import TraitsStorageManager from './traits/TraitsStorageManager';
 import TraitsContainerList from './traits/TraitsContainerList';
+import TraitsRbacManager from './traits/TraitsRbacManager';
 
 interface TraitsPanelProps {
     node: FlowNode;
@@ -13,7 +14,7 @@ interface TraitsPanelProps {
 
 const TraitsPanel: React.FC<TraitsPanelProps> = ({ node }) => {
     const { updateNodeData } = useFlowStore();
-    const [activeTab, setActiveTab] = useState<'envs' | 'probes' | 'storage' | 'sidecar' | 'init'>('envs');
+    const [activeTab, setActiveTab] = useState<'envs' | 'probes' | 'storage' | 'sidecar' | 'init' | 'rbac'>('envs');
 
     const traits = node.data.traits || {};
 
@@ -29,6 +30,7 @@ const TraitsPanel: React.FC<TraitsPanelProps> = ({ node }) => {
         { id: 'storage', label: 'Storage' },
         { id: 'sidecar', label: 'Sidecar' },
         { id: 'init', label: 'Init' },
+        { id: 'rbac', label: 'RBAC' },
     ] as const;
 
     return (
@@ -85,6 +87,12 @@ const TraitsPanel: React.FC<TraitsPanelProps> = ({ node }) => {
                         containers={traits.init || []}
                         onChange={(init) => updateTraits({ init })}
                         variant="init"
+                    />
+                )}
+                {activeTab === 'rbac' && (
+                    <TraitsRbacManager
+                        rbac={traits.rbac || []}
+                        onChange={(rbac) => updateTraits({ rbac })}
                     />
                 )}
             </div>
