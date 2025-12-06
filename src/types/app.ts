@@ -80,9 +80,13 @@ export interface ComponentTraitRbac {
   roleName: string;
   bindingName: string;
   rules: ComponentTraitRbacRule[];
-  serviceAccountLabels?: Record<string, string>;
   roleLabels?: Record<string, string>;
-  bindingLabels?: Record<string, string>;
+}
+
+export interface ComponentTraitResource {
+  cpu?: string;
+  memory?: string;
+  gpu?: string;
 }
 
 export interface ComponentInitContainer {
@@ -119,6 +123,7 @@ export interface ComponentTraits {
   rbac?: ComponentTraitRbac[];
   envs?: ComponentTraitEnv[];
   probes?: ComponentTraitProbe[];
+  resource?: ComponentTraitResource;
 }
 
 export interface ComponentProperties {

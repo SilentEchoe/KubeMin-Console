@@ -1,4 +1,4 @@
-import type { FlowNode, Traits, TraitEnv, TraitStorage, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule } from '../types/flow';
+import type { FlowNode, Traits, TraitEnv, TraitStorage, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule, TraitResource } from '../types/flow';
 
 /**
  * Export component structure matching the target JSON format
@@ -30,9 +30,13 @@ export interface ExportTraitRbac {
     roleName: string;
     bindingName: string;
     rules: ExportTraitRbacRule[];
-    serviceAccountLabels?: Record<string, string>;
     roleLabels?: Record<string, string>;
-    bindingLabels?: Record<string, string>;
+}
+
+export interface ExportTraitResource {
+    cpu?: string;
+    memory?: string;
+    gpu?: string;
 }
 
 export interface ExportTraits {
@@ -42,6 +46,7 @@ export interface ExportTraits {
     sidecar?: ExportSidecar[];
     init?: ExportInitContainer[];
     rbac?: ExportTraitRbac[];
+    resource?: ExportTraitResource;
 }
 
 export interface ExportTraitEnv {
@@ -259,14 +264,8 @@ function convertRbacToExport(rbac: TraitRbac): ExportTraitRbac {
         rules: rbac.rules.map(convertRbacRuleToExport),
     };
 
-    if (rbac.serviceAccountLabels && Object.keys(rbac.serviceAccountLabels).length > 0) {
-        result.serviceAccountLabels = rbac.serviceAccountLabels;
-    }
     if (rbac.roleLabels && Object.keys(rbac.roleLabels).length > 0) {
         result.roleLabels = rbac.roleLabels;
-    }
-    if (rbac.bindingLabels && Object.keys(rbac.bindingLabels).length > 0) {
-        result.bindingLabels = rbac.bindingLabels;
     }
 
     return result;
@@ -363,6 +362,24 @@ function convertTraitsToExport(traits: Traits, nodeData: FlowNode['data']): Expo
     if (traits.rbac && traits.rbac.length > 0) {
         result.rbac = traits.rbac.map(convertRbacToExport);
         hasTraits = true;
+    }
+
+    // Convert resource
+    if (traits.resource) {
+        const resource: ExportTraitResource = {};
+        if (traits.resource.cpu) {
+            resource.cpu = traits.resource.cpu;
+        }
+        if (traits.resource.memory) {
+            resource.memory = traits.resource.memory;
+        }
+        if (traits.resource.gpu) {
+            resource.gpu = traits.resource.gpu;
+        }
+        if (Object.keys(resource).length > 0) {
+            result.resource = resource;
+            hasTraits = true;
+        }
     }
 
     return hasTraits ? result : undefined;

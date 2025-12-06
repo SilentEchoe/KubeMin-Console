@@ -37,14 +37,10 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
     const [roleName, setRoleName] = useState('');
     const [bindingName, setBindingName] = useState('');
     const [rules, setRules] = useState<TraitRbacRule[]>([{ apiGroups: [''], resources: [''], verbs: [''] }]);
-    const [serviceAccountLabels, setServiceAccountLabels] = useState<LabelItem[]>([]);
     const [roleLabels, setRoleLabels] = useState<LabelItem[]>([]);
-    const [bindingLabels, setBindingLabels] = useState<LabelItem[]>([]);
 
     // Collapsed sections state
-    const [showSaLabels, setShowSaLabels] = useState(false);
     const [showRoleLabels, setShowRoleLabels] = useState(false);
-    const [showBindingLabels, setShowBindingLabels] = useState(false);
 
     const isEditMode = !!initialData;
 
@@ -71,23 +67,15 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
             setRoleName(initialData.roleName || '');
             setBindingName(initialData.bindingName || '');
             setRules(initialData.rules.length > 0 ? initialData.rules : [{ apiGroups: [''], resources: [''], verbs: [''] }]);
-            setServiceAccountLabels(recordToLabels(initialData.serviceAccountLabels));
             setRoleLabels(recordToLabels(initialData.roleLabels));
-            setBindingLabels(recordToLabels(initialData.bindingLabels));
-            setShowSaLabels(!!initialData.serviceAccountLabels && Object.keys(initialData.serviceAccountLabels).length > 0);
             setShowRoleLabels(!!initialData.roleLabels && Object.keys(initialData.roleLabels).length > 0);
-            setShowBindingLabels(!!initialData.bindingLabels && Object.keys(initialData.bindingLabels).length > 0);
         } else {
             setServiceAccount('');
             setRoleName('');
             setBindingName('');
             setRules([{ apiGroups: [''], resources: [''], verbs: [''] }]);
-            setServiceAccountLabels([]);
             setRoleLabels([]);
-            setBindingLabels([]);
-            setShowSaLabels(false);
             setShowRoleLabels(false);
-            setShowBindingLabels(false);
         }
     }, [initialData]);
 
@@ -110,9 +98,7 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
             roleName,
             bindingName,
             rules: filteredRules.length > 0 ? filteredRules : [{ apiGroups: [''], resources: [''], verbs: ['get'] }],
-            serviceAccountLabels: labelsToRecord(serviceAccountLabels),
             roleLabels: labelsToRecord(roleLabels),
-            bindingLabels: labelsToRecord(bindingLabels),
         };
 
         if (isEditMode && onUpdate) {
@@ -258,7 +244,7 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
                         <input
                             type="text"
                             className={INPUT_STYLES}
-                            placeholder="e.g. backend-sa"
+                            placeholder="e.g. pod-labeler-sa"
                             value={serviceAccount}
                             onChange={(e) => setServiceAccount(e.target.value)}
                         />
@@ -275,7 +261,7 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
                         <input
                             type="text"
                             className={INPUT_STYLES}
-                            placeholder="e.g. backend-reader"
+                            placeholder="e.g. pod-labeler-role"
                             value={roleName}
                             onChange={(e) => setRoleName(e.target.value)}
                         />
@@ -292,7 +278,7 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
                         <input
                             type="text"
                             className={INPUT_STYLES}
-                            placeholder="e.g. backend-reader-binding"
+                            placeholder="e.g. pod-labeler-binding"
                             value={bindingName}
                             onChange={(e) => setBindingName(e.target.value)}
                         />
@@ -355,7 +341,7 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
                                             type="text"
                                             value={rule.verbs.join(', ')}
                                             onChange={(e) => updateRule(idx, 'verbs', e.target.value)}
-                                            placeholder="e.g. get, list, watch, create"
+                                            placeholder="e.g. get, list, watch, patch"
                                             className="w-full px-2 py-1.5 text-xs border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                                         />
                                     </div>
@@ -364,29 +350,15 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
                         </div>
                     </div>
 
-                    {/* Labels Sections */}
+                    {/* Role Labels Section */}
                     <div className="space-y-2">
                         <label className="text-[13px] font-medium text-text-primary block">Labels (optional)</label>
-                        {renderLabelEditor(
-                            'ServiceAccount Labels',
-                            serviceAccountLabels,
-                            setServiceAccountLabels,
-                            showSaLabels,
-                            setShowSaLabels
-                        )}
                         {renderLabelEditor(
                             'Role Labels',
                             roleLabels,
                             setRoleLabels,
                             showRoleLabels,
                             setShowRoleLabels
-                        )}
-                        {renderLabelEditor(
-                            'Binding Labels',
-                            bindingLabels,
-                            setBindingLabels,
-                            showBindingLabels,
-                            setShowBindingLabels
                         )}
                     </div>
                 </div>
@@ -415,4 +387,3 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
 };
 
 export default TraitsRbacPanel;
-

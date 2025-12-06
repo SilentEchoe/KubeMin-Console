@@ -22,26 +22,18 @@ const TraitsRbacManager: React.FC<TraitsRbacManagerProps> = ({ rbac, onChange })
     const [roleName, setRoleName] = useState('');
     const [bindingName, setBindingName] = useState('');
     const [rules, setRules] = useState<TraitRbacRule[]>([{ apiGroups: [''], resources: [''], verbs: [''] }]);
-    const [serviceAccountLabels, setServiceAccountLabels] = useState<LabelItem[]>([]);
     const [roleLabels, setRoleLabels] = useState<LabelItem[]>([]);
-    const [bindingLabels, setBindingLabels] = useState<LabelItem[]>([]);
 
     // Collapsed sections state
-    const [showSaLabels, setShowSaLabels] = useState(false);
     const [showRoleLabels, setShowRoleLabels] = useState(false);
-    const [showBindingLabels, setShowBindingLabels] = useState(false);
 
     const resetForm = () => {
         setServiceAccount('');
         setRoleName('');
         setBindingName('');
         setRules([{ apiGroups: [''], resources: [''], verbs: [''] }]);
-        setServiceAccountLabels([]);
         setRoleLabels([]);
-        setBindingLabels([]);
-        setShowSaLabels(false);
         setShowRoleLabels(false);
-        setShowBindingLabels(false);
         setIsAdding(false);
         setEditingIndex(null);
     };
@@ -81,9 +73,7 @@ const TraitsRbacManager: React.FC<TraitsRbacManagerProps> = ({ rbac, onChange })
             roleName,
             bindingName,
             rules: filteredRules.length > 0 ? filteredRules : [{ apiGroups: [''], resources: [''], verbs: ['get'] }],
-            serviceAccountLabels: labelsToRecord(serviceAccountLabels),
             roleLabels: labelsToRecord(roleLabels),
-            bindingLabels: labelsToRecord(bindingLabels),
         };
 
         if (editingIndex !== null) {
@@ -102,12 +92,8 @@ const TraitsRbacManager: React.FC<TraitsRbacManagerProps> = ({ rbac, onChange })
         setRoleName(item.roleName);
         setBindingName(item.bindingName);
         setRules(item.rules.length > 0 ? item.rules : [{ apiGroups: [''], resources: [''], verbs: [''] }]);
-        setServiceAccountLabels(recordToLabels(item.serviceAccountLabels));
         setRoleLabels(recordToLabels(item.roleLabels));
-        setBindingLabels(recordToLabels(item.bindingLabels));
-        setShowSaLabels(!!item.serviceAccountLabels && Object.keys(item.serviceAccountLabels).length > 0);
         setShowRoleLabels(!!item.roleLabels && Object.keys(item.roleLabels).length > 0);
-        setShowBindingLabels(!!item.bindingLabels && Object.keys(item.bindingLabels).length > 0);
         setEditingIndex(index);
         setIsAdding(true);
     };
@@ -252,7 +238,7 @@ const TraitsRbacManager: React.FC<TraitsRbacManagerProps> = ({ rbac, onChange })
                                     type="text"
                                     value={serviceAccount}
                                     onChange={(e) => setServiceAccount(e.target.value)}
-                                    placeholder="e.g. backend-sa"
+                                    placeholder="e.g. pod-labeler-sa"
                                     className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                                 />
                             </div>
@@ -262,7 +248,7 @@ const TraitsRbacManager: React.FC<TraitsRbacManagerProps> = ({ rbac, onChange })
                                     type="text"
                                     value={roleName}
                                     onChange={(e) => setRoleName(e.target.value)}
-                                    placeholder="e.g. backend-reader"
+                                    placeholder="e.g. pod-labeler-role"
                                     className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                                 />
                             </div>
@@ -272,7 +258,7 @@ const TraitsRbacManager: React.FC<TraitsRbacManagerProps> = ({ rbac, onChange })
                                     type="text"
                                     value={bindingName}
                                     onChange={(e) => setBindingName(e.target.value)}
-                                    placeholder="e.g. backend-reader-binding"
+                                    placeholder="e.g. pod-labeler-binding"
                                     className="w-full px-2 py-1.5 text-sm border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                                 />
                             </div>
@@ -332,7 +318,7 @@ const TraitsRbacManager: React.FC<TraitsRbacManagerProps> = ({ rbac, onChange })
                                                 type="text"
                                                 value={rule.verbs.join(', ')}
                                                 onChange={(e) => updateRule(idx, 'verbs', e.target.value)}
-                                                placeholder="e.g. get, list, watch, create"
+                                                placeholder="e.g. get, list, watch, patch"
                                                 className="w-full px-2 py-1 text-xs border border-components-panel-border rounded bg-white input-gradient-focus focus:ring-0 outline-none"
                                             />
                                         </div>
@@ -341,28 +327,14 @@ const TraitsRbacManager: React.FC<TraitsRbacManagerProps> = ({ rbac, onChange })
                             </div>
                         </div>
 
-                        {/* Labels Sections */}
+                        {/* Role Labels Section */}
                         <div className="space-y-2">
-                            {renderLabelEditor(
-                                'ServiceAccount Labels',
-                                serviceAccountLabels,
-                                setServiceAccountLabels,
-                                showSaLabels,
-                                setShowSaLabels
-                            )}
                             {renderLabelEditor(
                                 'Role Labels',
                                 roleLabels,
                                 setRoleLabels,
                                 showRoleLabels,
                                 setShowRoleLabels
-                            )}
-                            {renderLabelEditor(
-                                'Binding Labels',
-                                bindingLabels,
-                                setBindingLabels,
-                                showBindingLabels,
-                                setShowBindingLabels
                             )}
                         </div>
 
@@ -454,32 +426,12 @@ const TraitsRbacManager: React.FC<TraitsRbacManagerProps> = ({ rbac, onChange })
                                         </div>
                                     </div>
                                 ))}
-                                {(item.serviceAccountLabels || item.roleLabels || item.bindingLabels) && (
-                                    <div className="text-xs space-y-1">
-                                        {item.serviceAccountLabels && Object.keys(item.serviceAccountLabels).length > 0 && (
-                                            <div>
-                                                <span className="text-text-tertiary">SA Labels: </span>
-                                                <span className="text-text-secondary">
-                                                    {Object.entries(item.serviceAccountLabels).map(([k, v]) => `${k}=${v}`).join(', ')}
-                                                </span>
-                                            </div>
-                                        )}
-                                        {item.roleLabels && Object.keys(item.roleLabels).length > 0 && (
-                                            <div>
-                                                <span className="text-text-tertiary">Role Labels: </span>
-                                                <span className="text-text-secondary">
-                                                    {Object.entries(item.roleLabels).map(([k, v]) => `${k}=${v}`).join(', ')}
-                                                </span>
-                                            </div>
-                                        )}
-                                        {item.bindingLabels && Object.keys(item.bindingLabels).length > 0 && (
-                                            <div>
-                                                <span className="text-text-tertiary">Binding Labels: </span>
-                                                <span className="text-text-secondary">
-                                                    {Object.entries(item.bindingLabels).map(([k, v]) => `${k}=${v}`).join(', ')}
-                                                </span>
-                                            </div>
-                                        )}
+                                {item.roleLabels && Object.keys(item.roleLabels).length > 0 && (
+                                    <div className="text-xs">
+                                        <span className="text-text-tertiary">Role Labels: </span>
+                                        <span className="text-text-secondary">
+                                            {Object.entries(item.roleLabels).map(([k, v]) => `${k}=${v}`).join(', ')}
+                                        </span>
                                     </div>
                                 )}
                             </div>
@@ -492,4 +444,3 @@ const TraitsRbacManager: React.FC<TraitsRbacManagerProps> = ({ rbac, onChange })
 };
 
 export default TraitsRbacManager;
-

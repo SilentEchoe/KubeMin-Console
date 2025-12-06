@@ -1,5 +1,5 @@
 import type { Component } from '../types/app';
-import type { FlowNode, FlowNodeData, Traits, TraitStorage, TraitEnv, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule, ConfigDataItem, SecretDataItem } from '../types/flow';
+import type { FlowNode, FlowNodeData, Traits, TraitStorage, TraitEnv, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule, TraitResource, ConfigDataItem, SecretDataItem } from '../types/flow';
 
 // Node layout configuration
 const NODE_WIDTH = 240;
@@ -230,10 +230,17 @@ function convertTraits(apiTraits: Component['traits']): Traits {
         resources: rule.resources,
         verbs: rule.verbs,
       })),
-      serviceAccountLabels: r.serviceAccountLabels,
       roleLabels: r.roleLabels,
-      bindingLabels: r.bindingLabels,
     }));
+  }
+
+  // Convert resource
+  if (apiTraits.resource) {
+    traits.resource = {
+      cpu: apiTraits.resource.cpu,
+      memory: apiTraits.resource.memory,
+      gpu: apiTraits.resource.gpu,
+    } as TraitResource;
   }
 
   return traits;

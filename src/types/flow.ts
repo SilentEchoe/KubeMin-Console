@@ -81,9 +81,7 @@ export interface TraitRbac {
     roleName: string;
     bindingName: string;
     rules: TraitRbacRule[];
-    serviceAccountLabels?: Record<string, string>;
     roleLabels?: Record<string, string>;
-    bindingLabels?: Record<string, string>;
 }
 
 export interface Traits {
