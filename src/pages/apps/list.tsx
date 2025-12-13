@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSWRInfinite from 'swr/infinite';
 import { Search, Filter, Plus } from 'lucide-react';
-import { fetchApps } from '../../api/apps';
+import { fetchApps, createApp } from '../../api/apps';
 import type { AppFilters } from '../../types/app';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
@@ -10,6 +10,7 @@ import { AppCard } from './components/app-card';
 import { NewAppCard } from './components/new-app-card';
 import { Empty } from './components/empty';
 import { Footer } from './components/footer';
+import { CreateBlankAppModal, type CreateBlankAppData } from './components/create-blank-app-modal';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -18,6 +19,7 @@ export const List: React.FC = () => {
     const [searchInput, setSearchInput] = useState('');
     const [myApps, setMyApps] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const debouncedSearch = useDebounce(searchInput, 500);
 
@@ -51,7 +53,27 @@ export const List: React.FC = () => {
     });
 
     const handleCreateBlank = () => {
-        navigate('/workflow/new');
+        setIsCreateModalOpen(true);
+    };
+
+    const handleCreateApp = async (data: CreateBlankAppData) => {
+        const createdApp = await createApp({
+            name: data.name,
+            namespace: data.namespace,
+            version: data.version,
+            description: data.description,
+            alias: data.alias || undefined,
+            project: data.project || undefined,
+            icon: data.icon || undefined,
+            image: data.image || undefined,
+            tmp_enable: data.tmp_enable,
+            component: [],
+            workflow: [],
+        });
+        // Refresh the app list after creation
+        mutate();
+        // Navigate to the new app's workflow page using response id
+        navigate(`/workflow/${createdApp.id}`);
     };
 
     const handleCreateFromTemplate = () => {
@@ -183,6 +205,13 @@ export const List: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            {/* Create Blank App Modal */}
+            <CreateBlankAppModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSubmit={handleCreateApp}
+            />
         </div>
     );
 };

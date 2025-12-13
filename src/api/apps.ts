@@ -101,6 +101,81 @@ export const fetchApp = async (id: string): Promise<App> => {
     }
 };
 
+export interface CreateAppRequest {
+    name: string;
+    namespace: string;
+    version: string;
+    description: string;
+    alias?: string;
+    project?: string;
+    icon?: string;
+    image?: string;
+    tmp_enable?: boolean;
+    component: ComponentCreateRequest[];
+    workflow: WorkflowStepCreateRequest[];
+}
+
+export interface ComponentCreateRequest {
+    name: string;
+    type: 'config' | 'secret' | 'store' | 'webservice';
+    image?: string;
+    replicas: number;
+    properties?: {
+        ports?: { port: number; expose: boolean }[];
+        env?: Record<string, string>;
+        conf?: Record<string, string>;
+        secret?: Record<string, string>;
+    };
+    traits?: {
+        storage?: {
+            name: string;
+            type: string;
+            mountPath: string;
+            tmpCreate?: boolean;
+            size?: string;
+        }[];
+        envFrom?: {
+            type: string;
+            sourceName: string;
+        }[];
+    };
+}
+
+export interface WorkflowStepCreateRequest {
+    name: string;
+    mode: 'StepByStep' | 'DAG';
+    components: string[];
+}
+
+export interface CreateAppResponse {
+    id: string;
+    name: string;
+    alias: string;
+    project: string;
+    description: string;
+    createTime: string;
+    updateTime: string;
+    icon: string;
+    workflow_id: string;
+}
+
+export const createApp = async (data: CreateAppRequest): Promise<CreateAppResponse> => {
+    const response = await fetch(`${API_BASE_URL}/applications`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || 'Failed to create application');
+    }
+
+    return response.json();
+};
+
 export const deleteApp = async (id: string): Promise<void> => {
     // TODO: Implement delete API call
     console.log('Delete app:', id);
