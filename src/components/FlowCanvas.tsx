@@ -30,8 +30,9 @@ import type { NodeWithIssues } from './workflow/WorkflowChecklist';
 import WorkflowPanel from './workflow/WorkflowPanel';
 import Modal from './base/Modal';
 import { applyWorkflowConnections, rearrangeNodesForWorkflow } from '../utils/workflowConnection';
-import { fetchWorkflows, executeWorkflow, getTaskStatus, cancelWorkflow, tryApplication, saveApplication } from '../api/apps';
+import { fetchWorkflows, executeWorkflow, getTaskStatus, cancelWorkflow, tryApplication, saveApplication, extractTryErrorMessage } from '../api/apps';
 import { nodesToDSL } from '../utils/nodeToComponent';
+import { isEventTargetInputArea } from '../utils/keyboard';
 
 import { useShortcuts } from '../hooks/useShortcuts';
 
@@ -293,33 +294,12 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
             const payload = {
                 id: app.id || appId,
                 ...dsl,
+                icon: app.icon,
+                tmp_enable: app.tmp_enable,
             };
 
             const tryResult = await tryApplication(payload);
-
-            const getTryErrorMessage = (result: unknown): string | null => {
-                if (result == null) return null;
-                if (typeof result === 'string') return result.trim() ? result : null;
-                if (Array.isArray(result)) {
-                    const items = result.filter((x) => typeof x === 'string' && x.trim()) as string[];
-                    return items.length ? items.join('; ') : null;
-                }
-                if (typeof result === 'object') {
-                    const record = result as Record<string, unknown>;
-                    const keys = ['error', 'errors', 'errorMessage', 'errMsg', 'detail', 'details'];
-                    for (const key of keys) {
-                        const value = record[key];
-                        if (typeof value === 'string' && value.trim()) return value;
-                        if (Array.isArray(value)) {
-                            const strings = value.filter((x) => typeof x === 'string' && x.trim()) as string[];
-                            if (strings.length) return strings.join('; ');
-                        }
-                    }
-                }
-                return null;
-            };
-
-            const tryError = getTryErrorMessage(tryResult);
+            const tryError = extractTryErrorMessage(tryResult);
             if (tryError) {
                 setSaveResult({
                     type: 'error',
@@ -349,6 +329,26 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
             setIsSaving(false);
         }
     }, [appId, app, nodes, onSaved]);
+
+    // Ctrl/Cmd + S to trigger Save (same as button)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (isEventTargetInputArea(e.target as HTMLElement)) {
+                return;
+            }
+
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                if (!appId || !app || isSaving || e.repeat) return;
+                void handleSave();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [appId, app, isSaving, handleSave]);
 
     // Auto-dismiss save toast
     useEffect(() => {

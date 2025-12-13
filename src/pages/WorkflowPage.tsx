@@ -139,7 +139,7 @@ const WorkflowPage: React.FC = () => {
                 )}
             </header>
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-                <Sidebar />
+                <Sidebar onSaved={refreshWorkflowData} />
                 <main style={{ flex: 1, position: 'relative' }}>
                     <FlowCanvas appId={appId} app={app} refreshKey={refreshKey} onSaved={refreshWorkflowData} />
                     <PropertyPanel />

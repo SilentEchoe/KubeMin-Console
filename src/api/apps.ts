@@ -291,6 +291,9 @@ export interface TryApplicationRequest {
     version: string;
     project: string;
     description: string;
+    namespace?: string;
+    icon?: string;
+    tmp_enable?: boolean;
     component: TryApplicationComponent[];
 }
 
@@ -306,6 +309,28 @@ const readJsonOrText = async (response: Response): Promise<unknown> => {
     } catch {
         return text;
     }
+};
+
+export const extractTryErrorMessage = (result: unknown): string | null => {
+    if (result == null) return null;
+    if (typeof result === 'string') return result.trim() ? result : null;
+    if (Array.isArray(result)) {
+        const items = result.filter((x) => typeof x === 'string' && x.trim()) as string[];
+        return items.length ? items.join('; ') : null;
+    }
+    if (typeof result === 'object') {
+        const record = result as Record<string, unknown>;
+        const keys = ['error', 'errors', 'errorMessage', 'errMsg', 'detail', 'details', 'message'];
+        for (const key of keys) {
+            const value = record[key];
+            if (typeof value === 'string' && value.trim()) return value;
+            if (Array.isArray(value)) {
+                const strings = value.filter((x) => typeof x === 'string' && x.trim()) as string[];
+                if (strings.length) return strings.join('; ');
+            }
+        }
+    }
+    return null;
 };
 
 export const tryApplication = async (data: TryApplicationRequest): Promise<unknown> => {

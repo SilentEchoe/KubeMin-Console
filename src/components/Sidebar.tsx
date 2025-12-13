@@ -14,10 +14,13 @@ import {
 import { useParams } from 'react-router-dom';
 import useSWR from 'swr';
 import Modal from './base/Modal';
-import { fetchApp } from '../api/apps';
+import Switch from './base/switch';
+import { extractTryErrorMessage, fetchApp, saveApplication, tryApplication } from '../api/apps';
 import GameIcon from '../assets/game.svg';
 import ArrangementIcon from '../assets/arrangement.svg';
 import SetIcon from '../assets/set.svg';
+import { useFlowStore } from '../stores/flowStore';
+import { nodesToDSL } from '../utils/nodeToComponent';
 
 // Default icon background colors (matching AppCard)
 const ICON_BACKGROUNDS = ['#dbeafe', '#fce7f3', '#fef3c7', '#ddd6fe', '#d1fae5', '#fecaca'];
@@ -32,25 +35,96 @@ const AVAILABLE_ICONS: Record<string, React.ElementType> = {
     Cpu,
     Globe,
     Layout,
-    Terminal
+	Terminal
 };
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+    onSaved?: () => void | Promise<void>;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onSaved }) => {
     const { appId } = useParams<{ appId: string }>();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedIcon, setSelectedIcon] = useState<string>('');
     const [isHovering, setIsHovering] = useState(false);
+    const { nodes } = useFlowStore();
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [formData, setFormData] = useState({
+        name: '',
+        alias: '',
+        project: '',
+        namespace: 'default',
+        description: '',
+        tmp_enable: false,
+    });
 
     const { data: app, isLoading } = useSWR(
         appId ? ['app', appId] : null,
-        ([_, id]) => fetchApp(id)
+        ([, id]) => fetchApp(id)
     );
 
     useEffect(() => {
-        if (app?.icon) {
-            setSelectedIcon(app.icon);
+        if (!isModalOpen || !app) return;
+        setFormData({
+            name: app.name ?? '',
+            alias: app.alias ?? '',
+            project: app.project ?? '',
+            namespace: app.namespace || 'default',
+            description: app.description ?? '',
+            tmp_enable: app.tmp_enable || false,
+        });
+        setSelectedIcon(app.icon || '');
+        setSaveError(null);
+        setIsSaving(false);
+    }, [isModalOpen, app]);
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        setSaveError(null);
+        setIsSaving(false);
+    };
+
+    const handleModalSave = async () => {
+        if (!appId || !app) return;
+
+        setIsSaving(true);
+        setSaveError(null);
+
+        try {
+            const dsl = nodesToDSL(nodes, {
+                name: formData.name,
+                alias: formData.alias,
+                version: app.version,
+                project: formData.project,
+                description: formData.description,
+            });
+
+            const payload = {
+                id: app.id || appId,
+                ...dsl,
+                namespace: formData.namespace || 'default',
+                icon: selectedIcon,
+                tmp_enable: formData.tmp_enable,
+            };
+
+            const tryResult = await tryApplication(payload);
+            const tryError = extractTryErrorMessage(tryResult);
+            if (tryError) {
+                setSaveError(tryError);
+                return;
+            }
+
+            await saveApplication(payload);
+            await onSaved?.();
+
+            setIsModalOpen(false);
+        } catch (error) {
+            setSaveError(error instanceof Error ? error.message : 'Save failed');
+        } finally {
+            setIsSaving(false);
         }
-    }, [app]);
+    };
 
     // Generate a consistent background color based on app id
     const iconBackground = app?.id ? ICON_BACKGROUNDS[
@@ -199,7 +273,7 @@ const Sidebar: React.FC = () => {
 
             <Modal
                 isShow={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={handleModalClose}
                 title="Edit App Info"
             >
                 <div className="mt-4 space-y-4">
@@ -208,7 +282,8 @@ const Sidebar: React.FC = () => {
                         <input
                             className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Enter app name"
-                            defaultValue={app?.name ?? ''}
+                            value={formData.name}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                         />
                     </div>
 
@@ -217,7 +292,8 @@ const Sidebar: React.FC = () => {
                         <input
                             className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Enter alias"
-                            defaultValue={app?.alias ?? ''}
+                            value={formData.alias}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, alias: e.target.value }))}
                         />
                     </div>
 
@@ -226,7 +302,18 @@ const Sidebar: React.FC = () => {
                         <input
                             className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Enter project"
-                            defaultValue={app?.project ?? ''}
+                            value={formData.project}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, project: e.target.value }))}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Namespace</label>
+                        <input
+                            className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            placeholder="default"
+                            value={formData.namespace}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, namespace: e.target.value }))}
                         />
                     </div>
 
@@ -237,6 +324,7 @@ const Sidebar: React.FC = () => {
                                 <button
                                     key={name}
                                     onClick={() => setSelectedIcon(name)}
+                                    type="button"
                                     className={`
                                         p-2 rounded-lg flex items-center justify-center transition-all
                                         ${selectedIcon === name
@@ -257,23 +345,46 @@ const Sidebar: React.FC = () => {
                         <textarea
                             className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Enter description"
-                            defaultValue={app?.description ?? ''}
+                            value={formData.description}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                             rows={3}
                         />
                     </div>
 
+                    <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <p className="text-sm font-medium text-gray-700">Temporary Enable</p>
+                            <p className="text-xs text-gray-500">Enable temporary mode for this app</p>
+                        </div>
+                        <Switch
+                            checked={formData.tmp_enable}
+                            onChange={(checked) => setFormData((prev) => ({ ...prev, tmp_enable: checked }))}
+                            size="md"
+                        />
+                    </div>
+
+                    {saveError && (
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                            {saveError}
+                        </div>
+                    )}
+
                     <div className="mt-6 flex justify-end gap-3">
                         <button
                             className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                            onClick={() => setIsModalOpen(false)}
+                            onClick={handleModalClose}
+                            disabled={isSaving}
                         >
                             Cancel
                         </button>
                         <button
-                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                            onClick={() => setIsModalOpen(false)}
+                            className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
+                                isSaving ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                            }`}
+                            onClick={handleModalSave}
+                            disabled={isSaving}
                         >
-                            Save
+                            {isSaving ? 'Saving...' : 'Save'}
                         </button>
                     </div>
                 </div>
