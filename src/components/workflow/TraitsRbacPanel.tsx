@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
-import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
 import type { TraitRbac, TraitRbacRule } from '../../types/flow';
 

@@ -9,9 +9,7 @@ import {
     Cpu,
     Globe,
     Layout,
-    Terminal,
-    Eye,
-    FileText
+    Terminal
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import useSWR from 'swr';

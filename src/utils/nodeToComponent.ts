@@ -1,4 +1,4 @@
-import type { FlowNode, Traits, TraitEnv, TraitStorage, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule, TraitResource } from '../types/flow';
+import type { FlowNode, Traits, TraitEnv, TraitStorage, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule } from '../types/flow';
 
 /**
  * Export component structure matching the target JSON format
@@ -593,7 +593,6 @@ export function nodesToDSL(
 }
 
 export default nodesToDSL;
-
 
 
 

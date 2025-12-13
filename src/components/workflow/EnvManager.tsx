@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { X, Plus, Edit2, Trash2, HelpCircle } from 'lucide-react';
+import { X, Plus, Edit2, Trash2 } from 'lucide-react';
 import type { EnvironmentVariable } from '../../types/flow';
-import { cn } from '../../utils/cn';
 
 interface EnvManagerProps {
     variables: EnvironmentVariable[];
@@ -13,7 +12,7 @@ interface EnvManagerProps {
 
 const EnvManager: React.FC<EnvManagerProps> = ({ variables, onChange, onAddClick, onEditClick, onClose }) => {
     // Debug: log variables
-    React.useEffect(() => {
+    useEffect(() => {
         console.log('EnvManager received variables:', variables, 'length:', variables?.length);
     }, [variables]);
 
@@ -32,14 +31,24 @@ const EnvManager: React.FC<EnvManagerProps> = ({ variables, onChange, onAddClick
         <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[13px] font-medium text-text-primary">Environment Variables</h3>
-                {onClose && (
+                <div className="flex items-center gap-2">
                     <button
-                        onClick={onClose}
+                        onClick={onAddClick}
                         className="flex items-center justify-center w-6 h-6 rounded-md border border-components-button-secondary-border bg-white hover:bg-state-base-hover transition-colors"
+                        aria-label="Add environment variable"
                     >
-                        <X className="h-4 w-4 text-text-primary" />
+                        <Plus className="h-4 w-4 text-text-primary" />
                     </button>
-                )}
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            className="flex items-center justify-center w-6 h-6 rounded-md border border-components-button-secondary-border bg-white hover:bg-state-base-hover transition-colors"
+                            aria-label="Close"
+                        >
+                            <X className="h-4 w-4 text-text-primary" />
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2">
@@ -96,4 +105,3 @@ const EnvManager: React.FC<EnvManagerProps> = ({ variables, onChange, onAddClick
 };
 
 export default EnvManager;
-

@@ -10,9 +10,6 @@ import { useFlowStore } from '../stores/flowStore';
 import { componentsToNodes } from '../utils/componentToNode';
 import GameIcon from '../assets/game.svg';
 
-// Default icon background colors
-const ICON_BACKGROUNDS = ['#dbeafe', '#fce7f3', '#fef3c7', '#ddd6fe', '#d1fae5', '#fecaca'];
-
 const AVAILABLE_ICONS: Record<string, React.ElementType> = {
     Package,
     Database,
@@ -35,13 +32,13 @@ const WorkflowPage: React.FC = () => {
     // Fetch app details
     const { data: app, isLoading } = useSWR(
         appId ? ['app', appId] : null,
-        ([_, id]) => fetchApp(id)
+        ([, id]) => fetchApp(id)
     );
 
     // Fetch app components
-    const { data: components, isLoading: isLoadingComponents } = useSWR(
+    const { data: components } = useSWR(
         appId ? ['components', appId] : null,
-        ([_, id]) => fetchAppComponents(id)
+        ([, id]) => fetchAppComponents(id)
     );
 
     // Initialize nodes when components are loaded
@@ -56,11 +53,6 @@ const WorkflowPage: React.FC = () => {
             clearNodes();
         };
     }, [components, setNodes, clearNodes]);
-
-    // Generate a consistent background color based on app id
-    const iconBackground = app?.id ? ICON_BACKGROUNDS[
-        Math.abs(app.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0)) % ICON_BACKGROUNDS.length
-    ] : ICON_BACKGROUNDS[0];
 
     // Use app icon or default game.svg icon
     const displayIcon = app?.icon || GameIcon;
@@ -141,7 +133,7 @@ const WorkflowPage: React.FC = () => {
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
                 <Sidebar />
                 <main style={{ flex: 1, position: 'relative' }}>
-                    <FlowCanvas appId={appId} />
+                    <FlowCanvas appId={appId} app={app} />
                     <PropertyPanel />
                 </main>
             </div>

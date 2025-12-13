@@ -1,5 +1,5 @@
 import type { FlowNode, FlowEdge } from '../types/flow';
-import type { Workflow, WorkflowStep } from '../types/app';
+import type { Workflow } from '../types/app';
 
 /**
  * Apply workflow connections to canvas nodes based on workflow steps.
@@ -140,7 +140,6 @@ export const rearrangeNodesForWorkflow = (
         return node;
     });
 };
-
 
 
 

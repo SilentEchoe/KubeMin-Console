@@ -267,3 +267,53 @@ export const cancelWorkflow = async (appId: string, taskId: string): Promise<voi
         throw new Error('Failed to cancel workflow');
     }
 };
+
+export interface TryApplicationComponent {
+    name: string;
+    type: string;
+    replicas: number;
+    image?: string;
+    properties: {
+        ports?: { port: number }[] | null;
+        env?: Record<string, string> | null;
+        conf?: Record<string, string> | null;
+        secret?: Record<string, string> | null;
+        command?: string[] | null;
+        labels?: Record<string, string> | null;
+    };
+    traits?: unknown;
+}
+
+export interface TryApplicationRequest {
+    id: string;
+    name: string;
+    alias: string;
+    version: string;
+    project: string;
+    description: string;
+    component: TryApplicationComponent[];
+}
+
+export const tryApplication = async (data: TryApplicationRequest): Promise<unknown> => {
+    const response = await fetch(`${API_BASE_URL}/applications/try`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || 'Failed to save application');
+    }
+
+    const text = await response.text();
+    if (!text) return null;
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        return text;
+    }
+};

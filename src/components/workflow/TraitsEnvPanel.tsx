@@ -8,7 +8,7 @@ import {
     PortalToFollowElemContent,
     PortalToFollowElemTrigger,
 } from '../ui/PortalToFollowElem';
-import type { Traits, TraitEnv } from '../../types/flow';
+import type { TraitEnv } from '../../types/flow';
 
 interface TraitsEnvPanelProps {
     onClose: () => void;
@@ -252,4 +252,3 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd, initial
 };
 
 export default TraitsEnvPanel;
-

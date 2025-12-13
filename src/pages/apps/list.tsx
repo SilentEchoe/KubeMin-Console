@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSWRInfinite from 'swr/infinite';
-import { Search, Filter, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { fetchApps, createApp } from '../../api/apps';
 import type { AppFilters } from '../../types/app';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -9,15 +9,14 @@ import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { AppCard } from './components/app-card';
 import { NewAppCard } from './components/new-app-card';
 import { Empty } from './components/empty';
-import { Footer } from './components/footer';
 import { CreateBlankAppModal, type CreateBlankAppData } from './components/create-blank-app-modal';
 
 const ITEMS_PER_PAGE = 12;
 
 export const List: React.FC = () => {
     const navigate = useNavigate();
-    const [searchInput, setSearchInput] = useState('');
-    const [myApps, setMyApps] = useState(false);
+    const [searchInput] = useState('');
+    const [myApps] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -35,7 +34,7 @@ export const List: React.FC = () => {
 
     const { data, size, setSize, isLoading, mutate } = useSWRInfinite(
         getKey,
-        ([_key, page, pageFilters]) => fetchApps(page as number, ITEMS_PER_PAGE, pageFilters as AppFilters),
+        ([, page, pageFilters]) => fetchApps(page as number, ITEMS_PER_PAGE, pageFilters as AppFilters),
         {
             revalidateFirstPage: false,
             revalidateOnFocus: false,

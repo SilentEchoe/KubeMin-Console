@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { Play, ChevronDown, ListChecks, AlertCircle, Loader2, CheckCircle2, XCircle, X } from 'lucide-react';
+import { Save, Play, ChevronDown, ListChecks, AlertCircle, Loader2, CheckCircle2, XCircle, X } from 'lucide-react';
 import {
     ReactFlow,
     Background,
@@ -21,7 +21,7 @@ import CustomNode from './CustomNode';
 import CanvasControl from './CanvasControl';
 import { ControlMode } from '../types/flow';
 import type { FlowNode, ComponentStatus } from '../types/flow';
-import type { Workflow } from '../types/app';
+import type { App, Workflow } from '../types/app';
 import PanelContextMenu from './PanelContextMenu';
 import CustomEdge from './workflow/CustomEdge';
 import CustomConnectionLine from './workflow/CustomConnectionLine';
@@ -30,7 +30,8 @@ import type { NodeWithIssues } from './workflow/WorkflowChecklist';
 import WorkflowPanel from './workflow/WorkflowPanel';
 import Modal from './base/Modal';
 import { applyWorkflowConnections, rearrangeNodesForWorkflow } from '../utils/workflowConnection';
-import { fetchWorkflows, executeWorkflow, getTaskStatus, cancelWorkflow } from '../api/apps';
+import { fetchWorkflows, executeWorkflow, getTaskStatus, cancelWorkflow, tryApplication } from '../api/apps';
+import { nodesToDSL } from '../utils/nodeToComponent';
 
 import { useShortcuts } from '../hooks/useShortcuts';
 
@@ -73,9 +74,10 @@ const ZoomIndicator = () => {
 
 interface FlowCanvasProps {
     appId?: string;
+    app?: App;
 }
 
-const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
+const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app }) => {
     useShortcuts();
     const {
         nodes,
@@ -107,9 +109,11 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
     const [workflowResult, setWorkflowResult] = useState<{ type: 'success' | 'error'; message: string; details?: string[] } | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveResult, setSaveResult] = useState<{ type: 'success' | 'error'; message: string; details?: string[] } | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const reactFlowInstanceRef = useRef<any>(null);
-    const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Handle workflow selection
     const handleSelectWorkflow = useCallback((workflow: Workflow) => {
@@ -261,6 +265,48 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
         }
     }, [appId, taskId, clearPreviewState]);
 
+    const handleSave = useCallback(async () => {
+        if (!appId || !app) return;
+
+        setIsSaving(true);
+        setSaveResult(null);
+
+        try {
+            const dsl = nodesToDSL(nodes, {
+                name: app.name,
+                alias: app.alias,
+                version: app.version,
+                project: app.project,
+                description: app.description,
+            });
+
+            await tryApplication({
+                id: app.id || appId,
+                ...dsl,
+            });
+
+            setSaveResult({
+                type: 'success',
+                message: 'Saved successfully!',
+            });
+        } catch (error) {
+            setSaveResult({
+                type: 'error',
+                message: 'Save failed',
+                details: [error instanceof Error ? error.message : 'Unknown error'],
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    }, [appId, app, nodes]);
+
+    // Auto-dismiss save toast
+    useEffect(() => {
+        if (!saveResult) return;
+        const timeout = setTimeout(() => setSaveResult(null), 3000);
+        return () => clearTimeout(timeout);
+    }, [saveResult]);
+
     // Cleanup polling on unmount
     useEffect(() => {
         return () => {
@@ -302,6 +348,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
     // Generate workflow issues from nodes
     const getWorkflowIssues = useCallback((): NodeWithIssues[] => {
         const issues: NodeWithIssues[] = [];
+        const shouldRequireConnections = nodes.length > 1;
         
         nodes.forEach((node) => {
             const nodeIssues: { message: string }[] = [];
@@ -310,7 +357,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
             const hasIncoming = edges.some(e => e.target === node.id);
             const hasOutgoing = edges.some(e => e.source === node.id);
             
-            if (!hasIncoming && !hasOutgoing) {
+            if (shouldRequireConnections && !hasIncoming && !hasOutgoing) {
                 nodeIssues.push({ message: 'This node is not connected to other nodes' });
             }
             
@@ -446,14 +493,23 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                 <PanelContextMenu />
                 <Panel position="top-right">
                     <div className="flex items-center gap-2">
-                        {/* Test Run Button Group */}
+                        {/* Save Button Group */}
                         <div className="flex h-8 items-center rounded-lg border-[0.5px] border-components-button-secondary-border bg-components-button-secondary-bg px-0.5 shadow-xs">
                             <button
-                                onClick={() => console.log('Test Run')}
-                                className="flex h-7 cursor-pointer items-center rounded-md px-2.5 text-[13px] font-medium text-text-secondary hover:bg-state-base-hover border-none bg-transparent"
+                                onClick={handleSave}
+                                disabled={!appId || !app || isSaving}
+                                className={`flex h-7 items-center rounded-md px-2.5 text-[13px] font-medium border-none bg-transparent ${
+                                    !appId || !app || isSaving
+                                        ? 'text-gray-400 cursor-not-allowed'
+                                        : 'text-text-secondary hover:bg-state-base-hover cursor-pointer'
+                                }`}
                             >
-                                <Play className="mr-1 h-4 w-4" />
-                                Test Run
+                                {isSaving ? (
+                                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Save className="mr-1 h-4 w-4" />
+                                )}
+                                Save
                             </button>
                             <div className="mx-0.5 h-3.5 w-[1px] bg-divider-regular"></div>
                             <button
@@ -554,7 +610,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                                         {currentWorkflow.alias || currentWorkflow.name}
                                     </p>
                                     <p className="text-xs text-gray-500">
-                                        {currentWorkflow.steps.length} steps
+                                        {(currentWorkflow.steps?.length ?? 0)} steps
                                     </p>
                                 </div>
                             </div>
@@ -690,6 +746,47 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId }) => {
                             className="flex-shrink-0 p-1 rounded hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent"
                         >
                             <X size={14} className={workflowResult.type === 'success' ? 'text-green-500' : 'text-red-500'} />
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Save Result Toast */}
+            {saveResult && (
+                <div
+                    className={`fixed top-32 right-6 z-[100] max-w-sm rounded-lg shadow-lg border p-4 animate-in slide-in-from-right ${
+                        saveResult.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                    }`}
+                >
+                    <div className="flex items-start gap-3">
+                        {saveResult.type === 'success' ? (
+                            <CheckCircle2 size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                        ) : (
+                            <XCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                            <p
+                                className={`text-sm font-medium ${
+                                    saveResult.type === 'success' ? 'text-green-800' : 'text-red-800'
+                                }`}
+                            >
+                                {saveResult.message}
+                            </p>
+                            {saveResult.details && saveResult.details.length > 0 && (
+                                <ul className="mt-2 space-y-1">
+                                    {saveResult.details.map((detail, index) => (
+                                        <li key={index} className="text-xs text-red-600">
+                                            {detail}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                        <button
+                            onClick={() => setSaveResult(null)}
+                            className="flex-shrink-0 p-1 rounded hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent"
+                        >
+                            <X size={14} className={saveResult.type === 'success' ? 'text-green-500' : 'text-red-500'} />
                         </button>
                     </div>
                 </div>
