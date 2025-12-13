@@ -147,6 +147,16 @@ const Sidebar: React.FC = () => {
                         }}>
                             {app?.name ?? ''}
                         </div>
+                        {/* App Namespace */}
+                        <div style={{
+                            fontSize: '12px',
+                            fontWeight: 400,
+                            lineHeight: '16px',
+                            color: '#94a3b8',
+                            marginTop: '2px'
+                        }}>
+                            {app?.namespace || 'default'}
+                        </div>
                         {/* App Version */}
                         {app?.version && (
                             <div style={{

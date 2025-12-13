@@ -294,6 +294,20 @@ export interface TryApplicationRequest {
     component: TryApplicationComponent[];
 }
 
+export interface SaveApplicationRequest extends TryApplicationRequest {
+    namespace: string;
+}
+
+const readJsonOrText = async (response: Response): Promise<unknown> => {
+    const text = await response.text();
+    if (!text) return null;
+    try {
+        return JSON.parse(text);
+    } catch {
+        return text;
+    }
+};
+
 export const tryApplication = async (data: TryApplicationRequest): Promise<unknown> => {
     const response = await fetch(`${API_BASE_URL}/applications/try`, {
         method: 'POST',
@@ -308,12 +322,22 @@ export const tryApplication = async (data: TryApplicationRequest): Promise<unkno
         throw new Error(error || 'Failed to save application');
     }
 
-    const text = await response.text();
-    if (!text) return null;
+    return readJsonOrText(response);
+};
 
-    try {
-        return JSON.parse(text);
-    } catch {
-        return text;
+export const saveApplication = async (data: SaveApplicationRequest): Promise<unknown> => {
+    const response = await fetch(`${API_BASE_URL}/applications`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || 'Failed to save application');
     }
+
+    return readJsonOrText(response);
 };

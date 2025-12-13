@@ -256,20 +256,6 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                     </div>
                 </div>
 
-                {/* Namespace */}
-                <FlexRow className="justify-between mb-4">
-                    <label className="text-[13px] font-medium text-text-primary mb-0">
-                        Namespace
-                    </label>
-                    <input
-                        type="text"
-                        className={cn(INPUT_CONTAINER_STYLES, "w-2/3 h-8 outline-none input-gradient-focus focus:ring-0")}
-                        placeholder="e.g. default"
-                        value={String(selectedNode.data.namespace || '')}
-                        onChange={(e) => updateNodeData(selectedNode.id, { namespace: e.target.value })}
-                    />
-                </FlexRow>
-
                 {/* Conditional Controls */}
                 {(!selectedNode.data.componentType || selectedNode.data.componentType === 'webservice' || selectedNode.data.componentType === 'store') && (
                     <>

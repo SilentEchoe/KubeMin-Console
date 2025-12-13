@@ -30,7 +30,7 @@ import type { NodeWithIssues } from './workflow/WorkflowChecklist';
 import WorkflowPanel from './workflow/WorkflowPanel';
 import Modal from './base/Modal';
 import { applyWorkflowConnections, rearrangeNodesForWorkflow } from '../utils/workflowConnection';
-import { fetchWorkflows, executeWorkflow, getTaskStatus, cancelWorkflow, tryApplication } from '../api/apps';
+import { fetchWorkflows, executeWorkflow, getTaskStatus, cancelWorkflow, tryApplication, saveApplication } from '../api/apps';
 import { nodesToDSL } from '../utils/nodeToComponent';
 
 import { useShortcuts } from '../hooks/useShortcuts';
@@ -75,9 +75,11 @@ const ZoomIndicator = () => {
 interface FlowCanvasProps {
     appId?: string;
     app?: App;
+    refreshKey?: number;
+    onSaved?: () => void | Promise<void>;
 }
 
-const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app }) => {
+const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved }) => {
     useShortcuts();
     const {
         nodes,
@@ -114,6 +116,14 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const reactFlowInstanceRef = useRef<any>(null);
     const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Reset internal workflow state when external refresh happens
+    useEffect(() => {
+        if (refreshKey === undefined) return;
+        setHasAppliedInitialWorkflow(false);
+        setCurrentWorkflow(null);
+        setEdges([]);
+    }, [refreshKey, setEdges]);
 
     // Handle workflow selection
     const handleSelectWorkflow = useCallback((workflow: Workflow) => {
@@ -280,10 +290,50 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app }) => {
                 description: app.description,
             });
 
-            await tryApplication({
+            const payload = {
                 id: app.id || appId,
                 ...dsl,
+            };
+
+            const tryResult = await tryApplication(payload);
+
+            const getTryErrorMessage = (result: unknown): string | null => {
+                if (result == null) return null;
+                if (typeof result === 'string') return result.trim() ? result : null;
+                if (Array.isArray(result)) {
+                    const items = result.filter((x) => typeof x === 'string' && x.trim()) as string[];
+                    return items.length ? items.join('; ') : null;
+                }
+                if (typeof result === 'object') {
+                    const record = result as Record<string, unknown>;
+                    const keys = ['error', 'errors', 'errorMessage', 'errMsg', 'detail', 'details'];
+                    for (const key of keys) {
+                        const value = record[key];
+                        if (typeof value === 'string' && value.trim()) return value;
+                        if (Array.isArray(value)) {
+                            const strings = value.filter((x) => typeof x === 'string' && x.trim()) as string[];
+                            if (strings.length) return strings.join('; ');
+                        }
+                    }
+                }
+                return null;
+            };
+
+            const tryError = getTryErrorMessage(tryResult);
+            if (tryError) {
+                setSaveResult({
+                    type: 'error',
+                    message: 'Save validation failed',
+                    details: [tryError],
+                });
+                return;
+            }
+
+            await saveApplication({
+                ...payload,
+                namespace: app.namespace || 'default',
             });
+            await onSaved?.();
 
             setSaveResult({
                 type: 'success',
@@ -298,7 +348,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app }) => {
         } finally {
             setIsSaving(false);
         }
-    }, [appId, app, nodes]);
+    }, [appId, app, nodes, onSaved]);
 
     // Auto-dismiss save toast
     useEffect(() => {

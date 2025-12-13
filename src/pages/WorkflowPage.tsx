@@ -27,23 +27,24 @@ const WorkflowPage: React.FC = () => {
     const { appId } = useParams<{ appId: string }>();
     const navigate = useNavigate();
     const [showArrow, setShowArrow] = useState(false);
-    const { setNodes, clearNodes } = useFlowStore();
+    const { setNodes, setEdges, clearNodes } = useFlowStore();
+    const [refreshKey, setRefreshKey] = useState(0);
 
     // Fetch app details
-    const { data: app, isLoading } = useSWR(
+    const { data: app, isLoading, mutate: mutateApp } = useSWR(
         appId ? ['app', appId] : null,
         ([, id]) => fetchApp(id)
     );
 
     // Fetch app components
-    const { data: components } = useSWR(
+    const { data: components, mutate: mutateComponents } = useSWR(
         appId ? ['components', appId] : null,
         ([, id]) => fetchAppComponents(id)
     );
 
     // Initialize nodes when components are loaded
     useEffect(() => {
-        if (components && components.length > 0) {
+        if (components) {
             const nodes = componentsToNodes(components);
             setNodes(nodes);
         }
@@ -53,6 +54,13 @@ const WorkflowPage: React.FC = () => {
             clearNodes();
         };
     }, [components, setNodes, clearNodes]);
+
+    const refreshWorkflowData = async () => {
+        if (!appId) return;
+        setEdges([]);
+        await Promise.all([mutateApp(), mutateComponents()]);
+        setRefreshKey((k) => k + 1);
+    };
 
     // Use app icon or default game.svg icon
     const displayIcon = app?.icon || GameIcon;
@@ -133,7 +141,7 @@ const WorkflowPage: React.FC = () => {
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
                 <Sidebar />
                 <main style={{ flex: 1, position: 'relative' }}>
-                    <FlowCanvas appId={appId} app={app} />
+                    <FlowCanvas appId={appId} app={app} refreshKey={refreshKey} onSaved={refreshWorkflowData} />
                     <PropertyPanel />
                 </main>
             </div>
