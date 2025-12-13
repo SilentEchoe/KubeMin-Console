@@ -1,4 +1,4 @@
-import type { FlowNode, Traits, TraitEnv, TraitStorage, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule } from '../types/flow';
+import type { FlowNode, Traits, TraitEnv, TraitStorage, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule, TraitIngressSpec } from '../types/flow';
 
 /**
  * Export component structure matching the target JSON format
@@ -46,7 +46,46 @@ export interface ExportTraits {
     sidecar?: ExportSidecar[];
     init?: ExportInitContainer[];
     rbac?: ExportTraitRbac[];
+    ingress?: ExportTraitIngressSpec[];
     resource?: ExportTraitResource;
+}
+
+export interface ExportTraitIngressTLSConfig {
+    secretName: string;
+    hosts?: string[];
+}
+
+export interface ExportTraitIngressRouteBackend {
+    serviceName: string;
+    servicePort?: number;
+    weight?: number;
+    headers?: Record<string, string>;
+}
+
+export interface ExportTraitIngressRewritePolicy {
+    type: string;
+    match?: string;
+    replacement?: string;
+}
+
+export interface ExportTraitIngressRoute {
+    path?: string;
+    pathType?: string;
+    host?: string;
+    backend: ExportTraitIngressRouteBackend;
+    rewrite?: ExportTraitIngressRewritePolicy;
+}
+
+export interface ExportTraitIngressSpec {
+    name: string;
+    namespace: string;
+    hosts?: string[];
+    label: Record<string, string>;
+    annotations?: Record<string, string>;
+    ingressClassName?: string;
+    defaultPathType?: string;
+    tls?: ExportTraitIngressTLSConfig[];
+    routes: ExportTraitIngressRoute[];
 }
 
 export interface ExportTraitEnv {
@@ -271,6 +310,40 @@ function convertRbacToExport(rbac: TraitRbac): ExportTraitRbac {
     return result;
 }
 
+function convertIngressToExport(ingress: TraitIngressSpec): ExportTraitIngressSpec {
+    return {
+        name: ingress.name,
+        namespace: ingress.namespace,
+        hosts: ingress.hosts,
+        label: ingress.label || {},
+        annotations: ingress.annotations,
+        ingressClassName: ingress.ingressClassName,
+        defaultPathType: ingress.defaultPathType,
+        tls: ingress.tls?.map((t): ExportTraitIngressTLSConfig => ({
+            secretName: t.secretName,
+            hosts: t.hosts,
+        })),
+        routes: (ingress.routes || []).map((r): ExportTraitIngressRoute => ({
+            path: r.path,
+            pathType: r.pathType,
+            host: r.host,
+            backend: {
+                serviceName: r.backend.serviceName,
+                servicePort: r.backend.servicePort,
+                weight: r.backend.weight,
+                headers: r.backend.headers,
+            },
+            rewrite: r.rewrite
+                ? {
+                    type: r.rewrite.type,
+                    match: r.rewrite.match,
+                    replacement: r.rewrite.replacement,
+                }
+                : undefined,
+        })),
+    };
+}
+
 /**
  * Convert FlowNode traits to export format
  */
@@ -361,6 +434,12 @@ function convertTraitsToExport(traits: Traits, nodeData: FlowNode['data']): Expo
     // Convert rbac
     if (traits.rbac && traits.rbac.length > 0) {
         result.rbac = traits.rbac.map(convertRbacToExport);
+        hasTraits = true;
+    }
+
+    // Convert ingress
+    if (traits.ingress && traits.ingress.length > 0) {
+        result.ingress = traits.ingress.map(convertIngressToExport);
         hasTraits = true;
     }
 
@@ -593,6 +672,4 @@ export function nodesToDSL(
 }
 
 export default nodesToDSL;
-
-
 

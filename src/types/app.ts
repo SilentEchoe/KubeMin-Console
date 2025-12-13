@@ -1,3 +1,5 @@
+import type { TraitIngressSpec } from './flow';
+
 export interface Tag {
   id: string;
   name: string;
@@ -125,6 +127,7 @@ export interface ComponentTraits {
   envs?: ComponentTraitEnv[];
   probes?: ComponentTraitProbe[];
   resource?: ComponentTraitResource;
+  ingress?: TraitIngressSpec[];
 }
 
 export interface ComponentProperties {

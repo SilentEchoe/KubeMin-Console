@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import type { ComponentSetSectionKey } from '../PropertyPanel';
-import type { Traits, EnvironmentVariable, TraitEnv, TraitStorage, TraitContainer, TraitRbac } from '../../types/flow';
+import type { Traits, EnvironmentVariable, TraitEnv, TraitStorage, TraitContainer, TraitRbac, TraitIngressSpec } from '../../types/flow';
 import { ChevronDown, Check, X } from 'lucide-react';
 import { useFlowStore } from '../../stores/flowStore';
 import EnvironmentVariableManager from '../EnvironmentVariableManager';
@@ -47,6 +47,8 @@ interface ComponentSetMenuProps {
     onTraitsInitEditClick?: (index: number, init: TraitContainer) => void;
     onTraitsRbacAddClick?: () => void;
     onTraitsRbacEditClick?: (index: number, rbac: TraitRbac) => void;
+    onTraitsIngressAddClick?: () => void;
+    onTraitsIngressEditClick?: (index: number, ingress: TraitIngressSpec) => void;
 }
 
 const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
@@ -63,7 +65,9 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
     onTraitsInitAddClick,
     onTraitsInitEditClick,
     onTraitsRbacAddClick,
-    onTraitsRbacEditClick
+    onTraitsRbacEditClick,
+    onTraitsIngressAddClick,
+    onTraitsIngressEditClick
 }) => {
     const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
     const selectedNode = nodes.find((n) => n.id === selectedNodeId);
@@ -979,6 +983,49 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                                     });
                                                 }}
                                                 className="hover:text-cyan-900 transition-colors"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Traits Ingress Section */}
+                        <div className="mb-4">
+                            <FlexRow className="justify-between items-center mb-2">
+                                <label className="text-[13px] font-medium text-text-primary mb-0">
+                                    Traits Ingress
+                                </label>
+                                <Button
+                                    variant="secondary"
+                                    size="small"
+                                    onClick={onTraitsIngressAddClick}
+                                    className="h-8 w-[120px] text-xs whitespace-nowrap"
+                                >
+                                    + Add Ingress
+                                </Button>
+                            </FlexRow>
+                            {((selectedNode.data.traits as Traits)?.ingress || []).length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                    {((selectedNode.data.traits as Traits)?.ingress || []).map((ingress, index) => (
+                                        <span
+                                            key={index}
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-indigo-50 text-indigo-700 rounded-md border border-indigo-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => onTraitsIngressEditClick?.(index, ingress)}
+                                        >
+                                            {ingress.name}
+                                            <span className="text-indigo-400 text-[10px]">({ingress.routes?.length ?? 0} routes)</span>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const traits = (selectedNode.data.traits as Traits) || {};
+                                                    updateNodeData(selectedNode.id, {
+                                                        traits: { ...traits, ingress: traits.ingress?.filter((_, i) => i !== index) }
+                                                    });
+                                                }}
+                                                className="hover:text-indigo-900 transition-colors"
                                             >
                                                 <X size={12} />
                                             </button>

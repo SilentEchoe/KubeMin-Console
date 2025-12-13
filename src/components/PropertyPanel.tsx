@@ -10,19 +10,20 @@ import TraitsStoragePanel from './workflow/TraitsStoragePanel';
 import TraitsSidecarPanel from './workflow/TraitsSidecarPanel';
 import TraitsInitPanel from './workflow/TraitsInitPanel';
 import TraitsRbacPanel from './workflow/TraitsRbacPanel';
+import TraitsIngressPanel from './workflow/TraitsIngressPanel';
 import { Button } from './ui/Button';
 import TraitsPanel from './TraitsPanel';
 import componentIcon from '../assets/component.svg';
 import configIcon from '../assets/config.svg';
-import type { EnvironmentVariable, Traits, TraitEnv, TraitStorage, TraitContainer, TraitRbac } from '../types/flow';
+import type { EnvironmentVariable, Traits, TraitEnv, TraitStorage, TraitContainer, TraitRbac, TraitIngressSpec } from '../types/flow';
 
-type TraitsPanelType = 'env' | 'storage' | 'sidecar' | 'init' | 'rbac' | null;
+type TraitsPanelType = 'env' | 'storage' | 'sidecar' | 'init' | 'rbac' | 'ingress' | null;
 
 // Edit state type
 interface EditState {
-    type: 'env' | 'traitsEnv' | 'traitsStorage' | 'traitsSidecar' | 'traitsInit' | 'traitsRbac' | null;
+    type: 'env' | 'traitsEnv' | 'traitsStorage' | 'traitsSidecar' | 'traitsInit' | 'traitsRbac' | 'traitsIngress' | null;
     index: number;
-    data: EnvironmentVariable | TraitEnv | TraitStorage | TraitContainer | TraitRbac | null;
+    data: EnvironmentVariable | TraitEnv | TraitStorage | TraitContainer | TraitRbac | TraitIngressSpec | null;
 }
 
 const PANEL_CONTAINER_STYLES = 'absolute top-[70px] right-5 bottom-5 flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl z-20 transition-all duration-200';
@@ -243,6 +244,32 @@ const PropertyPanel: React.FC = () => {
         setEditState({ type: null, index: -1, data: null });
     };
 
+    const handleTraitsIngressAdd = (newIngress: TraitIngressSpec) => {
+        if (!selectedNode) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, ingress: [...(traits.ingress || []), newIngress] }
+        });
+        setActiveTraitsPanel(null);
+    };
+
+    const handleTraitsIngressEdit = (index: number, ingress: TraitIngressSpec) => {
+        setEditState({ type: 'traitsIngress', index, data: ingress });
+        setActiveTraitsPanel('ingress');
+    };
+
+    const handleTraitsIngressUpdate = (updatedIngress: TraitIngressSpec) => {
+        if (!selectedNode || editState.index < 0) return;
+        const traits = (selectedNode.data.traits as Traits) || {};
+        const newIngress = [...(traits.ingress || [])];
+        newIngress[editState.index] = updatedIngress;
+        updateNodeData(selectedNode.id, {
+            traits: { ...traits, ingress: newIngress }
+        });
+        setActiveTraitsPanel(null);
+        setEditState({ type: null, index: -1, data: null });
+    };
+
     // Close panel and clear edit state
     const handleCloseEnvPanel = () => {
         setShowEnvPanel(false);
@@ -381,6 +408,25 @@ const PropertyPanel: React.FC = () => {
                     </div>
                 )}
 
+                {activeTraitsPanel === 'ingress' && (
+                    <div
+                        className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border bg-white shadow-2xl transition-all duration-200"
+                        style={{
+                            minWidth: '420px',
+                            maxWidth: '420px',
+                            width: '420px',
+                            height: '100%',
+                        }}
+                    >
+                        <TraitsIngressPanel
+                            onClose={handleCloseTraitsPanel}
+                            onAdd={handleTraitsIngressAdd}
+                            initialData={editState.type === 'traitsIngress' ? editState.data as TraitIngressSpec : undefined}
+                            onUpdate={handleTraitsIngressUpdate}
+                        />
+                    </div>
+                )}
+
                 {/* Env Panel - Left (conditionally rendered) */}
                 {showEnvPanel && !activeTraitsPanel && (
                     <div
@@ -514,6 +560,11 @@ const PropertyPanel: React.FC = () => {
                                     setActiveTraitsPanel('rbac');
                                 }}
                                 onTraitsRbacEditClick={handleTraitsRbacEdit}
+                                onTraitsIngressAddClick={() => {
+                                    setEditState({ type: null, index: -1, data: null });
+                                    setActiveTraitsPanel('ingress');
+                                }}
+                                onTraitsIngressEditClick={handleTraitsIngressEdit}
                             />
                         </div>
 

@@ -84,6 +84,44 @@ export interface TraitRbac {
     roleLabels?: Record<string, string>;
 }
 
+export interface TraitIngressTLSConfig {
+    secretName: string;
+    hosts?: string[];
+}
+
+export interface TraitIngressRouteBackend {
+    serviceName: string;
+    servicePort?: number;
+    weight?: number;
+    headers?: Record<string, string>;
+}
+
+export interface TraitIngressRewritePolicy {
+    type: string;
+    match?: string;
+    replacement?: string;
+}
+
+export interface TraitIngressRoute {
+    path?: string;
+    pathType?: string;
+    host?: string;
+    backend: TraitIngressRouteBackend;
+    rewrite?: TraitIngressRewritePolicy;
+}
+
+export interface TraitIngressSpec {
+    name: string;
+    namespace: string;
+    hosts?: string[];
+    label: Record<string, string>;
+    annotations?: Record<string, string>;
+    ingressClassName?: string;
+    defaultPathType?: string;
+    tls?: TraitIngressTLSConfig[];
+    routes: TraitIngressRoute[];
+}
+
 export interface Traits {
     envs?: TraitEnv[];
     probes?: TraitProbe[];
@@ -92,6 +130,7 @@ export interface Traits {
     init?: TraitContainer[];
     resource?: TraitResource;
     rbac?: TraitRbac[];
+    ingress?: TraitIngressSpec[];
 }
 
 // Config data item (key-value pair for config files like master.cnf, slave.cnf)

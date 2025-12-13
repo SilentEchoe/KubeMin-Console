@@ -1,5 +1,5 @@
 import type { Component } from '../types/app';
-import type { FlowNode, FlowNodeData, Traits, TraitStorage, TraitEnv, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule, TraitResource, ConfigDataItem, SecretDataItem } from '../types/flow';
+import type { FlowNode, FlowNodeData, Traits, TraitStorage, TraitEnv, TraitProbe, TraitContainer, TraitRbac, TraitRbacRule, TraitResource, TraitIngressSpec, TraitIngressRoute, TraitIngressTLSConfig, ConfigDataItem, SecretDataItem } from '../types/flow';
 
 // Node layout configuration
 const NODE_WIDTH = 240;
@@ -243,6 +243,41 @@ function convertTraits(apiTraits: Component['traits']): Traits {
     } as TraitResource;
   }
 
+  // Convert ingress
+  if (apiTraits.ingress) {
+    traits.ingress = apiTraits.ingress.map((ing): TraitIngressSpec => ({
+      name: ing.name,
+      namespace: ing.namespace,
+      hosts: ing.hosts,
+      label: ing.label || {},
+      annotations: ing.annotations,
+      ingressClassName: ing.ingressClassName,
+      defaultPathType: ing.defaultPathType,
+      tls: ing.tls?.map((t): TraitIngressTLSConfig => ({
+        secretName: t.secretName,
+        hosts: t.hosts,
+      })),
+      routes: ing.routes.map((r): TraitIngressRoute => ({
+        path: r.path,
+        pathType: r.pathType,
+        host: r.host,
+        backend: {
+          serviceName: r.backend.serviceName,
+          servicePort: r.backend.servicePort,
+          weight: r.backend.weight,
+          headers: r.backend.headers,
+        },
+        rewrite: r.rewrite
+          ? ({
+              type: r.rewrite.type,
+              match: r.rewrite.match,
+              replacement: r.rewrite.replacement,
+            })
+          : undefined,
+      })),
+    }));
+  }
+
   return traits;
 }
 
@@ -302,4 +337,3 @@ export function componentsToNodes(components: Component[]): FlowNode[] {
 }
 
 export default componentsToNodes;
-
