@@ -109,7 +109,6 @@ export interface CreateAppRequest {
     alias?: string;
     project?: string;
     icon?: string;
-    image?: string;
     tmp_enable?: boolean;
     component: ComponentCreateRequest[];
     workflow: WorkflowStepCreateRequest[];

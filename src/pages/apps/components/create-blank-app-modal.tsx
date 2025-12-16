@@ -5,10 +5,8 @@ import Switch from '../../../components/base/switch';
 import { Loader2 } from 'lucide-react';
 
 export interface CreateBlankAppData {
-    id: string;
     name: string;
     namespace: string;
-    image: string;
     alias: string;
     version: string;
     project: string;
@@ -45,10 +43,8 @@ export const CreateBlankAppModal: React.FC<CreateBlankAppModalProps> = ({
     onSubmit,
 }) => {
     const [formData, setFormData] = useState<CreateBlankAppData>({
-        id: '',
         name: '',
         namespace: 'default',
-        image: 'nginx:latest',
         alias: '',
         version: '1.0.0',
         project: '',
@@ -69,8 +65,6 @@ export const CreateBlankAppModal: React.FC<CreateBlankAppModalProps> = ({
     const validate = (): boolean => {
         const newErrors: Partial<Record<keyof CreateBlankAppData, string>> = {};
 
-        // ID is optional
-
         if (!formData.name.trim()) {
             newErrors.name = 'Name is required';
         } else if (!validateName(formData.name)) {
@@ -84,8 +78,6 @@ export const CreateBlankAppModal: React.FC<CreateBlankAppModalProps> = ({
         if (!formData.project.trim()) {
             newErrors.project = 'Project is required';
         }
-
-        // Image is optional
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -122,10 +114,8 @@ export const CreateBlankAppModal: React.FC<CreateBlankAppModalProps> = ({
 
     const handleClose = () => {
         setFormData({
-            id: '',
             name: '',
             namespace: 'default',
-            image: 'nginx:latest',
             alias: '',
             version: '1.0.0',
             project: '',
@@ -141,37 +131,17 @@ export const CreateBlankAppModal: React.FC<CreateBlankAppModalProps> = ({
         <Modal
             isShow={isOpen}
             onClose={handleClose}
-            title="Create Blank App"
+            title="Create APP"
             className="max-w-[520px]"
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Two column grid for compact fields */}
                 <div className="grid grid-cols-2 gap-4">
-                    <FormField label="ID" error={errors.id}>
-                        <Input
-                            value={formData.id}
-                            onChange={handleChange('id')}
-                            placeholder="auto-generated"
-                            className="w-full"
-                        />
-                    </FormField>
-
                     <FormField label="Name" required error={errors.name}>
                         <Input
                             value={formData.name}
                             onChange={handleChange('name')}
                             placeholder="my-app"
-                            className="w-full"
-                        />
-                    </FormField>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <FormField label="Alias" error={errors.alias}>
-                        <Input
-                            value={formData.alias}
-                            onChange={handleChange('alias')}
-                            placeholder="My Application"
                             className="w-full"
                         />
                     </FormField>
@@ -187,6 +157,15 @@ export const CreateBlankAppModal: React.FC<CreateBlankAppModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                    <FormField label="Alias" error={errors.alias}>
+                        <Input
+                            value={formData.alias}
+                            onChange={handleChange('alias')}
+                            placeholder="My Application"
+                            className="w-full"
+                        />
+                    </FormField>
+
                     <FormField label="Project" required error={errors.project}>
                         <Input
                             value={formData.project}
@@ -195,38 +174,31 @@ export const CreateBlankAppModal: React.FC<CreateBlankAppModalProps> = ({
                             className="w-full"
                         />
                     </FormField>
-
-                    <FormField label="Version" error={errors.version}>
-                        <Input
-                            value={formData.version}
-                            onChange={handleChange('version')}
-                            placeholder="1.0.0"
-                            className="w-full"
-                        />
-                    </FormField>
                 </div>
 
-                <FormField label="Image" error={errors.image}>
-                    <Input
-                        value={formData.image}
-                        onChange={handleChange('image')}
-                        placeholder="nginx:latest"
-                        className="w-full"
-                    />
-                </FormField>
+	                <div className="grid grid-cols-2 gap-4">
+	                    <FormField label="Version" error={errors.version}>
+	                        <Input
+	                            value={formData.version}
+	                            onChange={handleChange('version')}
+	                            placeholder="1.0.0"
+	                            className="w-full"
+	                        />
+	                    </FormField>
 
-                <FormField label="Icon URL" error={errors.icon}>
-                    <Input
-                        value={formData.icon}
-                        onChange={handleChange('icon')}
-                        placeholder="https://example.com/icon.png"
-                        className="w-full"
-                    />
-                </FormField>
+	                    <FormField label="Icon URL" error={errors.icon}>
+	                        <Input
+	                            value={formData.icon}
+	                            onChange={handleChange('icon')}
+	                            placeholder="https://example.com/icon.png"
+	                            className="w-full"
+	                        />
+	                    </FormField>
+	                </div>
 
-                <FormField label="Description">
-                    <textarea
-                        value={formData.description}
+	                <FormField label="Description">
+	                    <textarea
+	                        value={formData.description}
                         onChange={handleChange('description')}
                         placeholder="Describe your application..."
                         rows={3}
@@ -270,4 +242,3 @@ export const CreateBlankAppModal: React.FC<CreateBlankAppModalProps> = ({
         </Modal>
     );
 };
-
