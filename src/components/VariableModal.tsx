@@ -19,6 +19,7 @@ const VariableModal: React.FC<VariableModalProps> = ({ isOpen, onClose, initialD
     });
 
     useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (initialData) {
             setFormData({
                 ...initialData,
@@ -32,6 +33,7 @@ const VariableModal: React.FC<VariableModalProps> = ({ isOpen, onClose, initialD
                 description: '',
             });
         }
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [initialData, isOpen, envSecrets]);
 
     if (!isOpen) return null;
@@ -49,7 +51,6 @@ const VariableModal: React.FC<VariableModalProps> = ({ isOpen, onClose, initialD
             key: formData.key,
             value: formData.isSecret ? '[__HIDDEN__]' : formData.value,
             isSecret: formData.isSecret,
-            // @ts-ignore - description might not be in type yet, need to check
             description: formData.description,
         };
 
@@ -135,9 +136,7 @@ const VariableModal: React.FC<VariableModalProps> = ({ isOpen, onClose, initialD
                     <div>
                         <label className="mb-1 block text-sm font-medium text-text-secondary">Description</label>
                         <textarea
-                            // @ts-ignore
-                            value={formData.description || ''}
-                            // @ts-ignore
+                            value={formData.description ?? ''}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             className="w-full rounded-lg border border-components-panel-border bg-components-panel-bg-alt p-2 text-sm text-text-primary outline-none focus:border-state-accent-solid"
                             rows={3}

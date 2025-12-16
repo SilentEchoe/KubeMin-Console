@@ -6,7 +6,7 @@ import type { App } from '../types/app';
 type TabKey = 'blocks' | 'tmp';
 
 interface BlockSelectorProps {
-    onSelect: (type: string, data?: any) => void;
+    onSelect: (type: string, data?: unknown) => void;
     onClose: () => void;
 }
 

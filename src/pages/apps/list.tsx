@@ -27,8 +27,9 @@ export const List: React.FC = () => {
         myApps,
     };
 
-    const getKey = (pageIndex: number, previousPageData: any) => {
-        if (previousPageData && !previousPageData.hasMore) return null;
+    const getKey = (pageIndex: number, previousPageData: unknown) => {
+        const previous = previousPageData as { hasMore?: boolean } | null;
+        if (previous && previous.hasMore === false) return null;
         return ['apps', pageIndex + 1, filters];
     };
 

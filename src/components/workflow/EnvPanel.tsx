@@ -48,6 +48,7 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd, initialData, onUpda
 
     // Populate form when initialData changes (edit mode)
     useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (initialData) {
             setKey(initialData.key || '');
             setValue(initialData.value || '');
@@ -58,6 +59,7 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd, initialData, onUpda
             setValue('');
             setEnvType('String');
         }
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [initialData]);
 
     const handleSubmit = () => {
@@ -237,4 +239,3 @@ const EnvPanel: React.FC<EnvPanelProps> = ({ onClose, onAdd, initialData, onUpda
 };
 
 export default EnvPanel;
-

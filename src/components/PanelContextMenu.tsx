@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useEffect, useState } from 'react';
 import { useFlowStore } from '../stores/flowStore';
 import { Plus, Play, Clipboard, Download, Upload, ChevronRight } from 'lucide-react';

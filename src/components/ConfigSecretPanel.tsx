@@ -4,9 +4,7 @@ import { useFlowStore } from '../stores/flowStore';
 import configIcon from '../assets/config.svg';
 import type { ConfigDataItem, SecretDataItem } from '../types/flow';
 
-interface ConfigSecretPanelProps {
-    // Optional props for external control
-}
+type ConfigSecretPanelProps = Record<string, never>;
 
 const ConfigSecretPanel: React.FC<ConfigSecretPanelProps> = () => {
     const { nodes, selectedNodeId, updateNodeData, setSelectedNode } = useFlowStore();
@@ -451,5 +449,4 @@ const ConfigSecretPanel: React.FC<ConfigSecretPanelProps> = () => {
 };
 
 export default ConfigSecretPanel;
-
 

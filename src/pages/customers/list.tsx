@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, Filter, Plus, Download, Upload } from 'lucide-react';
 import useSWRInfinite from 'swr/infinite';
 import { fetchCustomers } from '../../api/customers';
-import type { CustomerFilters } from '../../types/customer';
+import type { Customer, CustomerFilters } from '../../types/customer';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { CustomerCard } from './components/CustomerCard';
@@ -22,14 +22,15 @@ export const List: React.FC = () => {
         status: statusFilter.length > 0 ? statusFilter : undefined,
     };
 
-    const getKey = (pageIndex: number, previousPageData: any) => {
-        if (previousPageData && !previousPageData.hasMore) return null;
+    const getKey = (pageIndex: number, previousPageData: unknown) => {
+        const previous = previousPageData as { hasMore?: boolean } | null;
+        if (previous && previous.hasMore === false) return null;
         return ['customers', pageIndex + 1, filters];
     };
 
     const { data, size, setSize, isLoading } = useSWRInfinite(
         getKey,
-        ([_key, page, pageFilters]) => fetchCustomers(page as number, ITEMS_PER_PAGE, pageFilters as CustomerFilters),
+        ([, page, pageFilters]) => fetchCustomers(page as number, ITEMS_PER_PAGE, pageFilters as CustomerFilters),
         {
             revalidateFirstPage: false,
             revalidateOnFocus: false,
@@ -71,12 +72,12 @@ export const List: React.FC = () => {
         // TODO: Implement customer export
     };
 
-    const handleEditCustomer = (customer: any) => {
+    const handleEditCustomer = (customer: Customer) => {
         console.log('Edit customer:', customer.id);
         // TODO: Implement customer edit modal
     };
 
-    const handleDeleteCustomer = (customer: any) => {
+    const handleDeleteCustomer = (customer: Customer) => {
         console.log('Delete customer:', customer.id);
         // TODO: Implement customer deletion
     };

@@ -56,6 +56,7 @@ const TraitsInitPanel: React.FC<TraitsInitPanelProps> = ({ onClose, onAdd, initi
 
     // Populate form when initialData changes (edit mode)
     useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (initialData) {
             setName(initialData.name || '');
             setImage(initialData.properties?.image || '');
@@ -81,6 +82,7 @@ const TraitsInitPanel: React.FC<TraitsInitPanelProps> = ({ onClose, onAdd, initi
             setEnvs([]);
             setStorage([]);
         }
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [initialData]);
 
     const handleAddEnv = () => {
@@ -465,5 +467,4 @@ const TraitsInitPanel: React.FC<TraitsInitPanelProps> = ({ onClose, onAdd, initi
 };
 
 export default TraitsInitPanel;
-
 

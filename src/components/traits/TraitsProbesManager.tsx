@@ -9,15 +9,15 @@ interface TraitsProbesManagerProps {
 const TraitsProbesManager: React.FC<TraitsProbesManagerProps> = ({ probes, onChange }) => {
     const getProbe = (type: 'liveness' | 'readiness') => probes.find(p => p.type === type);
 
-    const handleProbeChange = (type: 'liveness' | 'readiness', field: keyof TraitProbe | 'command', value: any) => {
+    const handleProbeChange = (type: 'liveness' | 'readiness', field: keyof TraitProbe | 'command', value: unknown) => {
         const currentProbe = getProbe(type);
         let newProbes = [...probes];
 
         if (field === 'command') {
             // Handle command specifically as it's nested in exec
             const newProbe: TraitProbe = currentProbe
-                ? { ...currentProbe, exec: { command: value } }
-                : { type, exec: { command: value } };
+                ? { ...currentProbe, exec: { command: value as string[] } }
+                : { type, exec: { command: value as string[] } };
 
             if (currentProbe) {
                 newProbes = newProbes.map(p => p.type === type ? newProbe : p);
@@ -27,8 +27,8 @@ const TraitsProbesManager: React.FC<TraitsProbesManagerProps> = ({ probes, onCha
         } else {
             // Handle top-level fields
             const newProbe: TraitProbe = currentProbe
-                ? { ...currentProbe, [field]: value }
-                : { type, [field]: value };
+                ? { ...currentProbe, [field]: value as TraitProbe[keyof TraitProbe] }
+                : { type, [field]: value as TraitProbe[keyof TraitProbe] };
 
             if (currentProbe) {
                 newProbes = newProbes.map(p => p.type === type ? newProbe : p);

@@ -1,4 +1,5 @@
-
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable react-hooks/refs */
 import {
     autoUpdate,
     flip,
@@ -18,10 +19,15 @@ import type { Placement } from "@floating-ui/react";
 import React, { cloneElement, createContext, useContext, useState } from "react";
 import { cn } from "../../lib/utils";
 
+type FloatingRefs = {
+    setReference: (node: Element | null) => void;
+    setFloating: (node: HTMLElement | null) => void;
+};
+
 interface PortalToFollowElemContextType {
     isOpen: boolean;
     setIsOpen: (open: boolean) => void;
-    refs: any;
+    refs: FloatingRefs;
     floatingStyles: React.CSSProperties;
     getReferenceProps: (userProps?: React.HTMLProps<Element>) => Record<string, unknown>;
     getFloatingProps: (userProps?: React.HTMLProps<HTMLElement>) => Record<string, unknown>;
@@ -120,21 +126,23 @@ export const PortalToFollowElemTrigger = ({
     className?: string;
 }) => {
     const { refs, getReferenceProps } = usePortalToFollowElem();
+    const { setReference } = refs;
 
     if (asChild && React.isValidElement(children)) {
+        const referenceProps = getReferenceProps(children.props as React.HTMLProps<Element>) as React.HTMLProps<Element>;
         return cloneElement(
             children,
-            getReferenceProps({
-                ref: refs.setReference,
-                ...(children.props as object),
+            {
+                ...referenceProps,
+                ref: setReference,
                 "data-state": "open", // Simplified state for demo
-            } as any) as React.HTMLProps<Element>
+            } as React.HTMLProps<Element>
         );
     }
 
     return (
         <div
-            ref={refs.setReference}
+            ref={setReference}
             className={cn("inline-block", className)}
             {...getReferenceProps()}
         >
@@ -151,13 +159,14 @@ export const PortalToFollowElemContent = ({
     className?: string;
 }) => {
     const { isOpen, refs, floatingStyles, getFloatingProps } = usePortalToFollowElem();
+    const { setFloating } = refs;
 
     if (!isOpen) return null;
 
     return (
         <FloatingPortal>
             <div
-                ref={refs.setFloating}
+                ref={setFloating}
                 style={floatingStyles}
                 className={cn(
                     "z-50 min-w-[8rem] overflow-hidden rounded-md border border-components-panel-border bg-components-panel-bg p-1 text-text-primary shadow-md animate-in fade-in-0 zoom-in-95",

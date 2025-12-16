@@ -10,7 +10,7 @@ import {
     BackgroundVariant,
     PanOnScrollMode,
 } from '@xyflow/react';
-import type { NodeTypes } from '@xyflow/react';
+import type { NodeTypes, ReactFlowInstance } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 // Viewport type definition
@@ -115,7 +115,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
     const [isSaving, setIsSaving] = useState(false);
     const [saveResult, setSaveResult] = useState<{ type: 'success' | 'error'; message: string; details?: string[] } | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const reactFlowInstanceRef = useRef<any>(null);
+    const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null);
     const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Reset internal workflow state when external refresh happens
@@ -439,7 +439,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
     const workflowIssues = getWorkflowIssues();
 
     // Track viewport changes
-    const onMove = useCallback((_: any, viewport: Viewport) => {
+    const onMove = useCallback((_event: unknown, viewport: Viewport) => {
         setViewportState(viewport);
     }, []);
 

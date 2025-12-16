@@ -20,6 +20,7 @@ const VariableForm: React.FC<VariableFormProps> = ({ initialData, onSave, onCanc
     });
 
     useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (initialData) {
             setFormData({
                 ...initialData,
@@ -33,6 +34,7 @@ const VariableForm: React.FC<VariableFormProps> = ({ initialData, onSave, onCanc
                 description: '',
             });
         }
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [initialData, envSecrets]);
 
     const handleSubmit = (e: React.FormEvent) => {

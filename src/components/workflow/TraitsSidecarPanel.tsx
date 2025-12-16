@@ -52,6 +52,7 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd,
 
     // Populate form when initialData changes (edit mode)
     useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (initialData) {
             setName(initialData.name || '');
             setImage(initialData.image || '');
@@ -70,6 +71,7 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd,
             setEnvs([]);
             setStorage([]);
         }
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [initialData]);
 
     const handleAddEnv = () => {
@@ -372,5 +374,4 @@ const TraitsSidecarPanel: React.FC<TraitsSidecarPanelProps> = ({ onClose, onAdd,
 };
 
 export default TraitsSidecarPanel;
-
 

@@ -52,8 +52,6 @@ interface ComponentSetMenuProps {
 }
 
 const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
-    activeKey: _activeKey,
-    onChange: _onChange,
     onEnvAddClick,
     onEnvEditClick,
     onTraitsEnvAddClick,
@@ -68,9 +66,9 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
     onTraitsRbacEditClick,
     onTraitsIngressAddClick,
     onTraitsIngressEditClick
-}) => {
-    const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
-    const selectedNode = nodes.find((n) => n.id === selectedNodeId);
+	}) => {
+	    const { nodes, selectedNodeId, updateNodeData } = useFlowStore();
+	    const selectedNode = nodes.find((n) => n.id === selectedNodeId);
     const [portInput, setPortInput] = useState('');
     const [ports, setPorts] = useState<string[]>([]);
     const [cmdInput, setCmdInput] = useState('');
@@ -80,12 +78,14 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
     const [editingCmdValue, setEditingCmdValue] = useState('');
 
 
-    useEffect(() => {
-        if (selectedNode) {
-            setPorts(selectedNode.data.ports || []);
-            setCmds((selectedNode.data.cmd as string[]) || []);
-        }
-    }, [selectedNode?.id, selectedNode?.data.ports, selectedNode?.data.cmd]);
+	    useEffect(() => {
+	        /* eslint-disable react-hooks/set-state-in-effect */
+	        if (selectedNode) {
+	            setPorts(selectedNode.data.ports || []);
+	            setCmds((selectedNode.data.cmd as string[]) || []);
+	        }
+	        /* eslint-enable react-hooks/set-state-in-effect */
+	    }, [selectedNode?.id, selectedNode?.data.ports, selectedNode?.data.cmd]);
 
     if (!selectedNode) {
         return null;
@@ -229,10 +229,10 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                                     "group flex items-start gap-2.5 p-2.5 rounded-md cursor-pointer transition-colors",
                                                     isSelected ? "bg-state-accent-active" : "hover:bg-state-base-hover"
                                                 )}
-                                                onClick={() => {
-                                                    updateNodeData(selectedNode.id, { componentType: type.value as any });
-                                                    setIsComponentTypeOpen(false);
-                                                }}
+	                                                onClick={() => {
+	                                                    updateNodeData(selectedNode.id, { componentType: type.value });
+	                                                    setIsComponentTypeOpen(false);
+	                                                }}
                                             >
                                                 <div className={cn(
                                                     "mt-0.5 flex h-4 w-4 items-center justify-center shrink-0",
@@ -1049,11 +1049,12 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                             updateNodeData(selectedNode.id, {
                                                 traits: { ...traits, resource: { cpu: '', memory: '', gpu: '' } }
                                             });
-                                        } else {
-                                            const { resource, ...restTraits } = traits;
-                                            updateNodeData(selectedNode.id, { traits: restTraits });
-                                        }
-                                    }}
+	                                        } else {
+	                                            const { resource, ...restTraits } = traits;
+	                                            void resource;
+	                                            updateNodeData(selectedNode.id, { traits: restTraits });
+	                                        }
+	                                    }}
                                     size="md"
                                 />
                             </FlexRow>

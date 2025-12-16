@@ -60,6 +60,7 @@ const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd,
 
     // Populate form when initialData changes (edit mode)
     useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (initialData) {
             setStorageType(initialData.type || 'persistent');
             setName(initialData.name || '');
@@ -75,6 +76,7 @@ const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd,
             setSize('');
             setSourceName('');
         }
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [initialData]);
 
     const handleSubmit = () => {
@@ -358,5 +360,4 @@ const TraitsStoragePanel: React.FC<TraitsStoragePanelProps> = ({ onClose, onAdd,
 };
 
 export default TraitsStoragePanel;
-
 

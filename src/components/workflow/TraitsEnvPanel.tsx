@@ -52,6 +52,7 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd, initial
 
     // Populate form when initialData changes (edit mode)
     useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (initialData) {
             setEnvName(initialData.name || '');
             setEnvKey(initialData.valueFrom?.secret?.key || '');
@@ -68,6 +69,7 @@ const TraitsEnvPanel: React.FC<TraitsEnvPanelProps> = ({ onClose, onAdd, initial
             setSelectedNodeId('');
             setEnvKey('');
         }
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [initialData, nodes]);
 
     const handleSubmit = () => {

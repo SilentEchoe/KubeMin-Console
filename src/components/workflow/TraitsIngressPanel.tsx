@@ -121,6 +121,7 @@ const TraitsIngressPanel: React.FC<TraitsIngressPanelProps> = ({ onClose, onAdd,
     const [showRoutes, setShowRoutes] = useState(true);
 
     useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (initialData) {
             setName(initialData.name || '');
             setNamespace(initialData.namespace || defaultNamespace);
@@ -163,6 +164,7 @@ const TraitsIngressPanel: React.FC<TraitsIngressPanelProps> = ({ onClose, onAdd,
             setTls([]);
             setRoutes([createEmptyRoute()]);
         }
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [initialData, defaultNamespace]);
 
     const hasAnyRouteService = useMemo(() => routes.some((r) => r.serviceName.trim()), [routes]);

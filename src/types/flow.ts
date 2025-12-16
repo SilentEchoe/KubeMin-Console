@@ -1,4 +1,4 @@
-import type { Node, Edge } from '@xyflow/react';
+import type { Connection, Edge, EdgeChange, Node, NodeChange } from '@xyflow/react';
 
 export type EnvironmentVariable = {
     key: string;
@@ -159,8 +159,8 @@ export interface FlowNodeData extends Record<string, unknown> {
     replicas?: number;
     content?: string;
     environmentVariables?: EnvironmentVariable[];
-    properties?: any[];
-    envConfig?: any[];
+    properties?: PropertyItem[];
+    envConfig?: EnvConfigItem[];
     configData?: ConfigDataItem[];   // For config type: properties.conf
     secretData?: SecretDataItem[];   // For secret type: properties.secret
     enabled?: boolean;
@@ -208,9 +208,9 @@ export type FlowState = {
     setNodes: (nodes: FlowNode[]) => void;
     setEdges: (edges: FlowEdge[]) => void;
     clearNodes: () => void;
-    onNodesChange: (changes: any) => void;
-    onEdgesChange: (changes: any) => void;
-    onConnect: (connection: any) => void;
+    onNodesChange: (changes: NodeChange[]) => void;
+    onEdgesChange: (changes: EdgeChange[]) => void;
+    onConnect: (connection: Connection) => void;
     addNode: (node: FlowNode) => void;
     insertNodeOnEdge: (edgeId: string, node: FlowNode) => void;
     setSelectedNode: (id: string | null) => void;

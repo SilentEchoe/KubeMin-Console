@@ -27,6 +27,7 @@ const WorkflowPanel: React.FC<WorkflowPanelProps> = ({
 
     useEffect(() => {
         if (isOpen && appId) {
+            /* eslint-disable react-hooks/set-state-in-effect */
             setIsLoading(true);
             fetchWorkflows(appId)
                 .then((data) => {
@@ -38,6 +39,7 @@ const WorkflowPanel: React.FC<WorkflowPanelProps> = ({
                 })
                 .finally(() => {
                     setIsLoading(false);
+                    /* eslint-enable react-hooks/set-state-in-effect */
                 });
         }
     }, [isOpen, appId]);
@@ -191,4 +193,3 @@ const WorkflowPanel: React.FC<WorkflowPanelProps> = ({
 };
 
 export default WorkflowPanel;
-

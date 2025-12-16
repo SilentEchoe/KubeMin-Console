@@ -61,6 +61,7 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
 
     // Populate form when initialData changes (edit mode)
     useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (initialData) {
             setServiceAccount(initialData.serviceAccount || '');
             setRoleName(initialData.roleName || '');
@@ -76,6 +77,7 @@ const TraitsRbacPanel: React.FC<TraitsRbacPanelProps> = ({ onClose, onAdd, initi
             setRoleLabels([]);
             setShowRoleLabels(false);
         }
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [initialData]);
 
     const handleSubmit = () => {

@@ -57,6 +57,7 @@ const DropdownButton: React.FC<DropdownButtonProps> = ({
         ],
         whileElementsMounted: autoUpdate,
     });
+    const { setReference, setFloating } = refs;
 
     const click = useClick(context);
     const dismiss = useDismiss(context);
@@ -78,7 +79,7 @@ const DropdownButton: React.FC<DropdownButtonProps> = ({
     return (
         <>
             <Button
-                ref={refs.setReference}
+                ref={setReference}
                 className={cn("justify-between", className)}
                 {...getReferenceProps()}
                 {...props}
@@ -90,7 +91,7 @@ const DropdownButton: React.FC<DropdownButtonProps> = ({
                 <FloatingPortal>
                     <FloatingFocusManager context={context} modal={false}>
                         <div
-                            ref={refs.setFloating}
+                            ref={setFloating}
                             style={floatingStyles}
                             className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-components-panel-border bg-white p-1 shadow-md animate-in fade-in-0 zoom-in-95"
                             {...getFloatingProps()}

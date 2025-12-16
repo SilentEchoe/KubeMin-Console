@@ -17,6 +17,7 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
     const [description, setDescription] = useState('');
 
     useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (editingVariable) {
             setType(editingVariable.type || 'String');
             setName(editingVariable.key);
@@ -28,6 +29,7 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
             setValue('');
             setDescription('');
         }
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [editingVariable, isOpen]);
 
     if (!isOpen) return null;
@@ -171,4 +173,3 @@ const EnvModal: React.FC<EnvModalProps> = ({ isOpen, onClose, onSave, editingVar
 };
 
 export default EnvModal;
-

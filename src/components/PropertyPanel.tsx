@@ -51,7 +51,7 @@ const PropertyPanel: React.FC = () => {
     }
 
     // Use ConfigSecretPanel for config-secret type nodes
-    if ((selectedNode.data.componentType as any) === 'config-secret') {
+    if (selectedNode.data.componentType === 'config-secret') {
         return <ConfigSecretPanel />;
     }
 
