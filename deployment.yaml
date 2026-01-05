@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubemin-console
+  labels:
+    app: kubemin-console
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubemin-console
+  template:
+    metadata:
+      labels:
+        app: kubemin-console
+    spec:
+      containers:
+      - name: kubemin-console
+        image: kubemin-console:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubemin-console-svc
+spec:
+  selector:
+    app: kubemin-console
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kubemin-console-ingress
+spec:
+  # ingressClassName: nginx
+  rules:
+  - host: kubemin-console.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kubemin-console-svc
+            port:
+              number: 80

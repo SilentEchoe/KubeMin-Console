@@ -20,7 +20,7 @@ import { useFlowStore } from '../stores/flowStore';
 import CustomNode from './CustomNode';
 import CanvasControl from './CanvasControl';
 import { ControlMode } from '../types/flow';
-import type { FlowNode, ComponentStatus } from '../types/flow';
+import type { FlowNode, FlowEdge, ComponentStatus } from '../types/flow';
 import type { App, Workflow } from '../types/app';
 import PanelContextMenu from './PanelContextMenu';
 import CustomEdge from './workflow/CustomEdge';
@@ -115,7 +115,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
     const [isSaving, setIsSaving] = useState(false);
     const [saveResult, setSaveResult] = useState<{ type: 'success' | 'error'; message: string; details?: string[] } | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null);
+    const reactFlowInstanceRef = useRef<ReactFlowInstance<FlowNode, FlowEdge> | null>(null);
     const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Reset internal workflow state when external refresh happens
@@ -153,7 +153,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
         const pollStatus = async () => {
             try {
                 const status = await getTaskStatus(taskIdToPolling);
-                
+
                 // Update component statuses
                 const statusMap: Record<string, ComponentStatus> = {};
                 status.components.forEach((comp) => {
@@ -170,7 +170,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                 // Terminal states that indicate the workflow has finished
                 const terminalStates = ['completed', 'failed', 'cancelled', 'timeout', 'reject'];
                 const errorStates = ['failed', 'cancelled', 'timeout', 'reject'];
-                
+
                 // Check if all components are in a terminal state
                 const allTerminal = status.components.every(c => terminalStates.includes(c.status));
                 const allCompleted = status.components.every(c => c.status === 'completed');
@@ -234,14 +234,14 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
 
         try {
             const response = await executeWorkflow(appId, currentWorkflow.id);
-            
+
             // Enter preview mode
             setPreviewMode(true);
             setTaskId(response.taskId);
-            
+
             // Close modal
             setShowPublishModal(false);
-            
+
             // Start polling for status
             startPolling(response.taskId);
         } catch (error) {
@@ -259,13 +259,13 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
 
         try {
             await cancelWorkflow(appId, taskId);
-            
+
             // Stop polling
             if (pollingIntervalRef.current) {
                 clearInterval(pollingIntervalRef.current);
                 pollingIntervalRef.current = null;
             }
-            
+
             // Exit preview mode
             clearPreviewState();
             setShowCancelModal(false);
@@ -376,9 +376,9 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                     const sortedWorkflows = [...workflows].sort((a, b) => {
                         return new Date(b.createTime).getTime() - new Date(a.createTime).getTime();
                     });
-                    
+
                     const firstWorkflow = sortedWorkflows[0];
-                    
+
                     // Rearrange nodes based on workflow steps
                     const rearrangedNodes = rearrangeNodesForWorkflow(firstWorkflow, nodes);
                     setNodes(rearrangedNodes);
@@ -399,30 +399,30 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
     const getWorkflowIssues = useCallback((): NodeWithIssues[] => {
         const issues: NodeWithIssues[] = [];
         const shouldRequireConnections = nodes.length > 1;
-        
+
         nodes.forEach((node) => {
             const nodeIssues: { message: string }[] = [];
-            
+
             // Check if node has connections
             const hasIncoming = edges.some(e => e.target === node.id);
             const hasOutgoing = edges.some(e => e.source === node.id);
-            
+
             if (shouldRequireConnections && !hasIncoming && !hasOutgoing) {
                 nodeIssues.push({ message: 'This node is not connected to other nodes' });
             }
-            
+
             // Check required fields based on node type
             if (node.data.componentType === 'webservice' || node.data.componentType === 'store') {
                 if (!node.data.image) {
                     nodeIssues.push({ message: 'Image cannot be empty' });
                 }
             }
-            
+
             // Check if name is empty
             if (!node.data.name) {
                 nodeIssues.push({ message: 'Name cannot be empty' });
             }
-            
+
             if (nodeIssues.length > 0) {
                 issues.push({
                     id: node.id,
@@ -432,7 +432,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                 });
             }
         });
-        
+
         return issues;
     }, [nodes, edges]);
 
@@ -452,25 +452,25 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
             // Check if it's a zoom gesture (Ctrl/Cmd + scroll)
             if (event.ctrlKey || event.metaKey) {
                 event.preventDefault();
-                
+
                 if (!reactFlowInstanceRef.current) return;
-                
+
                 const { x, y, zoom } = viewport;
                 const rect = container.getBoundingClientRect();
-                
+
                 // Calculate mouse position relative to the container
                 const mouseX = event.clientX - rect.left;
                 const mouseY = event.clientY - rect.top;
-                
+
                 // Determine zoom direction
                 const delta = event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
                 const newZoom = Math.min(Math.max(zoom + delta, MIN_ZOOM), MAX_ZOOM);
-                
+
                 // Calculate new viewport position to zoom towards mouse position
                 const scale = newZoom / zoom;
                 const newX = mouseX - (mouseX - x) * scale;
                 const newY = mouseY - (mouseY - y) * scale;
-                
+
                 reactFlowInstanceRef.current.setViewport({ x: newX, y: newY, zoom: newZoom }, { duration: 0 });
             }
         };
@@ -548,11 +548,10 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                             <button
                                 onClick={handleSave}
                                 disabled={!appId || !app || isSaving}
-                                className={`flex h-7 items-center rounded-md px-2.5 text-[13px] font-medium border-none bg-transparent ${
-                                    !appId || !app || isSaving
-                                        ? 'text-gray-400 cursor-not-allowed'
-                                        : 'text-text-secondary hover:bg-state-base-hover cursor-pointer'
-                                }`}
+                                className={`flex h-7 items-center rounded-md px-2.5 text-[13px] font-medium border-none bg-transparent ${!appId || !app || isSaving
+                                    ? 'text-gray-400 cursor-not-allowed'
+                                    : 'text-text-secondary hover:bg-state-base-hover cursor-pointer'
+                                    }`}
                             >
                                 {isSaving ? (
                                     <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -590,11 +589,10 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                             <button
                                 onClick={() => setShowPublishModal(true)}
                                 disabled={isPreviewMode}
-                                className={`flex h-8 items-center rounded-lg px-3 text-[13px] font-medium border-none ${
-                                    isPreviewMode 
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                                        : 'bg-components-button-primary-bg text-components-button-primary-text hover:bg-components-button-primary-hover cursor-pointer'
-                                }`}
+                                className={`flex h-8 items-center rounded-lg px-3 text-[13px] font-medium border-none ${isPreviewMode
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-components-button-primary-bg text-components-button-primary-text hover:bg-components-button-primary-hover cursor-pointer'
+                                    }`}
                             >
                                 Publish
                                 <ChevronDown className="ml-1 h-4 w-4" />
@@ -614,14 +612,14 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                         )}
                     </div>
                 </Panel>
-                
+
                 {/* Workflow Checklist Panel */}
                 <WorkflowChecklist
                     isOpen={showChecklist}
                     onClose={() => setShowChecklist(false)}
                     nodes={workflowIssues}
                 />
-                
+
                 {/* Workflow Selection Panel */}
                 {appId && (
                     <WorkflowPanel
@@ -648,7 +646,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                     <p className="text-sm text-gray-600">
                         Are you sure you want to publish this workflow?
                     </p>
-                    
+
                     {currentWorkflow ? (
                         <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                             <div className="flex items-center gap-2">
@@ -696,11 +694,10 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                         <button
                             onClick={handlePublishConfirm}
                             disabled={!currentWorkflow || isPublishing}
-                            className={`px-4 py-2 text-sm font-medium text-white rounded-lg flex items-center gap-2 ${
-                                !currentWorkflow || isPublishing
-                                    ? 'bg-blue-300 cursor-not-allowed'
-                                    : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                            }`}
+                            className={`px-4 py-2 text-sm font-medium text-white rounded-lg flex items-center gap-2 ${!currentWorkflow || isPublishing
+                                ? 'bg-blue-300 cursor-not-allowed'
+                                : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                                }`}
                         >
                             {isPublishing && <Loader2 size={14} className="animate-spin" />}
                             {isPublishing ? 'Publishing...' : 'Confirm'}
@@ -719,7 +716,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                     <p className="text-sm text-gray-600">
                         Are you sure you want to cancel the workflow execution? This action cannot be undone.
                     </p>
-                    
+
                     <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                         <div className="flex items-center gap-2 text-yellow-700">
                             <AlertCircle size={16} />
@@ -737,11 +734,10 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                         <button
                             onClick={handleCancelWorkflow}
                             disabled={isCancelling}
-                            className={`px-4 py-2 text-sm font-medium text-white rounded-lg flex items-center gap-2 ${
-                                isCancelling
-                                    ? 'bg-red-300 cursor-not-allowed'
-                                    : 'bg-red-600 hover:bg-red-700 cursor-pointer'
-                            }`}
+                            className={`px-4 py-2 text-sm font-medium text-white rounded-lg flex items-center gap-2 ${isCancelling
+                                ? 'bg-red-300 cursor-not-allowed'
+                                : 'bg-red-600 hover:bg-red-700 cursor-pointer'
+                                }`}
                         >
                             {isCancelling && <Loader2 size={14} className="animate-spin" />}
                             {isCancelling ? 'Cancelling...' : 'Cancel Workflow'}
@@ -752,12 +748,11 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
 
             {/* Workflow Result Toast */}
             {workflowResult && (
-                <div 
-                    className={`fixed top-20 right-6 z-[100] max-w-sm rounded-lg shadow-lg border p-4 animate-in slide-in-from-right ${
-                        workflowResult.type === 'success' 
-                            ? 'bg-green-50 border-green-200' 
-                            : 'bg-red-50 border-red-200'
-                    }`}
+                <div
+                    className={`fixed top-20 right-6 z-[100] max-w-sm rounded-lg shadow-lg border p-4 animate-in slide-in-from-right ${workflowResult.type === 'success'
+                        ? 'bg-green-50 border-green-200'
+                        : 'bg-red-50 border-red-200'
+                        }`}
                 >
                     <div className="flex items-start gap-3">
                         {workflowResult.type === 'success' ? (
@@ -766,9 +761,8 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                             <XCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
                         )}
                         <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-medium ${
-                                workflowResult.type === 'success' ? 'text-green-800' : 'text-red-800'
-                            }`}>
+                            <p className={`text-sm font-medium ${workflowResult.type === 'success' ? 'text-green-800' : 'text-red-800'
+                                }`}>
                                 {workflowResult.message}
                             </p>
                             {workflowResult.details && workflowResult.details.length > 0 && (
@@ -804,9 +798,8 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
             {/* Save Result Toast */}
             {saveResult && (
                 <div
-                    className={`fixed top-32 right-6 z-[100] max-w-sm rounded-lg shadow-lg border p-4 animate-in slide-in-from-right ${
-                        saveResult.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                    }`}
+                    className={`fixed top-32 right-6 z-[100] max-w-sm rounded-lg shadow-lg border p-4 animate-in slide-in-from-right ${saveResult.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                        }`}
                 >
                     <div className="flex items-start gap-3">
                         {saveResult.type === 'success' ? (
@@ -816,9 +809,8 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                         )}
                         <div className="flex-1 min-w-0">
                             <p
-                                className={`text-sm font-medium ${
-                                    saveResult.type === 'success' ? 'text-green-800' : 'text-red-800'
-                                }`}
+                                className={`text-sm font-medium ${saveResult.type === 'success' ? 'text-green-800' : 'text-red-800'
+                                    }`}
                             >
                                 {saveResult.message}
                             </p>
