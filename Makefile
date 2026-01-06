@@ -31,6 +31,10 @@ package: build
 	tar -czf $(OUTPUT_ARCHIVE) -C $(BUILD_DIR) .
 	@echo "Package created at $(OUTPUT_ARCHIVE)"
 
+# Example:
+# docker build --platform linux/amd64 \
+#   --build-arg VITE_API_BASE_URL=https://api.example.com/v1 \
+#   -t registry.example.com/group/kubemin-console:latest .
 docker-build:
-	docker build -t $(IMAGE_NAME):$(TAG) .
+	docker build --platform linux/amd64 --build-arg VITE_API_BASE_URL=$(API_URL) -t $(IMAGE_NAME):$(TAG) .
 

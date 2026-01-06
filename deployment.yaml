@@ -38,7 +38,7 @@ kind: Ingress
 metadata:
   name: kubemin-console-ingress
 spec:
-  # ingressClassName: nginx
+  ingressClassName: nginx
   rules:
   - host: kubemin-console.local
     http:
