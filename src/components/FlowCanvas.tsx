@@ -1,3 +1,4 @@
+
 import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { Save, Play, ChevronDown, ListChecks, AlertCircle, Loader2, CheckCircle2, XCircle, X } from 'lucide-react';
 import {
@@ -30,6 +31,7 @@ import type { NodeWithIssues } from './workflow/WorkflowChecklist';
 import WorkflowPanel from './workflow/WorkflowPanel';
 import Modal from './base/Modal';
 import { applyWorkflowConnections, rearrangeNodesForWorkflow } from '../utils/workflowConnection';
+import { nodesAndEdgesToWorkflow } from '../utils/workflowHelper';
 import { fetchWorkflows, executeWorkflow, getTaskStatus, cancelWorkflow, tryApplication, saveApplication, extractTryErrorMessage } from '../api/apps';
 import { nodesToDSL } from '../utils/nodeToComponent';
 import { isEventTargetInputArea } from '../utils/keyboard';
@@ -291,11 +293,15 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                 description: app.description,
             });
 
+            // Calculate workflow based on current edges
+            const workflow = nodesAndEdgesToWorkflow(nodes, edges);
+
             const payload = {
                 id: app.id || appId,
                 ...dsl,
                 icon: app.icon,
                 tmp_enable: app.tmp_enable,
+                workflow, // Add workflow to payload
             };
 
             const tryResult = await tryApplication(payload);
@@ -328,7 +334,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
         } finally {
             setIsSaving(false);
         }
-    }, [appId, app, nodes, onSaved]);
+    }, [appId, app, nodes, edges, onSaved]);
 
     // Ctrl/Cmd + S to trigger Save (same as button)
     useEffect(() => {
@@ -798,7 +804,9 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
             {/* Save Result Toast */}
             {saveResult && (
                 <div
-                    className={`fixed top-32 right-6 z-[100] max-w-sm rounded-lg shadow-lg border p-4 animate-in slide-in-from-right ${saveResult.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                    className={`fixed top-20 right-6 z-[100] max-w-sm rounded-lg shadow-lg border p-4 animate-in slide-in-from-right ${saveResult.type === 'success'
+                        ? 'bg-green-50 border-green-200'
+                        : 'bg-red-50 border-red-200'
                         }`}
                 >
                     <div className="flex items-start gap-3">
@@ -808,10 +816,8 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                             <XCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
                         )}
                         <div className="flex-1 min-w-0">
-                            <p
-                                className={`text-sm font-medium ${saveResult.type === 'success' ? 'text-green-800' : 'text-red-800'
-                                    }`}
-                            >
+                            <p className={`text-sm font-medium ${saveResult.type === 'success' ? 'text-green-800' : 'text-red-800'
+                                }`}>
                                 {saveResult.message}
                             </p>
                             {saveResult.details && saveResult.details.length > 0 && (
@@ -833,7 +839,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                     </div>
                 </div>
             )}
-        </div>
+        </div >
     );
 };
 
