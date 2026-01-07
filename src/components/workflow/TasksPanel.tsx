@@ -271,17 +271,55 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, onClose }) 
                                             {stage.info && (
                                                 <div style={{
                                                     marginTop: '12px',
-                                                    padding: '10px 12px',
+                                                    padding: '12px',
                                                     background: '#eff6ff',
                                                     borderRadius: '6px',
-                                                    display: 'flex',
-                                                    alignItems: 'flex-start',
-                                                    gap: '8px'
                                                 }}>
-                                                    <Info size={14} style={{ color: '#3b82f6', flexShrink: 0, marginTop: '2px' }} />
-                                                    <span style={{ fontSize: '12px', color: '#1e40af', lineHeight: '1.5' }}>
-                                                        {stage.info}
-                                                    </span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                                                        <Info size={14} style={{ color: '#3b82f6' }} />
+                                                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#1e40af' }}>Resources</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                        {stage.info.split('\n').filter(line => line.trim()).map((line, lineIndex) => {
+                                                            // Parse and extract key information
+                                                            let displayText = '';
+                                                            let icon = '📦';
+
+                                                            if (line.includes('deployment:')) {
+                                                                // Extract: default/deploy-nginx-xxx from "deploy: deployment: default/deploy-nginx-xxx"
+                                                                const match = line.match(/deployment:\s*([^\s]+)/);
+                                                                displayText = match ? match[1] : '';
+                                                                icon = '📦';
+                                                            } else if (line.includes('service_deploy') || line.includes('svc:')) {
+                                                                // Extract: svc-nginx-xxx.default.svc:80 from "service_deploy: svc: svc-nginx-xxx.default.svc:80; ports: ..."
+                                                                const match = line.match(/svc:\s*([^;]+)/);
+                                                                displayText = match ? match[1].trim() : '';
+                                                                icon = '🔗';
+                                                            } else {
+                                                                // Fallback: show the line as is but try to clean it
+                                                                displayText = line.replace(/^\w+_?deploy:\s*/, '').trim();
+                                                            }
+
+                                                            if (!displayText) return null;
+
+                                                            return (
+                                                                <div key={lineIndex} style={{
+                                                                    fontSize: '13px',
+                                                                    color: '#1e40af',
+                                                                    padding: '8px 10px',
+                                                                    background: 'rgba(255,255,255,0.7)',
+                                                                    borderRadius: '4px',
+                                                                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '8px'
+                                                                }}>
+                                                                    <span>{icon}</span>
+                                                                    <span>{displayText}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -289,17 +327,32 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, onClose }) 
                                             {stage.error && (
                                                 <div style={{
                                                     marginTop: '12px',
-                                                    padding: '10px 12px',
+                                                    padding: '12px',
                                                     background: '#fef2f2',
                                                     borderRadius: '6px',
-                                                    display: 'flex',
-                                                    alignItems: 'flex-start',
-                                                    gap: '8px'
                                                 }}>
-                                                    <AlertTriangle size={14} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
-                                                    <span style={{ fontSize: '12px', color: '#991b1b', lineHeight: '1.5' }}>
-                                                        {stage.error}
-                                                    </span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                                                        <AlertTriangle size={14} style={{ color: '#dc2626' }} />
+                                                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#991b1b' }}>Error</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                        {stage.error.split('\n').filter(line => line.trim()).map((line, lineIndex) => {
+                                                            const [prefix, ...rest] = line.split(':');
+                                                            const content = rest.join(':').trim();
+                                                            return (
+                                                                <div key={lineIndex} style={{
+                                                                    fontSize: '12px',
+                                                                    color: '#991b1b',
+                                                                    padding: '6px 8px',
+                                                                    background: 'rgba(255,255,255,0.6)',
+                                                                    borderRadius: '4px',
+                                                                    wordBreak: 'break-word'
+                                                                }}>
+                                                                    <span style={{ fontWeight: 600 }}>{prefix}:</span> {content}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
@@ -421,10 +474,10 @@ const TasksPanel: React.FC<TasksPanelProps> = ({ appId }) => {
                                             </div>
                                         </td>
                                         <td style={{ padding: '16px', fontSize: '14px', color: '#6b7280' }}>
-                                            {formatTime(task.startTime)}
+                                            {formatTime(task.createTime || task.startTime || task.start_time)}
                                         </td>
                                         <td style={{ padding: '16px', fontSize: '14px', color: '#6b7280' }}>
-                                            {formatDuration(task.startTime, task.endTime)}
+                                            {formatDuration(task.createTime || task.startTime || task.start_time, task.updateTime || task.endTime || task.end_time)}
                                         </td>
                                         <td style={{ padding: '16px' }}>
                                             <span

@@ -516,7 +516,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                 onEdgesChange={isPreviewMode ? undefined : onEdgesChange}
                 onConnect={isPreviewMode ? undefined : onConnect}
                 onNodeClick={isPreviewMode ? undefined : onNodeClick}
-                onPaneClick={onPaneClick}
+                onPaneClick={isPreviewMode ? undefined : onPaneClick}
                 onPaneContextMenu={isPreviewMode ? undefined : handlePaneContextMenu}
                 onMove={onMove}
                 onInit={(instance) => {

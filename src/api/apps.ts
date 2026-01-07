@@ -271,12 +271,19 @@ export const cancelWorkflow = async (appId: string, taskId: string): Promise<voi
 export interface TaskHistoryItem {
     id?: string;
     taskId?: string;
-    name: string;
+    task_id?: string;
+    name?: string;
     status: 'waiting' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout' | 'reject' | 'prepare';
     startTime?: string | number;
     endTime?: string | number;
+    start_time?: string | number;
+    end_time?: string | number;
+    createTime?: string;
+    updateTime?: string;
     workflowId: string;
     workflowName: string;
+    workflowDisplayName?: string;
+    type?: string;
 }
 
 export interface TaskHistoryResponse {
