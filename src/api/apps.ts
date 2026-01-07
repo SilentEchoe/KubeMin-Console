@@ -269,11 +269,12 @@ export const cancelWorkflow = async (appId: string, taskId: string): Promise<voi
 
 // Task history types
 export interface TaskHistoryItem {
-    id: string;
+    id?: string;
+    taskId?: string;
     name: string;
     status: 'waiting' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout' | 'reject' | 'prepare';
-    startTime?: string;
-    endTime?: string;
+    startTime?: string | number;
+    endTime?: string | number;
     workflowId: string;
     workflowName: string;
 }
@@ -294,6 +295,42 @@ export const fetchTaskHistory = async (appId: string): Promise<TaskHistoryItem[]
     } catch (error) {
         console.error('Error fetching task history:', error);
         return [];
+    }
+};
+
+// Task stages types
+export interface TaskStage {
+    id: number;
+    name: string;
+    type: string;
+    status: 'waiting' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout' | 'reject' | 'prepare';
+    startTime?: number;
+    endTime?: number;
+    info?: string;
+    error?: string;
+}
+
+export interface TaskStagesResponse {
+    taskId: string;
+    status: string;
+    workflowId: string;
+    workflowName: string;
+    appId: string;
+    type: string;
+    stages: TaskStage[];
+}
+
+// Fetch task stages/details
+export const fetchTaskStages = async (taskId: string): Promise<TaskStagesResponse | null> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/workflow/tasks/${taskId}/stages`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch task stages');
+        }
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching task stages:', error);
+        return null;
     }
 };
 

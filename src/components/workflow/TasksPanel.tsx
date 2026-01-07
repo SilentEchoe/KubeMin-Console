@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import useSWR from 'swr';
-import { fetchTaskHistory } from '../../api/apps';
-import type { TaskHistoryItem } from '../../api/apps';
-import { Loader2, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { fetchTaskHistory, fetchTaskStages } from '../../api/apps';
+import type { TaskHistoryItem, TaskStagesResponse, TaskStage } from '../../api/apps';
+import { Loader2, CheckCircle2, XCircle, Clock, AlertCircle, X, Info, AlertTriangle } from 'lucide-react';
 
 interface TasksPanelProps {
     appId: string;
@@ -22,8 +22,8 @@ const statusConfig: Record<string, { icon: React.ElementType; color: string; bgC
 
 const formatDuration = (startTime?: string | number, endTime?: string | number): string => {
     if (!startTime) return '-';
-    const start = typeof startTime === 'number' ? startTime : new Date(startTime).getTime();
-    const end = endTime ? (typeof endTime === 'number' ? endTime : new Date(endTime).getTime()) : Date.now();
+    const start = typeof startTime === 'number' ? startTime * 1000 : new Date(startTime).getTime();
+    const end = endTime ? (typeof endTime === 'number' ? endTime * 1000 : new Date(endTime).getTime()) : Date.now();
     const durationMs = end - start;
 
     const seconds = Math.floor(durationMs / 1000);
@@ -41,7 +41,9 @@ const formatDuration = (startTime?: string | number, endTime?: string | number):
 
 const formatTime = (time?: string | number): string => {
     if (!time) return '-';
-    const date = typeof time === 'number' ? new Date(time) : new Date(time);
+    // Handle Unix timestamp (seconds)
+    const timestamp = typeof time === 'number' ? time * 1000 : new Date(time).getTime();
+    const date = new Date(timestamp);
     if (isNaN(date.getTime())) return '-';
     return date.toLocaleString('zh-CN', {
         month: 'short',
@@ -51,12 +53,278 @@ const formatTime = (time?: string | number): string => {
     });
 };
 
+// Task Details Modal Component
+interface TaskDetailsModalProps {
+    taskId: string;
+    onClose: () => void;
+}
+
+const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, onClose }) => {
+    const { data: taskDetails, isLoading, error } = useSWR<TaskStagesResponse | null>(
+        ['taskStages', taskId],
+        () => fetchTaskStages(taskId)
+    );
+
+    return (
+        <div
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 100,
+            }}
+            onClick={onClose}
+        >
+            <div
+                style={{
+                    background: '#ffffff',
+                    borderRadius: '12px',
+                    width: '700px',
+                    maxWidth: '90vw',
+                    maxHeight: '80vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Modal Header */}
+                <div
+                    style={{
+                        padding: '20px 24px',
+                        borderBottom: '1px solid #e5e7eb',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                    }}
+                >
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#1f2937' }}>
+                            Task Details
+                        </h3>
+                        {taskDetails && (
+                            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#6b7280' }}>
+                                {taskDetails.workflowName}
+                            </p>
+                        )}
+                    </div>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '8px',
+                            borderRadius: '8px',
+                            color: '#6b7280',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {/* Modal Content */}
+                <div style={{ flex: 1, overflow: 'auto', padding: '20px 24px' }}>
+                    {isLoading && (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+                            <Loader2 size={32} className="animate-spin" style={{ color: '#6b7280' }} />
+                        </div>
+                    )}
+
+                    {error && (
+                        <div style={{ padding: '20px', textAlign: 'center', color: '#dc2626' }}>
+                            Failed to load task details
+                        </div>
+                    )}
+
+                    {!isLoading && !error && taskDetails && (
+                        <div>
+                            {/* Task Summary */}
+                            <div style={{ marginBottom: '24px', padding: '16px', background: '#f9fafb', borderRadius: '8px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                                    <div>
+                                        <span style={{ fontSize: '12px', color: '#6b7280' }}>Task ID</span>
+                                        <p style={{ margin: '4px 0 0 0', fontSize: '13px', fontWeight: 500, color: '#1f2937' }}>
+                                            {taskDetails.taskId}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span style={{ fontSize: '12px', color: '#6b7280' }}>Status</span>
+                                        <p style={{ margin: '4px 0 0 0' }}>
+                                            {(() => {
+                                                const config = statusConfig[taskDetails.status] || statusConfig.waiting;
+                                                const StatusIcon = config.icon;
+                                                return (
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px',
+                                                            padding: '4px 8px',
+                                                            borderRadius: '9999px',
+                                                            fontSize: '12px',
+                                                            fontWeight: 500,
+                                                            color: config.color,
+                                                            backgroundColor: config.bgColor,
+                                                        }}
+                                                    >
+                                                        <StatusIcon size={12} />
+                                                        {config.label}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span style={{ fontSize: '12px', color: '#6b7280' }}>Type</span>
+                                        <p style={{ margin: '4px 0 0 0', fontSize: '13px', fontWeight: 500, color: '#1f2937' }}>
+                                            {taskDetails.type}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span style={{ fontSize: '12px', color: '#6b7280' }}>Workflow ID</span>
+                                        <p style={{ margin: '4px 0 0 0', fontSize: '13px', fontWeight: 500, color: '#1f2937' }}>
+                                            {taskDetails.workflowId}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Stages List */}
+                            <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 600, color: '#1f2937' }}>
+                                Stages ({taskDetails.stages?.length || 0})
+                            </h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {taskDetails.stages?.map((stage: TaskStage) => {
+                                    const stageConfig = statusConfig[stage.status] || statusConfig.waiting;
+                                    const StageIcon = stageConfig.icon;
+
+                                    return (
+                                        <div
+                                            key={stage.id}
+                                            style={{
+                                                padding: '16px',
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '8px',
+                                                background: '#ffffff',
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            borderRadius: '50%',
+                                                            fontSize: '12px',
+                                                            fontWeight: 600,
+                                                            color: '#ffffff',
+                                                            backgroundColor: stageConfig.color,
+                                                        }}
+                                                    >
+                                                        {stage.id}
+                                                    </span>
+                                                    <div>
+                                                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#1f2937' }}>
+                                                            {stage.name}
+                                                        </span>
+                                                        <span style={{ fontSize: '12px', color: '#9ca3af', marginLeft: '8px' }}>
+                                                            ({stage.type})
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        padding: '4px 8px',
+                                                        borderRadius: '9999px',
+                                                        fontSize: '12px',
+                                                        fontWeight: 500,
+                                                        color: stageConfig.color,
+                                                        backgroundColor: stageConfig.bgColor,
+                                                    }}
+                                                >
+                                                    <StageIcon size={12} className={stage.status === 'running' ? 'animate-spin' : ''} />
+                                                    {stageConfig.label}
+                                                </span>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '24px', fontSize: '12px', color: '#6b7280' }}>
+                                                <span>Start: {formatTime(stage.startTime)}</span>
+                                                <span>Duration: {formatDuration(stage.startTime, stage.endTime)}</span>
+                                            </div>
+
+                                            {/* Info */}
+                                            {stage.info && (
+                                                <div style={{
+                                                    marginTop: '12px',
+                                                    padding: '10px 12px',
+                                                    background: '#eff6ff',
+                                                    borderRadius: '6px',
+                                                    display: 'flex',
+                                                    alignItems: 'flex-start',
+                                                    gap: '8px'
+                                                }}>
+                                                    <Info size={14} style={{ color: '#3b82f6', flexShrink: 0, marginTop: '2px' }} />
+                                                    <span style={{ fontSize: '12px', color: '#1e40af', lineHeight: '1.5' }}>
+                                                        {stage.info}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Error */}
+                                            {stage.error && (
+                                                <div style={{
+                                                    marginTop: '12px',
+                                                    padding: '10px 12px',
+                                                    background: '#fef2f2',
+                                                    borderRadius: '6px',
+                                                    display: 'flex',
+                                                    alignItems: 'flex-start',
+                                                    gap: '8px'
+                                                }}>
+                                                    <AlertTriangle size={14} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
+                                                    <span style={{ fontSize: '12px', color: '#991b1b', lineHeight: '1.5' }}>
+                                                        {stage.error}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const TasksPanel: React.FC<TasksPanelProps> = ({ appId }) => {
+    const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const { data: tasks, isLoading, error } = useSWR(
         ['taskHistory', appId],
         () => fetchTaskHistory(appId),
         { refreshInterval: 5000 }
     );
+
+    const handleRowClick = (taskId: string) => {
+        setSelectedTaskId(taskId);
+    };
 
     return (
         <div
@@ -125,14 +393,23 @@ const TasksPanel: React.FC<TasksPanelProps> = ({ appId }) => {
                             {tasks.map((task: TaskHistoryItem, index: number) => {
                                 const config = statusConfig[task.status] || statusConfig.waiting;
                                 const StatusIcon = config.icon;
+                                const taskIdentifier = task.id || task.taskId;
 
                                 return (
                                     <tr
-                                        key={task.id || `task-${index}`}
+                                        key={taskIdentifier || `task-${index}`}
+                                        onClick={() => taskIdentifier && handleRowClick(taskIdentifier)}
                                         style={{
                                             borderBottom: '1px solid #f3f4f6',
                                             backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb',
                                             transition: 'background-color 0.15s',
+                                            cursor: 'pointer',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = '#f0f9ff';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#ffffff' : '#f9fafb';
                                         }}
                                     >
                                         <td style={{ padding: '16px' }}>
@@ -174,6 +451,14 @@ const TasksPanel: React.FC<TasksPanelProps> = ({ appId }) => {
                     </table>
                 )}
             </div>
+
+            {/* Task Details Modal */}
+            {selectedTaskId && (
+                <TaskDetailsModal
+                    taskId={selectedTaskId}
+                    onClose={() => setSelectedTaskId(null)}
+                />
+            )}
         </div>
     );
 };
