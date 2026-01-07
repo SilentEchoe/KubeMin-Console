@@ -267,6 +267,37 @@ export const cancelWorkflow = async (appId: string, taskId: string): Promise<voi
     }
 };
 
+// Task history types
+export interface TaskHistoryItem {
+    id: string;
+    name: string;
+    status: 'waiting' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout' | 'reject' | 'prepare';
+    startTime?: string;
+    endTime?: string;
+    workflowId: string;
+    workflowName: string;
+}
+
+export interface TaskHistoryResponse {
+    tasks: TaskHistoryItem[];
+}
+
+// Fetch task history for an application
+export const fetchTaskHistory = async (appId: string): Promise<TaskHistoryItem[]> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/applications/${appId}/workflow/tasks`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch task history');
+        }
+        const data: TaskHistoryResponse = await response.json();
+        return data.tasks || [];
+    } catch (error) {
+        console.error('Error fetching task history:', error);
+        return [];
+    }
+};
+
+
 export interface TryApplicationComponent {
     name: string;
     type: string;

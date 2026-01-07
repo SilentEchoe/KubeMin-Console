@@ -5,6 +5,7 @@ import useSWR from 'swr';
 import FlowCanvas from '../components/FlowCanvas';
 import Sidebar from '../components/Sidebar';
 import PropertyPanel from '../components/PropertyPanel';
+import TasksPanel from '../components/workflow/TasksPanel';
 import { fetchApp, fetchAppComponents } from '../api/apps';
 import { useFlowStore } from '../stores/flowStore';
 import { componentsToNodes } from '../utils/componentToNode';
@@ -29,6 +30,7 @@ const WorkflowPage: React.FC = () => {
     const [showArrow, setShowArrow] = useState(false);
     const { setNodes, setEdges, clearNodes } = useFlowStore();
     const [refreshKey, setRefreshKey] = useState(0);
+    const [activeMenu, setActiveMenu] = useState<'arrangement' | 'tasks'>('arrangement');
 
     // Fetch app details
     const { data: app, isLoading, mutate: mutateApp } = useSWR(
@@ -48,7 +50,7 @@ const WorkflowPage: React.FC = () => {
             const nodes = componentsToNodes(components);
             setNodes(nodes);
         }
-        
+
         // Cleanup: clear nodes when leaving the page
         return () => {
             clearNodes();
@@ -67,7 +69,7 @@ const WorkflowPage: React.FC = () => {
 
     const handleArrowClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        navigate('/');
+        navigate(-1);
     };
 
     const renderIcon = () => {
@@ -81,16 +83,16 @@ const WorkflowPage: React.FC = () => {
                 </div>
             );
         }
-        
+
         if (app?.icon && AVAILABLE_ICONS[app.icon]) {
             const IconComponent = AVAILABLE_ICONS[app.icon];
             return <IconComponent size={16} color="#155EEF" />;
         }
-        
+
         if (typeof displayIcon === 'string') {
             return <img src={displayIcon} alt="App icon" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />;
         }
-        
+
         return <img src={GameIcon} alt="App icon" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />;
     };
 
@@ -139,10 +141,16 @@ const WorkflowPage: React.FC = () => {
                 )}
             </header>
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-                <Sidebar onSaved={refreshWorkflowData} />
-                <main style={{ flex: 1, position: 'relative' }}>
-                    <FlowCanvas appId={appId} app={app} refreshKey={refreshKey} onSaved={refreshWorkflowData} />
-                    <PropertyPanel />
+                <Sidebar onSaved={refreshWorkflowData} activeMenu={activeMenu} onMenuSelect={setActiveMenu} />
+                <main style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                    {activeMenu === 'arrangement' ? (
+                        <>
+                            <FlowCanvas appId={appId} app={app} refreshKey={refreshKey} onSaved={refreshWorkflowData} />
+                            <PropertyPanel />
+                        </>
+                    ) : (
+                        appId && <TasksPanel appId={appId} />
+                    )}
                 </main>
             </div>
         </div>

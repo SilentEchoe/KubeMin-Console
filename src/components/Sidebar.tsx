@@ -35,14 +35,16 @@ const AVAILABLE_ICONS: Record<string, React.ElementType> = {
     Cpu,
     Globe,
     Layout,
-	Terminal
+    Terminal
 };
 
 interface SidebarProps {
     onSaved?: () => void | Promise<void>;
+    activeMenu?: 'arrangement' | 'tasks';
+    onMenuSelect?: (menu: 'arrangement' | 'tasks') => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onSaved }) => {
+const Sidebar: React.FC<SidebarProps> = ({ onSaved, activeMenu = 'arrangement', onMenuSelect }) => {
     const { appId } = useParams<{ appId: string }>();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedIcon, setSelectedIcon] = useState<string>('');
@@ -251,14 +253,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onSaved }) => {
             {/* Navigation Menu */}
             <div style={{ padding: '8px 0' }}>
                 <div
+                    onClick={() => onMenuSelect?.('arrangement')}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '12px',
                         padding: '10px 16px',
                         margin: '0 8px',
-                        background: '#dbeafe',
-                        color: '#155eef',
+                        background: activeMenu === 'arrangement' ? '#dbeafe' : 'transparent',
+                        color: activeMenu === 'arrangement' ? '#155eef' : '#64748b',
                         cursor: 'pointer',
                         fontSize: '13px',
                         fontWeight: 400,
@@ -268,6 +271,29 @@ const Sidebar: React.FC<SidebarProps> = ({ onSaved }) => {
                 >
                     <img src={ArrangementIcon} alt="Arrangement" style={{ width: '16px', height: '16px' }} />
                     <span>Arrangement</span>
+                </div>
+                <div
+                    onClick={() => onMenuSelect?.('tasks')}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '10px 16px',
+                        margin: '4px 8px 0 8px',
+                        background: activeMenu === 'tasks' ? '#dbeafe' : 'transparent',
+                        color: activeMenu === 'tasks' ? '#155eef' : '#64748b',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        fontWeight: 400,
+                        borderRadius: '8px',
+                        transition: 'background-color 0.2s, color 0.2s'
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 11l3 3L22 4" />
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                    </svg>
+                    <span>Tasks</span>
                 </div>
             </div>
 
@@ -378,9 +404,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onSaved }) => {
                             Cancel
                         </button>
                         <button
-                            className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
-                                isSaving ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
+                            className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${isSaving ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                                }`}
                             onClick={handleModalSave}
                             disabled={isSaving}
                         >
