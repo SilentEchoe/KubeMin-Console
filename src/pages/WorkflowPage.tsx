@@ -104,12 +104,16 @@ const WorkflowPage: React.FC = () => {
                     borderBottom: '1px solid #e2e8f0',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'space-between',
                     padding: '0 24px',
                     background: '#fff',
                     zIndex: 10,
                 }}
             >
+                {/* Left spacer for centering */}
+                <div style={{ width: '100px' }} />
+
+                {/* Center: App name */}
                 {isLoading ? (
                     <div className="animate-pulse h-8 w-48 bg-gray-200 rounded-lg" />
                 ) : (
@@ -139,6 +143,67 @@ const WorkflowPage: React.FC = () => {
                         <ChevronDown style={{ width: '16px', height: '16px', color: '#155EEF' }} />
                     </div>
                 )}
+
+                {/* Right: Status indicator based on components */}
+                {(() => {
+                    // Calculate app status based on component statuses
+                    let statusConfig = {
+                        label: 'Running',
+                        color: '#22c55e',
+                        shadowColor: 'rgba(34, 197, 94, 0.2)',
+                    };
+
+                    if (components && components.length > 0) {
+                        const hasNotDeployed = components.some(c => c.status === 'Not Deploy');
+                        const allRunning = components.every(c => c.status === 'Running');
+
+                        if (hasNotDeployed) {
+                            statusConfig = {
+                                label: 'Not Deploy',
+                                color: '#6b7280',
+                                shadowColor: 'rgba(107, 114, 128, 0.2)',
+                            };
+                        } else if (!allRunning) {
+                            statusConfig = {
+                                label: 'Error',
+                                color: '#ef4444',
+                                shadowColor: 'rgba(239, 68, 68, 0.2)',
+                            };
+                        }
+                    } else if (!components || components.length === 0) {
+                        statusConfig = {
+                            label: 'Not Deploy',
+                            color: '#6b7280',
+                            shadowColor: 'rgba(107, 114, 128, 0.2)',
+                        };
+                    }
+
+                    return (
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '8px 14px',
+                                background: '#fff',
+                                borderRadius: '8px',
+                                border: '1px solid #e5e7eb',
+                                boxShadow: '0px 1px 2px rgba(16, 24, 40, 0.05)',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    backgroundColor: statusConfig.color,
+                                    boxShadow: `0 0 0 3px ${statusConfig.shadowColor}`,
+                                }}
+                            />
+                            <span style={{ fontSize: '14px', color: '#374151', fontWeight: 500 }}>{statusConfig.label}</span>
+                        </div>
+                    );
+                })()}
             </header>
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
                 <Sidebar onSaved={refreshWorkflowData} activeMenu={activeMenu} onMenuSelect={setActiveMenu} />

@@ -39,6 +39,9 @@ export const List: React.FC = () => {
         {
             revalidateFirstPage: false,
             revalidateOnFocus: false,
+            revalidateIfStale: false,
+            revalidateOnReconnect: false,
+            dedupingInterval: 60000, // 1 minute deduplication
         }
     );
 
@@ -56,19 +59,19 @@ export const List: React.FC = () => {
         setIsCreateModalOpen(true);
     };
 
-	    const handleCreateApp = async (data: CreateBlankAppData) => {
-	        const createdApp = await createApp({
-	            name: data.name,
-	            namespace: data.namespace,
-	            version: data.version,
-	            description: data.description,
-	            alias: data.alias || undefined,
-	            project: data.project || undefined,
-	            icon: data.icon || undefined,
-	            tmp_enable: data.tmp_enable,
-	            component: [],
-	            workflow: [],
-	        });
+    const handleCreateApp = async (data: CreateBlankAppData) => {
+        const createdApp = await createApp({
+            name: data.name,
+            namespace: data.namespace,
+            version: data.version,
+            description: data.description,
+            alias: data.alias || undefined,
+            project: data.project || undefined,
+            icon: data.icon || undefined,
+            tmp_enable: data.tmp_enable,
+            component: [],
+            workflow: [],
+        });
         // Refresh the app list after creation
         mutate();
         // Navigate to the new app's workflow page using response id

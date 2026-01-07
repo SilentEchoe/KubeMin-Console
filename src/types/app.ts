@@ -140,6 +140,11 @@ export interface ComponentProperties {
   labels?: Record<string, string> | null;
 }
 
+export interface ComponentExternalLink {
+  type: string;
+  value: string;
+}
+
 export interface Component {
   id: number;
   appId: string;
@@ -150,6 +155,8 @@ export interface Component {
   type: 'config' | 'secret' | 'store' | 'webservice';
   properties: ComponentProperties;
   traits: ComponentTraits;
+  status?: string;
+  externalLinks?: ComponentExternalLink[];
   createTime: string;
   updateTime: string;
 }

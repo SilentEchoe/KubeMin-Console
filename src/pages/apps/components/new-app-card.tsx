@@ -18,15 +18,15 @@ export const NewAppCard: React.FC<NewAppCardProps> = ({
                 <button
                     onClick={onCreateBlank}
                     className="flex items-center gap-2 p-1.5 bg-white hover:bg-gray-50 rounded-lg border border-gray-200 hover:border-primary-400 transition-all text-left group"
-	                >
-	                    <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-	                        <Plus className="w-4 h-4 text-gray-600" />
-	                    </div>
-	                    <div className="flex-1 min-w-0">
-	                        <div className="font-medium text-xs text-gray-900 leading-tight">Create APP</div>
-	                        <div className="text-[10px] text-gray-500 leading-tight">Start from scratch</div>
-	                    </div>
-	                </button>
+                >
+                    <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                        <Plus className="w-4 h-4 text-gray-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <div className="font-medium text-xs text-gray-900 leading-tight">Create APP</div>
+                        <div className="text-[10px] text-gray-500 leading-tight">Start from scratch</div>
+                    </div>
+                </button>
 
                 <button
                     onClick={onCreateFromTemplate}

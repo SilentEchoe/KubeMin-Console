@@ -541,6 +541,8 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                 nodesDraggable={!isPreviewMode}
                 nodesConnectable={!isPreviewMode}
                 elementsSelectable={!isPreviewMode}
+                edgesFocusable={!isPreviewMode}
+                selectNodesOnDrag={!isPreviewMode}
             >
                 <Background color="#94a3b8" gap={20} size={1} variant={BackgroundVariant.Dots} />
                 <Controls />
