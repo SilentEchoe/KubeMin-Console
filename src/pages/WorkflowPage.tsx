@@ -31,6 +31,7 @@ const WorkflowPage: React.FC = () => {
     const { setNodes, setEdges, clearNodes } = useFlowStore();
     const [refreshKey, setRefreshKey] = useState(0);
     const [activeMenu, setActiveMenu] = useState<'arrangement' | 'tasks'>('arrangement');
+    const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
     // Fetch app details
     const { data: app, isLoading, mutate: mutateApp } = useSWR(
@@ -178,29 +179,144 @@ const WorkflowPage: React.FC = () => {
                         };
                     }
 
+                    const getComponentStatusColor = (status?: string) => {
+                        switch (status) {
+                            case 'Running': return '#22c55e';
+                            case 'Pending': return '#f59e0b';
+                            case 'Not Deploy': return '#6b7280';
+                            default: return '#ef4444';
+                        }
+                    };
+
                     return (
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                padding: '8px 14px',
-                                background: '#fff',
-                                borderRadius: '8px',
-                                border: '1px solid #e5e7eb',
-                                boxShadow: '0px 1px 2px rgba(16, 24, 40, 0.05)',
-                            }}
-                        >
+                        <div style={{ position: 'relative' }}>
                             <div
+                                onClick={() => setShowStatusDropdown(!showStatusDropdown)}
                                 style={{
-                                    width: '8px',
-                                    height: '8px',
-                                    borderRadius: '50%',
-                                    backgroundColor: statusConfig.color,
-                                    boxShadow: `0 0 0 3px ${statusConfig.shadowColor}`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '8px 14px',
+                                    background: '#fff',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e5e7eb',
+                                    boxShadow: '0px 1px 2px rgba(16, 24, 40, 0.05)',
+                                    cursor: 'pointer',
                                 }}
-                            />
-                            <span style={{ fontSize: '14px', color: '#374151', fontWeight: 500 }}>{statusConfig.label}</span>
+                            >
+                                <div
+                                    style={{
+                                        width: '8px',
+                                        height: '8px',
+                                        borderRadius: '50%',
+                                        backgroundColor: statusConfig.color,
+                                        boxShadow: `0 0 0 3px ${statusConfig.shadowColor}`,
+                                    }}
+                                />
+                                <span style={{ fontSize: '14px', color: '#374151', fontWeight: 500 }}>{statusConfig.label}</span>
+                                <ChevronDown style={{ width: '14px', height: '14px', color: '#6b7280', transform: showStatusDropdown ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                            </div>
+
+                            {/* Status Dropdown */}
+                            {showStatusDropdown && (
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        top: '100%',
+                                        right: 0,
+                                        marginTop: '8px',
+                                        width: '360px',
+                                        background: '#fff',
+                                        borderRadius: '12px',
+                                        border: '1px solid #e5e7eb',
+                                        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+                                        zIndex: 50,
+                                    }}
+                                >
+
+                                    {/* Components List */}
+                                    <div style={{ maxHeight: '320px', overflow: 'auto', padding: '12px' }}>
+                                        {components && components.length > 0 ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                {components.map((component) => (
+                                                    <div
+                                                        key={component.id}
+                                                        style={{
+                                                            padding: '12px',
+                                                            background: component.lastAbnormal ? '#fef2f2' : '#f9fafb',
+                                                            borderRadius: '8px',
+                                                            border: component.lastAbnormal ? '1px solid #fecaca' : '1px solid #e5e7eb',
+                                                        }}
+                                                    >
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                <span style={{ fontSize: '14px', fontWeight: 500, color: '#1f2937' }}>{component.name}</span>
+                                                            </div>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '4px',
+                                                                    padding: '2px 8px',
+                                                                    borderRadius: '9999px',
+                                                                    fontSize: '11px',
+                                                                    fontWeight: 500,
+                                                                    color: getComponentStatusColor(component.status),
+                                                                    backgroundColor: `${getComponentStatusColor(component.status)}15`,
+                                                                }}
+                                                            >
+                                                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: getComponentStatusColor(component.status) }} />
+                                                                {component.status || 'Unknown'}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* External Links */}
+                                                        {component.externalLinks && component.externalLinks.length > 0 && (
+                                                            <div style={{ marginBottom: '8px' }}>
+                                                                {component.externalLinks.map((link, idx) => (
+                                                                    <div
+                                                                        key={idx}
+                                                                        style={{
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            gap: '6px',
+                                                                            fontSize: '12px',
+                                                                            color: '#3b82f6',
+                                                                            fontFamily: 'ui-monospace, monospace',
+                                                                        }}
+                                                                    >
+                                                                        🔗 {link.value}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Error Info */}
+                                                        {component.lastAbnormal && (
+                                                            <div
+                                                                style={{
+                                                                    padding: '8px',
+                                                                    background: '#fee2e2',
+                                                                    borderRadius: '6px',
+                                                                    fontSize: '11px',
+                                                                    color: '#991b1b',
+                                                                    lineHeight: '1.4',
+                                                                }}
+                                                            >
+                                                                ⚠️ {component.lastAbnormal}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
+                                                No components found
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     );
                 })()}

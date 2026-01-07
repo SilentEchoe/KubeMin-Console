@@ -156,6 +156,7 @@ export interface Component {
   properties: ComponentProperties;
   traits: ComponentTraits;
   status?: string;
+  lastAbnormal?: string;
   externalLinks?: ComponentExternalLink[];
   createTime: string;
   updateTime: string;
