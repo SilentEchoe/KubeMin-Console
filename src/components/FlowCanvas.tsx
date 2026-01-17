@@ -618,56 +618,47 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                 <PanelContextMenu />
                 <Panel position="top-right">
                     <div className="flex items-center gap-2">
-{/* Save/Upgrade/Workflow Group */ }
-<div className="flex items-center gap-2">
-    <div className="flex h-8 items-center rounded-lg border-[0.5px] border-components-button-secondary-border bg-components-button-secondary-bg p-0.5 shadow-xs">
-        {/* Save Button */}
-        <button
-            onClick={() => {
-                setSaveMode('save');
-                if (appId && app && !isSaving) {
-                    handleSave();
-                }
-            }}
-            disabled={!appId || !app || isSaving}
-            className={`flex h-full items-center rounded-md px-3 text-[12px] font-medium transition-all border-none cursor-pointer ${saveMode === 'save'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 bg-transparent'
-                } ${(!appId || !app || isSaving) ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-            {isSaving && saveMode === 'save' ? (
-                <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-            ) : (
-                <Save className="mr-1 h-3.5 w-3.5" />
-            )}
-            Save
-        </button>
+                        {/* Save/Upgrade/Workflow Group */}
+                        <div className="flex items-center gap-2">
+                            <div className="flex h-8 items-center rounded-lg border-[0.5px] border-components-button-secondary-border bg-components-button-secondary-bg p-0.5 shadow-xs">
+                                {/* Save Button */}
+                                <button
+                                    onClick={() => setSaveMode('save')}
+                                    disabled={!appId || !app}
+                                    className={`flex h-full items-center rounded-md px-3 text-[12px] font-medium transition-all border-none cursor-pointer ${saveMode === 'save'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-700 bg-transparent'
+                                        } ${(!appId || !app) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <Save className="mr-1 h-3.5 w-3.5" />
+                                    Save
+                                </button>
 
-        {/* Upgrade Button */}
-        <button
-            onClick={() => setSaveMode('upgrade')}
-            className={`flex h-full items-center rounded-md px-3 text-[12px] font-medium transition-all border-none cursor-pointer ${saveMode === 'upgrade'
-                ? 'bg-white text-purple-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 bg-transparent'
-                }`}
-        >
-            Upgrade
-        </button>
+                                {/* Upgrade Button */}
+                                <button
+                                    onClick={() => setSaveMode('upgrade')}
+                                    className={`flex h-full items-center rounded-md px-3 text-[12px] font-medium transition-all border-none cursor-pointer ${saveMode === 'upgrade'
+                                        ? 'bg-white text-purple-600 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-700 bg-transparent'
+                                        }`}
+                                >
+                                    Upgrade
+                                </button>
 
-        <div className="mx-1 h-3.5 w-[1px] bg-divider-regular"></div>
+                                <div className="mx-1 h-3.5 w-[1px] bg-divider-regular"></div>
 
-        {/* Workflow Button */}
-        <button
-            onClick={() => setShowWorkflowPanel(!showWorkflowPanel)}
-            className={`flex h-full items-center rounded-md px-3 text-[12px] font-medium transition-all border-none cursor-pointer ${showWorkflowPanel
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 bg-transparent'
-                }`}
-        >
-            Workflow
-        </button>
-    </div>
-</div>
+                                {/* Workflow Button */}
+                                <button
+                                    onClick={() => setShowWorkflowPanel(!showWorkflowPanel)}
+                                    className={`flex h-full items-center rounded-md px-3 text-[12px] font-medium transition-all border-none cursor-pointer ${showWorkflowPanel
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-700 bg-transparent'
+                                        }`}
+                                >
+                                    Workflow
+                                </button>
+                            </div>
+                        </div>
 
                         {/* Workflow Checklist Button */}
                         <div className="relative flex h-8 items-center">
