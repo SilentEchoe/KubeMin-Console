@@ -70,7 +70,7 @@ const WorkflowPage: React.FC = () => {
 
     const handleArrowClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        navigate(-1);
+        navigate('/?section=apps');
     };
 
     const renderIcon = () => {

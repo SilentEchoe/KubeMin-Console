@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import SalesRevenueWidget from './components/SalesRevenueWidget';
 import SegmentationWidget from './components/SegmentationWidget';
@@ -10,7 +11,15 @@ import { List as AppsList } from '../apps/list';
 import { List as CustomersList } from '../customers/list';
 
 const DashboardPage: React.FC = () => {
-    const [activeSection, setActiveSection] = useState('widgets');
+    const [searchParams] = useSearchParams();
+    const sectionFromUrl = searchParams.get('section');
+    const [activeSection, setActiveSection] = useState(sectionFromUrl || 'widgets');
+
+    useEffect(() => {
+        if (sectionFromUrl) {
+            setActiveSection(sectionFromUrl);
+        }
+    }, [sectionFromUrl]);
 
     return (
         <div className="flex h-screen w-full bg-white overflow-hidden">
