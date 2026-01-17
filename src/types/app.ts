@@ -152,7 +152,7 @@ export interface Component {
   namespace: string;
   image?: string;
   replicas: number;
-  type: 'config' | 'secret' | 'store' | 'webservice';
+  type: 'config' | 'secret' | 'store' | 'webservice' | 'job';
   properties: ComponentProperties;
   traits: ComponentTraits;
   status?: string;

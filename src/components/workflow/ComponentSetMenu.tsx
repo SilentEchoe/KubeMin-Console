@@ -202,7 +202,8 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                     <span className="truncate leading-none flex-1 text-left">
                                         {selectedNode.data.componentType === 'webservice' ? 'Web Service' :
                                             selectedNode.data.componentType === 'store' ? 'Store' :
-                                                'Web Service'}
+                                                selectedNode.data.componentType === 'job' ? 'Job' :
+                                                    'Web Service'}
                                     </span>
                                     <ChevronDown className="h-3 w-3 text-text-tertiary opacity-70 shrink-0" />
                                 </button>
@@ -219,6 +220,11 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                                             value: 'store',
                                             label: 'Store',
                                             desc: 'Persistent storage component for data retention.'
+                                        },
+                                        {
+                                            value: 'job',
+                                            label: 'Job',
+                                            desc: 'Batch task component for running one-off or scheduled jobs.'
                                         }
                                     ].map((type) => {
                                         const isSelected = selectedNode.data.componentType === type.value;
@@ -261,7 +267,7 @@ const ComponentSetMenu: React.FC<ComponentSetMenuProps> = ({
                 </div>
 
                 {/* Conditional Controls */}
-                {(!selectedNode.data.componentType || selectedNode.data.componentType === 'webservice' || selectedNode.data.componentType === 'store') && (
+                {(!selectedNode.data.componentType || selectedNode.data.componentType === 'webservice' || selectedNode.data.componentType === 'store' || selectedNode.data.componentType === 'job') && (
                     <>
                         {/* Image - Inline with label */}
                         <FlexRow className="justify-between mb-4">

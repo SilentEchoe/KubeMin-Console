@@ -359,7 +359,7 @@ function convertTraitsToExport(traits: Traits, nodeData: FlowNode['data']): Expo
 
     // Convert probes - check both traits.probes and individual probe fields
     const probes: ExportTraitProbe[] = [];
-    
+
     if (traits.probes && traits.probes.length > 0) {
         probes.push(...traits.probes.map(convertTraitProbeToExport));
     } else {
@@ -508,17 +508,17 @@ function parseCommandString(cmdString: string): string[] {
  */
 export function nodeToComponent(node: FlowNode): ExportComponent {
     const data = node.data;
-    
+
     // Determine the actual type to export
     // Use originalType if available (preserves config/secret distinction)
     // Otherwise map config-secret back to config or secret based on data
     let exportType = data.originalType || data.componentType || 'webservice';
-    
+
     if (data.componentType === 'config-secret') {
         // Determine based on what data exists
         const hasConfig = data.configData && data.configData.length > 0;
         const hasSecret = data.secretData && data.secretData.length > 0;
-        
+
         if (hasSecret && !hasConfig) {
             exportType = 'secret';
         } else {
@@ -534,7 +534,14 @@ export function nodeToComponent(node: FlowNode): ExportComponent {
     };
 
     // Add image for non-config/secret types
-    if (exportType !== 'config' && exportType !== 'secret') {
+    if (exportType !== 'config' && exportType !== 'secret' && exportType !== 'job') {
+        component.image = data.image || '';
+    }
+
+    // For job, we still want to include image if present, but the check above was for "Non-config/secret"
+    // Actually, Job SHOULD have an image. The original check was excluding config/secret.
+    // Let's keep it inclusive for 'job'.
+    if (exportType === 'job') {
         component.image = data.image || '';
     }
 

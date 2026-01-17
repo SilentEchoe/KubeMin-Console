@@ -152,8 +152,8 @@ export interface FlowNodeData extends Record<string, unknown> {
     label: string;
     description?: string;
     icon?: string;
-    componentType?: 'webservice' | 'store' | 'config' | 'secret' | 'config-secret';
-    originalType?: 'config' | 'secret' | 'store' | 'webservice';  // Original API type
+    componentType?: 'webservice' | 'store' | 'config' | 'secret' | 'config-secret' | 'job';
+    originalType?: 'config' | 'secret' | 'store' | 'webservice' | 'job';  // Original API type
     image?: string;
     namespace?: string;
     replicas?: number;
@@ -172,7 +172,7 @@ export type FlowNode = Node<FlowNodeData>;
 export type FlowEdge = Edge;
 
 // Component deployment status types
-export type ComponentDeployStatus = 
+export type ComponentDeployStatus =
     | 'waiting'    // waiting
     | 'queued'     // queued
     | 'running'    // running

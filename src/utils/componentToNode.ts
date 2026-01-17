@@ -33,7 +33,7 @@ function mapComponentType(type: string): FlowNodeData['componentType'] {
  */
 function convertComponentToNode(component: Component, position: { x: number; y: number }): FlowNode {
   const mappedType = mapComponentType(component.type);
-  
+
   const nodeData: FlowNodeData = {
     label: TYPE_LABELS[component.type] || component.type,
     name: component.name,
@@ -61,6 +61,11 @@ function convertComponentToNode(component: Component, position: { x: number; y: 
     nodeData.ports = component.properties.ports.map(p => `${p.port}`);
   }
 
+  // Convert properties.command (for job/webservice/store types)
+  if (component.properties?.command) {
+    nodeData.cmd = component.properties.command;
+  }
+
   // Convert properties.conf to configData (for config type)
   // Config type uses conf field: { "master.cnf": "content...", "slave.cnf": "content..." }
   if (component.type === 'config' && component.properties?.conf) {
@@ -84,12 +89,12 @@ function convertComponentToNode(component: Component, position: { x: number; y: 
   // Convert traits (mainly for store/webservice types)
   if (component.traits && Object.keys(component.traits).length > 0) {
     nodeData.traits = convertTraits(component.traits);
-    
+
     // Extract probes to individual fields for UI display
     if (component.traits.probes) {
       const livenessProbe = component.traits.probes.find(p => p.type === 'liveness');
       const readinessProbe = component.traits.probes.find(p => p.type === 'readiness');
-      
+
       if (livenessProbe) {
         nodeData.livenessEnabled = true;
         nodeData.livenessInitialDelay = livenessProbe.initialDelaySeconds;
@@ -100,7 +105,7 @@ function convertComponentToNode(component: Component, position: { x: number; y: 
           nodeData.livenessExecCommand = livenessProbe.exec.command.join(' ');
         }
       }
-      
+
       if (readinessProbe) {
         nodeData.readinessEnabled = true;
         nodeData.readinessInitialDelay = readinessProbe.initialDelaySeconds;
@@ -269,10 +274,10 @@ function convertTraits(apiTraits: Component['traits']): Traits {
         },
         rewrite: r.rewrite
           ? ({
-              type: r.rewrite.type,
-              match: r.rewrite.match,
-              replacement: r.rewrite.replacement,
-            })
+            type: r.rewrite.type,
+            match: r.rewrite.match,
+            replacement: r.rewrite.replacement,
+          })
           : undefined,
       })),
     }));
@@ -296,11 +301,11 @@ function isConfigSecretType(type: string): boolean {
  */
 function calculatePositions(components: Component[]): Map<number, { x: number; y: number }> {
   const positions = new Map<number, { x: number; y: number }>();
-  
+
   // Group components by type
   const configSecretComponents = components.filter(c => isConfigSecretType(c.type));
   const storeServiceComponents = components.filter(c => !isConfigSecretType(c.type));
-  
+
   // Position config/secret components on top row
   configSecretComponents.forEach((component, index) => {
     positions.set(component.id, {
@@ -308,7 +313,7 @@ function calculatePositions(components: Component[]): Map<number, { x: number; y
       y: START_Y,
     });
   });
-  
+
   // Position store/webservice components on bottom row
   storeServiceComponents.forEach((component, index) => {
     positions.set(component.id, {
@@ -316,7 +321,7 @@ function calculatePositions(components: Component[]): Map<number, { x: number; y
       y: START_Y + NODE_HEIGHT + VERTICAL_GAP,
     });
   });
-  
+
   return positions;
 }
 
@@ -327,9 +332,9 @@ export function componentsToNodes(components: Component[]): FlowNode[] {
   if (!components || components.length === 0) {
     return [];
   }
-  
+
   const positions = calculatePositions(components);
-  
+
   return components.map(component => {
     const position = positions.get(component.id) || { x: START_X, y: START_Y };
     return convertComponentToNode(component, position);

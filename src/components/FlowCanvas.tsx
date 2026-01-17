@@ -418,7 +418,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
             }
 
             // Check required fields based on node type
-            if (node.data.componentType === 'webservice' || node.data.componentType === 'store') {
+            if (node.data.componentType === 'webservice' || node.data.componentType === 'store' || node.data.componentType === 'job') {
                 if (!node.data.image) {
                     nodeIssues.push({ message: 'Image cannot be empty' });
                 }

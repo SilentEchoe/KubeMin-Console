@@ -98,7 +98,7 @@ export interface CreateAppRequest {
 
 export interface ComponentCreateRequest {
     name: string;
-    type: 'config' | 'secret' | 'store' | 'webservice';
+    type: 'config' | 'secret' | 'store' | 'webservice' | 'job';
     image?: string;
     replicas: number;
     properties?: {

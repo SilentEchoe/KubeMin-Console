@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
-import { Key, File, CheckCircle2, Clock, Loader2, XCircle } from 'lucide-react';
+import { Key, File, CheckCircle2, Clock, Loader2, XCircle, Play } from 'lucide-react';
 
 import { cn } from '../utils/cn';
 import componentIcon from '../assets/component.svg';
@@ -135,11 +135,15 @@ const CustomNode = ({ data, selected }: NodeProps) => {
                 {/* Node Name - Displayed prominently */}
                 {nodeName && (
                     <div className="text-sm font-bold text-text-primary mb-1 truncate flex items-center gap-1">
-                        <img
-                            src={isConfigSecret ? configIcon : componentIcon}
-                            alt="icon"
-                            className="w-5 h-5"
-                        />
+                        {data.componentType === 'job' ? (
+                            <Play size={18} className="text-blue-500" />
+                        ) : (
+                            <img
+                                src={isConfigSecret ? configIcon : componentIcon}
+                                alt="icon"
+                                className="w-5 h-5"
+                            />
+                        )}
                         {nodeName}
                         {/* Status icon when in preview mode */}
                         {isPreviewMode && deployStatus && (
@@ -163,7 +167,8 @@ const CustomNode = ({ data, selected }: NodeProps) => {
                                 ) :
                                     (data.componentType as string) === 'config' ? 'Config' :
                                         (data.componentType as string) === 'secret' ? 'Secret' :
-                                            'Web Service'}
+                                            (data.componentType as string) === 'job' ? 'Job' :
+                                                'Web Service'}
                     </div>
                 </div>
 

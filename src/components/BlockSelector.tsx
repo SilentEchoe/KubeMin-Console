@@ -49,6 +49,7 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect }) => {
 
     const blocks = [
         { type: 'component', title: 'Component', category: 'Node' },
+        { type: 'job', title: 'Job', category: 'Node' },
         { type: 'config-secret', title: 'Config/Secret', category: 'Node' },
     ];
 

@@ -32,14 +32,14 @@ const PanelContextMenu: React.FC = () => {
         if (type === 'template' && Array.isArray(data)) {
             // Use componentsToNodes to properly convert API data to FlowNodes
             const convertedNodes = componentsToNodes(data as Component[]);
-            
+
             // Add each converted node with position offset from context menu location
             convertedNodes.forEach((node, index) => {
                 const id = Math.random().toString(36).substr(2, 9);
                 addNode({
                     ...node,
                     id,
-                    position: { 
+                    position: {
                         x: panelMenu.left + (index % 3) * 320,  // 3 columns layout
                         y: panelMenu.top + Math.floor(index / 3) * 150  // Row offset
                     },
