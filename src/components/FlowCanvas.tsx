@@ -1,6 +1,6 @@
 
 import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { Save, Play, ChevronDown, ListChecks, AlertCircle, Loader2, CheckCircle2, XCircle, X } from 'lucide-react';
+import { Save, Play, ChevronDown, ListChecks, AlertCircle, Loader2, CheckCircle2, XCircle, X, ArrowUpCircle } from 'lucide-react';
 import {
     ReactFlow,
     Background,
@@ -32,7 +32,8 @@ import WorkflowPanel from './workflow/WorkflowPanel';
 import Modal from './base/Modal';
 import { applyWorkflowConnections, rearrangeNodesForWorkflow } from '../utils/workflowConnection';
 import { nodesAndEdgesToWorkflow } from '../utils/workflowHelper';
-import { fetchWorkflows, executeWorkflow, getTaskStatus, cancelWorkflow, tryApplication, saveApplication, extractTryErrorMessage } from '../api/apps';
+import { fetchWorkflows, executeWorkflow, getTaskStatus, cancelWorkflow, tryApplication, saveApplication, extractTryErrorMessage, updateApplicationVersion } from '../api/apps';
+import type { UpdateAppVersionComponent } from '../api/apps';
 import { nodesToDSL } from '../utils/nodeToComponent';
 import { isEventTargetInputArea } from '../utils/keyboard';
 
@@ -116,6 +117,13 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
     const [isCancelling, setIsCancelling] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [saveResult, setSaveResult] = useState<{ type: 'success' | 'error'; message: string; details?: string[] } | null>(null);
+
+    // Upgrade Mode States
+    const [saveMode, setSaveMode] = useState<'save' | 'upgrade'>('save');
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [isUpgrading, setIsUpgrading] = useState(false);
+    const [upgradeChanges, setUpgradeChanges] = useState<UpdateAppVersionComponent[]>([]);
+
     const containerRef = useRef<HTMLDivElement>(null);
     const reactFlowInstanceRef = useRef<ReactFlowInstance<FlowNode, FlowEdge> | null>(null);
     const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -345,6 +353,12 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
 
             if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
                 e.preventDefault();
+
+                // Disable Ctrl+S in upgrade mode
+                if (saveMode === 'upgrade') {
+                    return;
+                }
+
                 if (!appId || !app || isSaving || e.repeat) return;
                 void handleSave();
             }
@@ -354,7 +368,60 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [appId, app, isSaving, handleSave]);
+    }, [appId, app, isSaving, handleSave, saveMode]);
+
+    // Handle Upgrade Publish
+    const handleUpgradePublish = useCallback(() => {
+        if (!app || !nodes) return;
+
+        const changes: UpdateAppVersionComponent[] = [];
+
+        nodes.forEach(node => {
+            if (['webservice', 'worker', 'job'].includes(node.data.componentType || '')) {
+                if (node.data.name && node.data.image) {
+                    changes.push({
+                        name: node.data.name,
+                        image: node.data.image
+                    });
+                }
+            }
+        });
+
+        setUpgradeChanges(changes);
+        setShowUpgradeModal(true);
+
+    }, [nodes, app]);
+
+    const handleConfirmUpgrade = async () => {
+        if (!appId || !app) return;
+
+        setIsUpgrading(true);
+        try {
+            await updateApplicationVersion(appId, {
+                version: app.version || "1.0.0",
+                strategy: "rolling",
+                components: upgradeChanges,
+                description: `Update components: ${upgradeChanges.map(c => c.name).join(', ')}`
+            });
+
+            setSaveResult({
+                type: 'success',
+                message: 'Application upgraded successfully!'
+            });
+            setShowUpgradeModal(false);
+
+            await onSaved?.();
+
+        } catch (error) {
+            setSaveResult({
+                type: 'error',
+                message: 'Upgrade failed',
+                details: [error instanceof Error ? error.message : 'Unknown error'],
+            });
+        } finally {
+            setIsUpgrading(false);
+        }
+    };
 
     // Auto-dismiss save toast
     useEffect(() => {
@@ -551,33 +618,58 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                 <PanelContextMenu />
                 <Panel position="top-right">
                     <div className="flex items-center gap-2">
-                        {/* Save Button Group */}
-                        <div className="flex h-8 items-center rounded-lg border-[0.5px] border-components-button-secondary-border bg-components-button-secondary-bg px-0.5 shadow-xs">
-                            <button
-                                onClick={handleSave}
-                                disabled={!appId || !app || isSaving}
-                                className={`flex h-7 items-center rounded-md px-2.5 text-[13px] font-medium border-none bg-transparent ${!appId || !app || isSaving
-                                    ? 'text-gray-400 cursor-not-allowed'
-                                    : 'text-text-secondary hover:bg-state-base-hover cursor-pointer'
-                                    }`}
-                            >
-                                {isSaving ? (
-                                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                                ) : (
-                                    <Save className="mr-1 h-4 w-4" />
-                                )}
-                                Save
-                            </button>
-                            <div className="mx-0.5 h-3.5 w-[1px] bg-divider-regular"></div>
-                            <button
-                                onClick={() => setShowWorkflowPanel(!showWorkflowPanel)}
-                                className={`flex h-7 cursor-pointer items-center rounded-md px-2.5 text-[13px] font-medium hover:bg-state-base-hover border-none bg-transparent ${showWorkflowPanel ? 'text-blue-600 bg-blue-50' : 'text-text-secondary'}`}
-                            >
-                                Workflow
-                            </button>
-                        </div>
+{/* Save/Upgrade/Workflow Group */ }
+<div className="flex items-center gap-2">
+    <div className="flex h-8 items-center rounded-lg border-[0.5px] border-components-button-secondary-border bg-components-button-secondary-bg p-0.5 shadow-xs">
+        {/* Save Button */}
+        <button
+            onClick={() => {
+                setSaveMode('save');
+                if (appId && app && !isSaving) {
+                    handleSave();
+                }
+            }}
+            disabled={!appId || !app || isSaving}
+            className={`flex h-full items-center rounded-md px-3 text-[12px] font-medium transition-all border-none cursor-pointer ${saveMode === 'save'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 bg-transparent'
+                } ${(!appId || !app || isSaving) ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+            {isSaving && saveMode === 'save' ? (
+                <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+            ) : (
+                <Save className="mr-1 h-3.5 w-3.5" />
+            )}
+            Save
+        </button>
 
-                        {/* Workflow Button */}
+        {/* Upgrade Button */}
+        <button
+            onClick={() => setSaveMode('upgrade')}
+            className={`flex h-full items-center rounded-md px-3 text-[12px] font-medium transition-all border-none cursor-pointer ${saveMode === 'upgrade'
+                ? 'bg-white text-purple-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 bg-transparent'
+                }`}
+        >
+            Upgrade
+        </button>
+
+        <div className="mx-1 h-3.5 w-[1px] bg-divider-regular"></div>
+
+        {/* Workflow Button */}
+        <button
+            onClick={() => setShowWorkflowPanel(!showWorkflowPanel)}
+            className={`flex h-full items-center rounded-md px-3 text-[12px] font-medium transition-all border-none cursor-pointer ${showWorkflowPanel
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 bg-transparent'
+                }`}
+        >
+            Workflow
+        </button>
+    </div>
+</div>
+
+                        {/* Workflow Checklist Button */}
                         <div className="relative flex h-8 items-center">
                             <button
                                 onClick={() => setShowChecklist(!showChecklist)}
@@ -592,19 +684,37 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                             )}
                         </div>
 
-                        {/* Publish Button */}
+                        {/* Rightmost Publish Button (Dynamic) */}
                         <div className="flex h-8 items-center">
-                            <button
-                                onClick={() => setShowPublishModal(true)}
-                                disabled={isPreviewMode}
-                                className={`flex h-8 items-center rounded-lg px-3 text-[13px] font-medium border-none ${isPreviewMode
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : 'bg-components-button-primary-bg text-components-button-primary-text hover:bg-components-button-primary-hover cursor-pointer'
-                                    }`}
-                            >
-                                Publish
-                                <ChevronDown className="ml-1 h-4 w-4" />
-                            </button>
+                            {saveMode === 'save' ? (
+                                <button
+                                    onClick={() => setShowPublishModal(true)}
+                                    disabled={isPreviewMode}
+                                    className={`flex h-8 items-center rounded-lg px-3 text-[13px] font-medium border-none ${isPreviewMode
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-components-button-primary-bg text-components-button-primary-text hover:bg-components-button-primary-hover cursor-pointer'
+                                        }`}
+                                >
+                                    Publish
+                                    <ChevronDown className="ml-1 h-4 w-4" />
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleUpgradePublish}
+                                    disabled={!appId || !app || isUpgrading}
+                                    className={`flex h-8 items-center rounded-lg px-3 text-[13px] font-medium border-none ${!appId || !app || isUpgrading
+                                        ? 'text-gray-400 cursor-not-allowed bg-gray-100'
+                                        : 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
+                                        }`}
+                                >
+                                    {isUpgrading ? (
+                                        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <ArrowUpCircle className="mr-1 h-4 w-4" />
+                                    )}
+                                    Publish
+                                </button>
+                            )}
                         </div>
 
                         {/* Exit Preview Mode Button */}
@@ -841,6 +951,59 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                     </div>
                 </div>
             )}
+            {/* Upgrade Confirmation Modal */}
+            <Modal
+                isShow={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+                title="Publish Updates"
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                        The following components will be updated. Please confirm the changes.
+                    </p>
+
+                    <div className="bg-gray-50 rounded-lg border border-gray-200 divide-y divide-gray-200 max-h-[300px] overflow-auto">
+                        {upgradeChanges.length > 0 ? (
+                            upgradeChanges.map((change, idx) => (
+                                <div key={idx} className="p-3">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="text-sm font-medium text-gray-900">{change.name}</span>
+                                        <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">Update</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-gray-500 font-mono bg-white p-2 rounded border border-gray-100">
+                                        <span className="font-semibold text-gray-400">Image:</span>
+                                        <span className="text-gray-700 break-all">{change.image}</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="p-4 text-center text-gray-500 text-sm">
+                                No valid components found to update.
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button
+                            onClick={() => setShowUpgradeModal(false)}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleConfirmUpgrade}
+                            disabled={isUpgrading || upgradeChanges.length === 0}
+                            className={`px-4 py-2 text-sm font-medium text-white rounded-lg flex items-center gap-2 ${isUpgrading || upgradeChanges.length === 0
+                                ? 'bg-purple-300 cursor-not-allowed'
+                                : 'bg-purple-600 hover:bg-purple-700 cursor-pointer'
+                                }`}
+                        >
+                            {isUpgrading && <Loader2 size={14} className="animate-spin" />}
+                            {isUpgrading ? 'Publishing...' : 'Confirm Update'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div >
     );
 };

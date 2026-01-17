@@ -356,3 +356,22 @@ export const saveApplication = async (data: SaveApplicationRequest): Promise<unk
     });
 };
 
+
+export interface UpdateAppVersionComponent {
+    name: string;
+    image: string;
+}
+
+export interface UpdateAppVersionRequest {
+    version: string;
+    strategy: string;
+    components: UpdateAppVersionComponent[];
+    description: string;
+}
+
+export const updateApplicationVersion = async (appId: string, data: UpdateAppVersionRequest): Promise<unknown> => {
+    return request<unknown>(`/applications/${appId}/version`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+};
