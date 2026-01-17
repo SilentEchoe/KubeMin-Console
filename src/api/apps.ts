@@ -1,6 +1,5 @@
-import type { App, AppListResponse, AppFilters, Component, Workflow } from '../types/app';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+import type { App, AppListResponse, AppFilters, Component, Workflow, ComponentsResponse, WorkflowsResponse } from '../types/app';
+import { request } from './request';
 
 export const fetchApps = async (
     page: number = 1,
@@ -8,12 +7,7 @@ export const fetchApps = async (
     filters?: AppFilters
 ): Promise<AppListResponse> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/applications`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch applications');
-        }
-
-        const data = await response.json();
+        const data = await request<{ applications: App[] }>('/applications');
         let apps: App[] = data.applications || [];
 
         // Apply filters
@@ -54,11 +48,7 @@ export const fetchApps = async (
 
 export const fetchTemplates = async (): Promise<App[]> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/applications/templates`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch templates');
-        }
-        const data = await response.json();
+        const data = await request<{ applications: App[] }>('/applications/templates');
         return data.applications || [];
     } catch (error) {
         console.error('Error fetching templates:', error);
@@ -68,11 +58,7 @@ export const fetchTemplates = async (): Promise<App[]> => {
 
 export const fetchAppComponents = async (appId: string): Promise<Component[]> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/applications/${appId}/components`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch app components');
-        }
-        const data = await response.json();
+        const data = await request<ComponentsResponse>(`/applications/${appId}/components`);
         return data.components || [];
     } catch (error) {
         console.error('Error fetching app components:', error);
@@ -83,11 +69,7 @@ export const fetchAppComponents = async (appId: string): Promise<Component[]> =>
 export const fetchApp = async (id: string): Promise<App> => {
     try {
         // Since backend doesn't support single app fetch, we fetch all and filter
-        const response = await fetch(`${API_BASE_URL}/applications`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch applications');
-        }
-        const data = await response.json();
+        const data = await request<{ applications: App[] }>('/applications');
         const app = (data.applications || []).find((a: App) => a.id === id);
 
         if (!app) {
@@ -159,20 +141,10 @@ export interface CreateAppResponse {
 }
 
 export const createApp = async (data: CreateAppRequest): Promise<CreateAppResponse> => {
-    const response = await fetch(`${API_BASE_URL}/applications`, {
+    return request<CreateAppResponse>('/applications', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
         body: JSON.stringify(data),
     });
-
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || 'Failed to create application');
-    }
-
-    return response.json();
 };
 
 export const deleteApp = async (id: string): Promise<void> => {
@@ -195,11 +167,7 @@ export const exportApp = async (id: string): Promise<Blob> => {
 
 export const fetchWorkflows = async (appId: string): Promise<Workflow[]> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/applications/${appId}/workflows`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch workflows');
-        }
-        const data = await response.json();
+        const data = await request<WorkflowsResponse>(`/applications/${appId}/workflows`);
         return data.workflows || [];
     } catch (error) {
         console.error('Error fetching workflows:', error);
@@ -213,17 +181,10 @@ export interface ExecuteWorkflowResponse {
 }
 
 export const executeWorkflow = async (appId: string, workflowId: string): Promise<ExecuteWorkflowResponse> => {
-    const response = await fetch(`${API_BASE_URL}/applications/${appId}/workflow/exec`, {
+    return request<ExecuteWorkflowResponse>(`/applications/${appId}/workflow/exec`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ workflowId }),
     });
-    if (!response.ok) {
-        throw new Error('Failed to execute workflow');
-    }
-    return response.json();
 };
 
 // Task status types
@@ -246,25 +207,15 @@ export interface TaskStatusResponse {
 }
 
 export const getTaskStatus = async (taskId: string): Promise<TaskStatusResponse> => {
-    const response = await fetch(`${API_BASE_URL}/workflow/tasks/${taskId}/status`);
-    if (!response.ok) {
-        throw new Error('Failed to fetch task status');
-    }
-    return response.json();
+    return request<TaskStatusResponse>(`/workflow/tasks/${taskId}/status`);
 };
 
 // Cancel workflow execution
 export const cancelWorkflow = async (appId: string, taskId: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/applications/${appId}/workflow/cancel`, {
+    return request<void>(`/applications/${appId}/workflow/cancel`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ taskId }),
     });
-    if (!response.ok) {
-        throw new Error('Failed to cancel workflow');
-    }
 };
 
 // Task history types
@@ -293,11 +244,7 @@ export interface TaskHistoryResponse {
 // Fetch task history for an application
 export const fetchTaskHistory = async (appId: string): Promise<TaskHistoryItem[]> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/applications/${appId}/workflow/tasks`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch task history');
-        }
-        const data: TaskHistoryResponse = await response.json();
+        const data = await request<TaskHistoryResponse>(`/applications/${appId}/workflow/tasks`);
         return data.tasks || [];
     } catch (error) {
         console.error('Error fetching task history:', error);
@@ -330,11 +277,7 @@ export interface TaskStagesResponse {
 // Fetch task stages/details
 export const fetchTaskStages = async (taskId: string): Promise<TaskStagesResponse | null> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/workflow/tasks/${taskId}/stages`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch task stages');
-        }
-        return response.json();
+        return request<TaskStagesResponse>(`/workflow/tasks/${taskId}/stages`);
     } catch (error) {
         console.error('Error fetching task stages:', error);
         return null;
@@ -377,16 +320,6 @@ export interface SaveApplicationRequest extends TryApplicationRequest {
     namespace: string;
 }
 
-const readJsonOrText = async (response: Response): Promise<unknown> => {
-    const text = await response.text();
-    if (!text) return null;
-    try {
-        return JSON.parse(text);
-    } catch {
-        return text;
-    }
-};
-
 export const extractTryErrorMessage = (result: unknown): string | null => {
     if (result == null) return null;
     if (typeof result === 'string') return result.trim() ? result : null;
@@ -410,35 +343,16 @@ export const extractTryErrorMessage = (result: unknown): string | null => {
 };
 
 export const tryApplication = async (data: TryApplicationRequest): Promise<unknown> => {
-    const response = await fetch(`${API_BASE_URL}/applications/try`, {
+    return request<unknown>('/applications/try', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
         body: JSON.stringify(data),
     });
-
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || 'Failed to save application');
-    }
-
-    return readJsonOrText(response);
 };
 
 export const saveApplication = async (data: SaveApplicationRequest): Promise<unknown> => {
-    const response = await fetch(`${API_BASE_URL}/applications`, {
+    return request<unknown>('/applications', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
         body: JSON.stringify(data),
     });
-
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || 'Failed to save application');
-    }
-
-    return readJsonOrText(response);
 };
+
