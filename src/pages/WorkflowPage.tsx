@@ -326,7 +326,7 @@ const WorkflowPage: React.FC = () => {
                 <main style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
                     {activeMenu === 'arrangement' ? (
                         <>
-                            <FlowCanvas appId={appId} app={app} refreshKey={refreshKey} onSaved={refreshWorkflowData} />
+                            <FlowCanvas appId={appId} app={app} components={components} refreshKey={refreshKey} onSaved={refreshWorkflowData} />
                             <PropertyPanel />
                         </>
                     ) : (

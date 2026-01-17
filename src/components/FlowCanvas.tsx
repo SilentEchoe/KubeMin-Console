@@ -22,7 +22,7 @@ import CustomNode from './CustomNode';
 import CanvasControl from './CanvasControl';
 import { ControlMode } from '../types/flow';
 import type { FlowNode, FlowEdge, ComponentStatus } from '../types/flow';
-import type { App, Workflow } from '../types/app';
+import type { App, Workflow, Component } from '../types/app';
 import PanelContextMenu from './PanelContextMenu';
 import CustomEdge from './workflow/CustomEdge';
 import CustomConnectionLine from './workflow/CustomConnectionLine';
@@ -79,11 +79,12 @@ const ZoomIndicator = () => {
 interface FlowCanvasProps {
     appId?: string;
     app?: App;
+    components?: Component[];
     refreshKey?: number;
     onSaved?: () => void | Promise<void>;
 }
 
-const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved }) => {
+const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, components, refreshKey, onSaved }) => {
     useShortcuts();
     const {
         nodes,
@@ -119,10 +120,13 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
     const [saveResult, setSaveResult] = useState<{ type: 'success' | 'error'; message: string; details?: string[] } | null>(null);
 
     // Upgrade Mode States
+    interface UpgradeDiff extends UpdateAppVersionComponent {
+        oldImage?: string;
+    }
     const [saveMode, setSaveMode] = useState<'save' | 'upgrade'>('save');
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [isUpgrading, setIsUpgrading] = useState(false);
-    const [upgradeChanges, setUpgradeChanges] = useState<UpdateAppVersionComponent[]>([]);
+    const [upgradeChanges, setUpgradeChanges] = useState<UpgradeDiff[]>([]);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const reactFlowInstanceRef = useRef<ReactFlowInstance<FlowNode, FlowEdge> | null>(null);
@@ -371,26 +375,52 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
     }, [appId, app, isSaving, handleSave, saveMode]);
 
     // Handle Upgrade Publish
+    // Handle Upgrade Publish
     const handleUpgradePublish = useCallback(() => {
         if (!app || !nodes) return;
 
-        const changes: UpdateAppVersionComponent[] = [];
+        const changes: UpgradeDiff[] = [];
 
         nodes.forEach(node => {
             if (['webservice', 'worker', 'job'].includes(node.data.componentType || '')) {
-                if (node.data.name && node.data.image) {
-                    changes.push({
-                        name: node.data.name,
-                        image: node.data.image
-                    });
+                const nodeName = node.data.name;
+                const newImage = node.data.image;
+
+                if (nodeName && newImage) {
+                    // Find original component
+                    const originalComponent = components?.find(c => c.name === nodeName);
+
+                    // Logic:
+                    // 1. If component exists and image is different -> Update
+                    // 2. If component doesn't exist (new) -> In Upgrade mode usually we update existing, 
+                    //    but if new component added, it might be handled differently. 
+                    //    The API updateApplicationVersion takes a list of components to update.
+                    //    Let's assume we only track changes to existing ones or new ones that are intended to be part of the version.
+                    //    For now, simpliest is: if no original, treat as change (new). If original, check diff.
+
+                    const oldImage = originalComponent?.properties?.image || originalComponent?.image;
+
+                    if (!originalComponent || oldImage !== newImage) {
+                        changes.push({
+                            name: nodeName,
+                            image: newImage,
+                            oldImage: oldImage
+                        });
+                    }
                 }
             }
         });
 
+        // Filter out if no changes
+        if (changes.length === 0) {
+            // Optional: could show a toast saying "No changes detected"
+            // For now, let's just open the modal empty or with specific message
+        }
+
         setUpgradeChanges(changes);
         setShowUpgradeModal(true);
 
-    }, [nodes, app]);
+    }, [nodes, app, components]);
 
     const handleConfirmUpgrade = async () => {
         if (!appId || !app) return;
@@ -400,7 +430,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
             await updateApplicationVersion(appId, {
                 version: app.version || "1.0.0",
                 strategy: "rolling",
-                components: upgradeChanges,
+                components: upgradeChanges.map(({ oldImage, ...rest }) => rest),
                 description: `Update components: ${upgradeChanges.map(c => c.name).join(', ')}`
             });
 
@@ -961,9 +991,17 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, refreshKey, onSaved
                                         <span className="text-sm font-medium text-gray-900">{change.name}</span>
                                         <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">Update</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 font-mono bg-white p-2 rounded border border-gray-100">
-                                        <span className="font-semibold text-gray-400">Image:</span>
-                                        <span className="text-gray-700 break-all">{change.image}</span>
+                                    <div className="flex flex-col gap-1 text-xs text-gray-500 font-mono bg-white p-2 rounded border border-gray-100">
+                                        {change.oldImage && (
+                                            <div className="flex items-center gap-2 text-red-400 line-through opacity-70">
+                                                <span className="font-semibold">Old:</span>
+                                                <span className="break-all">{change.oldImage}</span>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-2 text-green-600">
+                                            <span className="font-semibold">{change.oldImage ? 'New:' : 'Image:'}</span>
+                                            <span className="break-all">{change.image}</span>
+                                        </div>
                                     </div>
                                 </div>
                             ))
