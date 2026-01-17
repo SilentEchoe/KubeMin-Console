@@ -1,6 +1,6 @@
 
 import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { Save, Play, ChevronDown, ListChecks, AlertCircle, Loader2, CheckCircle2, XCircle, X, ArrowUpCircle } from 'lucide-react';
+import { Save, Play, ListChecks, AlertCircle, Loader2, CheckCircle2, XCircle, X, ArrowUpCircle } from 'lucide-react';
 import {
     ReactFlow,
     Background,
@@ -668,7 +668,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, components, refresh
                                 <button
                                     onClick={() => setSaveMode('upgrade')}
                                     className={`flex h-full items-center rounded-md px-3 text-[12px] font-medium transition-all border-none cursor-pointer ${saveMode === 'upgrade'
-                                        ? 'bg-white text-purple-600 shadow-sm'
+                                        ? 'bg-white text-orange-600 shadow-sm'
                                         : 'text-gray-500 hover:text-gray-700 bg-transparent'
                                         }`}
                                 >
@@ -716,8 +716,8 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, components, refresh
                                         : 'bg-components-button-primary-bg text-components-button-primary-text hover:bg-components-button-primary-hover cursor-pointer'
                                         }`}
                                 >
+                                    <Play className="mr-1 h-4 w-4" />
                                     Publish
-                                    <ChevronDown className="ml-1 h-4 w-4" />
                                 </button>
                             ) : (
                                 <button
@@ -725,7 +725,7 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, components, refresh
                                     disabled={!appId || !app || isUpgrading}
                                     className={`flex h-8 items-center rounded-lg px-3 text-[13px] font-medium border-none ${!appId || !app || isUpgrading
                                         ? 'text-gray-400 cursor-not-allowed bg-gray-100'
-                                        : 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
+                                        : 'bg-orange-600 hover:bg-orange-700 text-white cursor-pointer'
                                         }`}
                                 >
                                     {isUpgrading ? (
@@ -1023,8 +1023,8 @@ const FlowCanvas: React.FC<FlowCanvasProps> = ({ appId, app, components, refresh
                             onClick={handleConfirmUpgrade}
                             disabled={isUpgrading || upgradeChanges.length === 0}
                             className={`px-4 py-2 text-sm font-medium text-white rounded-lg flex items-center gap-2 ${isUpgrading || upgradeChanges.length === 0
-                                ? 'bg-purple-300 cursor-not-allowed'
-                                : 'bg-purple-600 hover:bg-purple-700 cursor-pointer'
+                                ? 'bg-orange-300 cursor-not-allowed'
+                                : 'bg-orange-600 hover:bg-orange-700 cursor-pointer'
                                 }`}
                         >
                             {isUpgrading && <Loader2 size={14} className="animate-spin" />}
